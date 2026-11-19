@@ -23,7 +23,8 @@ test("preloader counts up then gets out of the way", async ({ page }) => {
   await page.goto("/");
   const pre = page.locator("[data-preloader]");
   await expect(pre).toBeVisible();
-  await expect(pre).toBeHidden({ timeout: 6000 });
+  // count (1.7s) + hold for assets (<=2.2s) + wipe (1.1s), plus headroom for loaded CI machines
+  await expect(pre).toBeHidden({ timeout: 10_000 });
   await expect.poll(() => page.evaluate(() => document.documentElement.dataset.loaded)).toBe("true");
 });
 
