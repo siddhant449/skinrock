@@ -29,7 +29,7 @@ const images = {
   chaletKitchen: img("chalet-kitchen.jpg", 2000, 1500, "Chalet kitchen under timber beams with a Skinrock slate wall"),
   bedroom: img("bedroom.jpg", 2000, 1500, "Bedroom with a Skinrock slate veneer wall behind an upholstered headboard"),
   fireplace: img("fireplace.jpg", 1475, 2000, "Double sided fireplace wrapped in marbled Skinrock stone veneer"),
-  slateCloseup: img("slate-closeup.jpg", 1209, 1127, "Close up of Skinrock slate veneer showing copper, rose and grey mineral texture"),
+  slateCloseup: img("slate-closeup.jpg", 780, 840, "Close up of Skinrock slate veneer showing copper, rose and grey mineral texture"),
   slateSample: img("slate-sample.jpg", 800, 600, "Skinrock Swiss Valley Grey stone veneer sample with fine silver lines"),
   quartziteSample: img("quartzite-sample.jpg", 800, 600, "Skinrock Arctic Storm stone veneer sample with soft grey banding"),
   marbleSample: img("marble-sample.jpg", 800, 600, "Skinrock Atlantic White stone veneer sample with warm golden veins"),
@@ -65,11 +65,17 @@ export const site = {
   },
 
   manifesto: ["Stone.", "Bends.", "Glows.", "1.5 mm."],
+  manifestoNotes: [
+    "Split from the block. Every sheet unique.",
+    "Follows curves and complex surfaces.",
+    "Translucent when backlit.",
+    "Thin from 1.5 mm. Cuts with standard diamond tools.",
+  ],
 
   flex: {
     kicker: "Flexible",
     title: "It bends. It is still stone.",
-    body: "A layer of real stone, split from the block and bonded to a flexible backing. It follows curves and complex surfaces, cuts with standard diamond tools and works on most substrates.",
+    body: "A layer of real stone, split from the block. It follows curves and complex surfaces, cuts with standard diamond tools and works with many substrates.",
     stats: [
       { value: 1.5, decimals: 1, unit: "mm", label: "Thin from" },
       { value: 2.8, decimals: 1, unit: "kg/m²", label: "Approximate weight" },

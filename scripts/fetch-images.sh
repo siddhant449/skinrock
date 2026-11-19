@@ -44,7 +44,7 @@ for f in sorted(os.listdir(src)):
 # a cropped close-up of the copper slate wall for the bending sheet texture
 im = Image.open(os.path.join(src, "copper-wall.jpg")).convert("RGB")
 w, h = im.size
-crop = im.crop((int(w*0.35), int(h*0.18), int(w*0.98), int(h*0.62)))
+crop = im.crop((int(w*0.47), int(h*0.14), int(w*0.99), int(h*0.56)))
 crop.thumbnail((1600, 1600)); crop.save(os.path.join(out, "slate-closeup.jpg"), quality=84, optimize=True)
 print("slate-closeup.jpg", crop.size)
 PY
