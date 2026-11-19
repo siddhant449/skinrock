@@ -49,6 +49,7 @@ export function SplitReveal({
       const split = SplitText.create(el, {
         type: "words",
         mask: "words",
+        wordsClass: "sr-word",
         aria: "auto",
         autoSplit: true,
         onSplit(self) {

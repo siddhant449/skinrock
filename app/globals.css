@@ -109,3 +109,14 @@ html.js [data-reveal]:not([data-revealed]) {
 @media (prefers-reduced-motion: reduce) {
   .grain { animation: none; }
 }
+
+/* WebGL twin has drawn: let the shader carry the image */
+.gl-image[data-gl="ready"] > img {
+  opacity: 0;
+}
+
+/* SplitText word masks: leave room for descenders (g, j, p, y) */
+.sr-word-mask {
+  padding-bottom: 0.16em;
+  margin-bottom: -0.16em;
+}
