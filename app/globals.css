@@ -186,3 +186,17 @@ html.js:not(.sr-seen) .preloader {
 @media (prefers-reduced-motion: reduce) {
   .scroll-cue::after { animation: none; }
 }
+
+/* Light chapter without WebGL: a breathing warm glow over the photo */
+.backlight-fallback {
+  background: radial-gradient(60% 45% at 50% 55%, rgba(244, 233, 210, 0.28), transparent 70%);
+  mix-blend-mode: screen;
+  animation: backlight-breathe 6s ease-in-out infinite;
+}
+@keyframes backlight-breathe {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .backlight-fallback { animation: none; }
+}
