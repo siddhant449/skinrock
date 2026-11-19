@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+/* Graubünden Night: see docs/superpowers/specs/2026-11-19-skinrock-home-design.md */
+@theme {
+  --color-base: #0d1520;
+  --color-deep: #101b2a;
+  --color-raised: #132033;
+  --color-mute: #8fa0b3;
+  --color-stone: #eee9e0;
+  --color-cream: #ece6da;
+  --color-glacier: #bfe3f2;
+  --color-backlight: #f4e9d2;
+  --color-glacier-ink: #2c5a78;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  html {
+    background: var(--color-base);
+    color: var(--color-stone);
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    background: var(--color-base);
+    color: var(--color-stone);
+    font-family: var(--font-sans);
+    letter-spacing: -0.01em;
+    overflow-x: clip;
+  }
+  ::selection {
+    background: var(--color-glacier);
+    color: var(--color-base);
+  }
+  :focus-visible {
+    outline: 1px solid var(--color-glacier);
+    outline-offset: 4px;
+  }
+}
+
+@layer utilities {
+  .text-display {
+    font-weight: 500;
+    letter-spacing: -0.055em;
+    line-height: 0.9;
+  }
+  .text-headline {
+    font-weight: 500;
+    letter-spacing: -0.045em;
+    line-height: 1;
+  }
+  .text-label {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
