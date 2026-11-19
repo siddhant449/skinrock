@@ -88,8 +88,8 @@ export function Projects() {
               key={p.image.src}
               data-float=""
               data-speed={c.speed}
-              className="absolute"
-              style={{ left: `${c.left}%`, top: `${c.top}%`, width: `${c.w}vw` }}
+              className="absolute w-[calc(var(--w)*2.3vw)] md:w-[calc(var(--w)*1vw)]"
+              style={{ left: `${c.left}%`, top: `${c.top}%`, ["--w" as string]: c.w }}
             >
               <GLImage image={p.image} sizes="22vw" grade={0.45} parallax={0.06} className={`relative w-full ${c.ratio}`} />
             </div>

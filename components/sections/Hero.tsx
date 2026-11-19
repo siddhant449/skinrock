@@ -52,10 +52,16 @@ export function Hero() {
         sizes="(min-width: 768px) 60vw, 100vw"
         className="absolute inset-y-0 right-0 w-full md:w-[60%]"
       />
+      {/* phones: the photo is full width, so ink rises from the bottom under the headline */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-20 md:hidden"
+        style={{ backgroundImage: "linear-gradient(0deg, #0D1520 0%, rgba(13,21,32,0.82) 38%, rgba(13,21,32,0.2) 70%, rgba(13,21,32,0.55) 100%)" }}
+      />
       {/* ink falls off the left edge of the photo into the page */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-y-0 right-0 z-20 w-full md:w-[60%]"
+        className="pointer-events-none absolute inset-y-0 right-0 z-20 hidden w-[60%] md:block"
         style={{ backgroundImage: "linear-gradient(90deg, #0D1520 0%, rgba(13,21,32,0.55) 14%, rgba(13,21,32,0) 38%), linear-gradient(0deg, rgba(13,21,32,0.75) 0%, rgba(13,21,32,0) 35%), linear-gradient(180deg, rgba(13,21,32,0.7) 0%, rgba(13,21,32,0) 22%)" }}
       />
 

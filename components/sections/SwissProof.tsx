@@ -21,15 +21,14 @@ export function SwissProof() {
       const q = gsap.utils.selector(root);
       gsap.from(q("[data-cell]"), {
         clipPath: "inset(0% 0% 100% 0%)",
-        y: 24,
         duration: 1.1,
         ease: "expo.out",
         stagger: 0.07,
         scrollTrigger: { trigger: q("[data-grid]")[0], start: "top 80%", once: true },
       });
-      gsap.from(q("[data-rule]"), {
-        scaleX: 0,
-        transformOrigin: "left",
+      // the hairline is a background image on each group, drawn left to right
+      gsap.from(q("[data-cell]"), {
+        backgroundSize: "0% 1px",
         duration: 1.4,
         ease: "expo.out",
         stagger: 0.07,
@@ -58,16 +57,13 @@ export function SwissProof() {
         <div className="md:col-span-8">
           <dl data-grid className="grid grid-cols-1 sm:grid-cols-2">
             {site.proof.map((p) => (
-              <div key={p.standard} className="relative flex flex-col gap-3 py-6 sm:pr-8">
-                <span data-rule className="absolute inset-x-0 top-0 h-px bg-ink/15" />
-                <div data-cell className="flex flex-col gap-3">
-                  <dt className="text-label text-glacier-ink">{p.standard}</dt>
-                  <dd className="text-headline text-[clamp(1.35rem,2vw,1.9rem)] leading-[1.1]">{p.result}</dd>
-                </div>
+              <div key={p.standard} data-cell className="proof-cell flex flex-col gap-3 py-6 sm:pr-8">
+                <dt className="text-label text-glacier-ink">{p.standard}</dt>
+                <dd className="text-headline text-[clamp(1.35rem,2vw,1.9rem)] leading-[1.1]">{p.result}</dd>
               </div>
             ))}
           </dl>
-          <ul className="mt-12 flex flex-wrap gap-x-10 gap-y-3 border-t border-ink/15 pt-6 text-[13px] font-medium text-ink/60">
+          <ul className="mt-12 flex flex-wrap gap-x-10 gap-y-3 border-t border-ink/15 pt-6 text-[13px] font-medium text-ink/75">
             {specs.map((s) => (
               <li key={s}>{s}</li>
             ))}

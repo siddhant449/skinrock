@@ -44,7 +44,7 @@ export function Collection() {
                     {c.name}
                   </span>
                 </span>
-                <span className="text-right text-[13px] font-medium text-ink/60">
+                <span className="text-right text-[13px] font-medium text-ink/75">
                   {c.count}
                   <span aria-hidden className="ml-3 inline-block transition-transform duration-500 ease-expo group-hover:translate-x-1">
                     ↗

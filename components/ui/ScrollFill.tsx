@@ -17,10 +17,11 @@ export function ScrollFill({ text, className }: { text: string; className?: stri
   useGSAP(
     () => {
       if (reduced || !ref.current) return;
-      const split = SplitText.create(ref.current, { type: "words", aria: "auto" });
+      // aria "none": words stay real text for screen readers (aria-label is not allowed on <p>)
+      const split = SplitText.create(ref.current, { type: "words", aria: "none" });
       gsap.fromTo(
         split.words,
-        { opacity: 0.16 },
+        { opacity: 0.4 }, // still >= 3:1 for this large text before it fills
         {
           opacity: 1,
           ease: "none",

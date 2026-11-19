@@ -200,3 +200,10 @@ html.js:not(.sr-seen) .preloader {
 @media (prefers-reduced-motion: reduce) {
   .backlight-fallback { animation: none; }
 }
+
+.proof-cell {
+  background-image: linear-gradient(rgba(13, 21, 32, 0.15), rgba(13, 21, 32, 0.15));
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-size: 100% 1px;
+}

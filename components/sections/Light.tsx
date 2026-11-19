@@ -37,7 +37,7 @@ export function Light() {
       });
       tl.fromTo(intensity.current, { value: 0.04 }, { value: 1, ease: "power2.in", duration: 1 }, 0);
       tl.fromTo(q("[data-switch]"), { scaleY: 0 }, { scaleY: 1, ease: "none", duration: 1 }, 0);
-      tl.fromTo(q("[data-use]"), { autoAlpha: 0.25 }, { autoAlpha: 1, stagger: 0.12, duration: 0.3 }, 0.35);
+      tl.fromTo(q("[data-use]"), { color: "#8FA0B3" }, { color: "#EEE9E0", stagger: 0.12, duration: 0.3 }, 0.35);
     },
     { scope: root, dependencies: [reduced] },
   );
