@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { buildMetadata, jsonLdScript, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
+import { Providers } from "@/components/providers/Providers";
+import { Grain } from "@/components/ui/Grain";
 import "./globals.css";
 
 const inter = Inter({
@@ -19,9 +21,13 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+      </head>
       <body>
-        {children}
+        <Providers>{children}</Providers>
+        <Grain />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd()) }}
