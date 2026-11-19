@@ -4,6 +4,8 @@ import { Hero } from "@/components/sections/Hero";
 import { Manifesto } from "@/components/sections/Manifesto";
 import { FlexStory } from "@/components/sections/FlexStory";
 import { Light } from "@/components/sections/Light";
+import { Collection } from "@/components/sections/Collection";
+import { Projects } from "@/components/sections/Projects";
 
 export default function Home() {
   return (
@@ -15,6 +17,8 @@ export default function Home() {
         <Manifesto />
         <FlexStory />
         <Light />
+        <Collection />
+        <Projects />
       </main>
     </>
   );

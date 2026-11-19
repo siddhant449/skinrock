@@ -94,12 +94,13 @@ export const site = {
   },
 
   collection: [
-    { slug: "slate", name: "Slate", count: "10 stones", image: images.slateSample },
-    { slug: "quartzite", name: "Quartzite", count: "8 stones", image: images.quartziteSample },
-    { slug: "marble", name: "Marble", count: "24 stones", image: images.marbleSample },
-    { slug: "acoustic", name: "Acoustic", count: "Stone faced panel", image: images.acousticSample },
+    { slug: "slate", name: "Slate", count: "10 stones", image: images.slateSample, href: "https://skinrockofficial.com/product-category/slate/" },
+    { slug: "quartzite", name: "Quartzite", count: "8 stones", image: images.quartziteSample, href: "https://skinrockofficial.com/product-category/quartzite/" },
+    { slug: "marble", name: "Marble", count: "24 stones", image: images.marbleSample, href: "https://skinrockofficial.com/product-category/marble/" },
+    { slug: "acoustic", name: "Acoustic", count: "Stone faced panel", image: images.acousticSample, href: "https://skinrockofficial.com/product-category/acoustic-panel/" },
   ],
-  collectionIntro: "Forty three stones, each one split from a real block. No print, no pattern repeat.",
+  collectionTitle: "Forty three stones.",
+  collectionIntro: "Each one split from a real block, so no two sheets are ever alike.",
 
   projects: [
     { image: images.lobby, use: "Backlit ceiling", setting: "Hospitality, indoor" },
