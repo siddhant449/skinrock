@@ -1,0 +1,165 @@
+/**
+ * All home page copy and data. Facts come from the current skinrockofficial.com.
+ * Rules: no em or en dashes anywhere (enforced by tests/unit/content.test.ts).
+ * Values marked `pending: true` conflict on the current site and need client confirmation.
+ */
+
+export type SiteImage = { src: string; width: number; height: number; alt: string };
+
+const img = (file: string, width: number, height: number, alt: string): SiteImage => ({
+  src: `/images/${file}`,
+  width,
+  height,
+  alt,
+});
+
+const images = {
+  alpsSlate: img("alps-slate.jpg", 2000, 1863, "Skinrock slate veneer covering a living room wall beside a window with a view of snowy Alpine peaks"),
+  onyxColumn: img("onyx-column.jpg", 1500, 2000, "Backlit translucent Skinrock stone column glowing amber with dark veining"),
+  litTable: img("lit-table.jpg", 2000, 1500, "Large dining table topped with backlit translucent Skinrock stone in a dark event room"),
+  darkBath: img("dark-bath.jpg", 2000, 1477, "Bathroom clad floor to ceiling in dark grey Skinrock slate veneer"),
+  stairHall: img("stair-hall.jpg", 1500, 2000, "Stairwell with grey Skinrock slate veneer walls and recessed linear lights"),
+  copperWall: img("copper-wall.jpg", 1500, 2000, "Hallway wall in copper toned Skinrock slate veneer next to a wooden door"),
+  facadeCorner: img("facade-corner.jpg", 2000, 1500, "Building corner clad outdoors in large grey green Skinrock slate panels"),
+  sauna: img("sauna.jpg", 2000, 1500, "Spa relaxation room with a flowing veined Skinrock stone feature wall"),
+  streetWall: img("street-wall.jpg", 2000, 1125, "Outdoor retaining wall along a street finished in grey Skinrock slate veneer"),
+  lobby: img("lobby.jpg", 1500, 2000, "Hotel lounge with a backlit Skinrock stone ceiling panel and stone clad walls"),
+  kitchenIsland: img("kitchen-island.jpg", 2000, 1244, "Kitchen island and tall cabinets faced with dark Skinrock slate veneer"),
+  backlitBath: img("backlit-bath.jpg", 2000, 1500, "Bathroom vanity framed by backlit translucent Skinrock quartzite panels"),
+  chaletKitchen: img("chalet-kitchen.jpg", 2000, 1500, "Chalet kitchen under timber beams with a Skinrock slate wall"),
+  bedroom: img("bedroom.jpg", 2000, 1500, "Bedroom with a Skinrock slate veneer wall behind an upholstered headboard"),
+  fireplace: img("fireplace.jpg", 1475, 2000, "Double sided fireplace wrapped in marbled Skinrock stone veneer"),
+  slateCloseup: img("slate-closeup.jpg", 1209, 1127, "Close up of Skinrock slate veneer showing copper, rose and grey mineral texture"),
+  slateSample: img("slate-sample.jpg", 800, 600, "Skinrock Swiss Valley Grey stone veneer sample with fine silver lines"),
+  quartziteSample: img("quartzite-sample.jpg", 800, 600, "Skinrock Arctic Storm stone veneer sample with soft grey banding"),
+  marbleSample: img("marble-sample.jpg", 800, 600, "Skinrock Atlantic White stone veneer sample with warm golden veins"),
+  acousticSample: img("acoustic-sample.jpg", 800, 600, "Skinrock acoustic panels with slatted stone faces in light and dark tones"),
+  og: img("og.jpg", 1200, 630, "Skinrock slate veneer wall in an Alpine home"),
+} satisfies Record<string, SiteImage>;
+
+export const site = {
+  name: "Skinrock",
+  legalName: "Skinrock Official AG",
+  url: "https://skinrockofficial.com",
+  tagline: "Real Stone. Ultra Thin. Flexible. Translucent.",
+
+  nav: {
+    links: [
+      { label: "Stones", href: "#collection" },
+      { label: "Projects", href: "#projects" },
+      { label: "Light", href: "#light" },
+      { label: "Specs", href: "#proof" },
+      { label: "Studio", href: "#footer" },
+    ],
+    cta: { label: "Request samples", href: "#samples" },
+  },
+
+  hero: {
+    eyebrow: "Natural stone veneer",
+    index: "01",
+    headline: "Real stone. Thin enough to let light through.",
+    accentWord: "light",
+    lede: "Ultra thin veneers of slate, quartzite and marble. Flexible enough to follow a curve, translucent enough to glow, light enough to go almost anywhere.",
+    specLine: ["1.5 to 3 mm", "≈2.8 kg/m²", "Engineered in Chur, Switzerland"],
+    image: images.alpsSlate,
+  },
+
+  manifesto: ["Stone.", "Bends.", "Glows.", "1.5 mm."],
+
+  flex: {
+    kicker: "Flexible",
+    title: "It bends. It is still stone.",
+    body: "A layer of real stone, split from the block and bonded to a flexible backing. It follows curves and complex surfaces, cuts with standard diamond tools and works on most substrates.",
+    stats: [
+      { value: 1.5, decimals: 1, unit: "mm", label: "Thin from" },
+      { value: 2.8, decimals: 1, unit: "kg/m²", label: "Approximate weight" },
+      { value: 43, decimals: 0, unit: "", label: "Stones in the collection" },
+    ],
+    image: images.slateCloseup,
+  },
+
+  light: {
+    kicker: "Translucent",
+    title: "Lit from within.",
+    paragraph:
+      "Backlit, the stone stops being a surface and becomes the lamp. Every sheet glows with its own map of veins, and no two are ever the same.",
+    uses: ["Walls", "Bars", "Furniture", "Ceilings", "Installations"],
+    image: images.onyxColumn,
+  },
+
+  collection: [
+    { slug: "slate", name: "Slate", count: "10 stones", image: images.slateSample },
+    { slug: "quartzite", name: "Quartzite", count: "8 stones", image: images.quartziteSample },
+    { slug: "marble", name: "Marble", count: "24 stones", image: images.marbleSample },
+    { slug: "acoustic", name: "Acoustic", count: "Stone faced panel", image: images.acousticSample },
+  ],
+  collectionIntro: "Forty three stones, each one split from a real block. No print, no pattern repeat.",
+
+  projects: [
+    { image: images.lobby, use: "Backlit ceiling", setting: "Hospitality, indoor" },
+    { image: images.facadeCorner, use: "Facade", setting: "Residential, outdoor" },
+    { image: images.litTable, use: "Backlit table", setting: "Event space, indoor" },
+    { image: images.sauna, use: "Feature wall", setting: "Spa, indoor" },
+    { image: images.kitchenIsland, use: "Kitchen", setting: "Residential, indoor" },
+    { image: images.backlitBath, use: "Backlit bathroom", setting: "Residential, indoor" },
+    { image: images.fireplace, use: "Fireplace", setting: "Residential, indoor" },
+    { image: images.streetWall, use: "Retaining wall", setting: "Public, outdoor" },
+    { image: images.chaletKitchen, use: "Wall", setting: "Chalet, indoor" },
+    { image: images.darkBath, use: "Bathroom", setting: "Residential, indoor" },
+  ],
+  projectsTitle: "Indoors and out. Flat or curved. Lit or not.",
+
+  proofTitle: "Independently tested.",
+  proofIntro:
+    "Tested by laboratories in Switzerland, Germany, Austria and India. Full reports are available on request.",
+  proof: [
+    { standard: "DIN 4102-1", result: "Fire class B2" },
+    { standard: "EN 13823", result: "C-s2,d0, orienting test" },
+    { standard: "VKF guideline", result: "RF 2" },
+    { standard: "SIA 262/1:2013", result: "Frost and de-icing salt resistance tested" },
+    { standard: "SN EN 1931", result: "Water vapour permeability tested" },
+    { standard: "AgBB 2015", result: "Emission requirements fulfilled for slate and quartzite" },
+    { standard: "ASTM C121", result: "Water absorption 2.5%, unsealed" },
+  ],
+
+  cta: {
+    title: "Hold it in your hand.",
+    body: "Order a sample set and feel how thin, light and flexible real stone can be.",
+    button: "Request samples",
+    // pending: the new contact page does not exist yet; points to the current site.
+    href: "https://skinrockofficial.com/contact-us/",
+  },
+
+  contact: {
+    company: "Skinrock Official AG",
+    street: "Hartbertstrasse 9",
+    postal: "7000",
+    city: "Chur",
+    country: "CH",
+    countryName: "Switzerland",
+    // pending: no public email or phone on the current site.
+    email: null as string | null,
+  },
+
+  legal: [
+    { label: "Terms and Conditions", href: "https://skinrockofficial.com/terms-conditions/" },
+    { label: "Privacy Policy", href: "https://skinrockofficial.com/privacy-policy/" },
+  ],
+
+  specs: {
+    thickness: { value: "1.5 to 3 mm", pending: true },
+    weight: { value: "≈2.8 kg/m²", pending: true },
+    format: { value: "120 × 250 cm", pending: true },
+    headquarters: { value: "Chur", pending: true },
+  },
+
+  seo: {
+    title: "Skinrock | Flexible natural stone veneer from Switzerland",
+    description:
+      "Skinrock makes ultra thin natural stone veneers in slate, quartzite and marble. 1.5 to 3 mm thin, flexible, translucent when backlit and engineered in Chur, Switzerland.",
+  },
+
+  images,
+};
+
+export type Site = typeof site;
