@@ -1,0 +1,102 @@
+"use client";
+
+import { useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+import { site } from "@/content/site";
+import { GLImage } from "@/components/gl/GLImage";
+import { SplitReveal } from "@/components/ui/SplitReveal";
+import { useMotionPrefs } from "@/components/providers/MotionPrefs";
+import { onLoaded } from "@/lib/loaded";
+
+gsap.registerPlugin(ScrollTrigger, useGSAP);
+
+export function Hero() {
+  const root = useRef<HTMLElement>(null);
+  const { reduced } = useMotionPrefs();
+  const { hero } = site;
+  const [before, after] = hero.headline.split(hero.accentWord);
+
+  useGSAP(
+    () => {
+      if (reduced) return;
+      const q = gsap.utils.selector(root);
+      // intro: hairline draws, side copy fades up after the headline starts rising
+      gsap.set(q("[data-hero-fade]"), { autoAlpha: 0, y: 18 });
+      gsap.set(q("[data-hero-line]"), { scaleX: 0 });
+      const off = onLoaded(() => {
+        gsap.to(q("[data-hero-line]"), { scaleX: 1, duration: 1.4, ease: "expo.out", delay: 0.2 });
+        gsap.to(q("[data-hero-fade]"), { autoAlpha: 1, y: 0, duration: 1.2, ease: "expo.out", stagger: 0.08, delay: 0.55 });
+      });
+      // exit: copy drifts up and dims as the page leaves the hero (parallax layer)
+      gsap.to(q("[data-hero-copy]"), {
+        yPercent: -18,
+        autoAlpha: 0.25,
+        ease: "none",
+        scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: true },
+      });
+      return off;
+    },
+    { scope: root, dependencies: [reduced] },
+  );
+
+  return (
+    <section ref={root} id="hero" className="relative h-svh min-h-[640px] overflow-hidden">
+      <GLImage
+        image={hero.image}
+        priority
+        revealOn="load"
+        parallax={0.1}
+        grade={0.42}
+        sizes="(min-width: 768px) 60vw, 100vw"
+        className="absolute inset-y-0 right-0 w-full md:w-[60%]"
+      />
+      {/* ink falls off the left edge of the photo into the page */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-y-0 right-0 z-20 w-full md:w-[60%]"
+        style={{ backgroundImage: "linear-gradient(90deg, #0D1520 0%, rgba(13,21,32,0.55) 14%, rgba(13,21,32,0) 38%), linear-gradient(0deg, rgba(13,21,32,0.75) 0%, rgba(13,21,32,0) 35%), linear-gradient(180deg, rgba(13,21,32,0.7) 0%, rgba(13,21,32,0) 22%)" }}
+      />
+
+      <div data-hero-copy className="relative z-20 flex h-full flex-col justify-between px-5 pb-8 pt-28 md:px-8 md:pb-10 md:pt-[18vh]">
+        <div className="flex flex-col gap-8 md:max-w-[34vw]">
+          <div className="text-label flex items-center gap-4 text-mute">
+            <span className="text-stone">{hero.index}</span>
+            <span data-hero-line className="h-px w-20 origin-left bg-glacier" />
+            <span>{hero.eyebrow}</span>
+          </div>
+          <p data-hero-fade className="max-w-[34ch] text-[15px] leading-relaxed text-stone/80 md:text-base">
+            {hero.lede}
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
+          <SplitReveal
+            as="h1"
+            trigger="load"
+            stagger={0.055}
+            className="text-display max-w-[13ch] text-[clamp(3.25rem,8.6vw,10rem)]"
+          >
+            {before}
+            <span className="text-glacier">{hero.accentWord}</span>
+            {after}
+          </SplitReveal>
+
+          <ul className="flex shrink-0 flex-col gap-1.5 text-[13px] font-medium md:items-end md:text-right">
+            {hero.specLine.map((s) => (
+              <li data-hero-fade key={s} className="hero-spec">
+                {s}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div data-hero-fade className="text-label absolute bottom-10 left-1/2 z-20 hidden -translate-x-1/2 flex-col items-center gap-3 text-mute md:flex">
+        <span>Scroll</span>
+        <span className="scroll-cue block h-10 w-px bg-stone/30" />
+      </div>
+    </section>
+  );
+}

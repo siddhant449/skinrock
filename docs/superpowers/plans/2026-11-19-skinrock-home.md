@@ -77,12 +77,12 @@ tests/e2e/*.spec.ts     Playwright
 
 **Files:** Create: project via create-next-app, `app/globals.css`, `app/layout.tsx`, `vitest.config.ts`, `playwright.config.ts`, `tests/unit/smoke.test.ts`, `tests/e2e/home.spec.ts`, `.gitignore` entries `.superpowers/ .playwright-mcp/ test-results/`
 
-**Interfaces:** Produces: Tailwind color utilities `bg-base text-stone text-mute text-glacier bg-cream text-glacier-ink bg-deep bg-raised`, CSS var `--font-inter`, `npm run test` (vitest), `npm run e2e` (playwright, dev server on :3100).
+**Interfaces:** Produces: Tailwind color utilities `bg-ink text-stone text-mute text-glacier bg-cream text-glacier-ink bg-deep bg-raised`, CSS var `--font-inter`, `npm run test` (vitest), `npm run e2e` (playwright, dev server on :3100).
 
 - [ ] **Step 1:** `git init`; `npx create-next-app@latest . --ts --tailwind --eslint --app --no-src-dir --import-alias "@/*" --use-npm --turbopack --yes` (move `.superpowers`/`.playwright-mcp`/`docs` aside if it refuses, then restore).
 - [ ] **Step 2:** Install: `three @react-three/fiber @react-three/drei lenis gsap @gsap/react motion`; dev: `vitest @playwright/test @types/three`; pin `"react": "~19.3.1", "react-dom": "~19.3.1"`.
 - [ ] **Step 3:** Write e2e `home responds with Skinrock title`: `expect(page).toHaveTitle(/Skinrock/)`; run, expect FAIL.
-- [ ] **Step 4:** `globals.css` `@theme` with the 9 tokens as `--color-*`, `--font-sans: var(--font-inter)`; body `bg-base text-stone antialiased`. Layout loads Inter (`axes:['opsz']`), sets `<title>` placeholder "Skinrock".
+- [ ] **Step 4:** `globals.css` `@theme` with the 9 tokens as `--color-*`, `--font-sans: var(--font-inter)`; body `bg-ink text-stone antialiased`. Layout loads Inter (`axes:['opsz']`), sets `<title>` placeholder "Skinrock".
 - [ ] **Step 5:** Run `npm run test` and `npm run e2e`; expect PASS. `npm run build` succeeds.
 - [ ] **Step 6:** Commit `chore: scaffold next app with tokens and test harness`.
 

@@ -2,7 +2,7 @@
 
 /* Graubünden Night: see docs/superpowers/specs/2026-11-19-skinrock-home-design.md */
 @theme {
-  --color-base: #0d1520;
+  --color-ink: #0d1520;
   --color-deep: #101b2a;
   --color-raised: #132033;
   --color-mute: #8fa0b3;
@@ -19,14 +19,14 @@
 
 @layer base {
   html {
-    background: var(--color-base);
+    background: var(--color-ink);
     color: var(--color-stone);
     font-optical-sizing: auto;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
   body {
-    background: var(--color-base);
+    background: var(--color-ink);
     color: var(--color-stone);
     font-family: var(--font-sans);
     letter-spacing: -0.01em;
@@ -34,7 +34,7 @@
   }
   ::selection {
     background: var(--color-glacier);
-    color: var(--color-base);
+    color: var(--color-ink);
   }
   :focus-visible {
     outline: 1px solid var(--color-glacier);
@@ -119,4 +119,70 @@ html.js [data-reveal]:not([data-revealed]) {
 .sr-word-mask {
   padding-bottom: 0.16em;
   margin-bottom: -0.16em;
+}
+
+/* Preloader: only when JS runs, motion is allowed and it hasn't played this session */
+.preloader {
+  display: none;
+}
+html.js:not(.sr-seen) .preloader {
+  display: flex;
+  animation: preloader-failsafe 0.4s 7s forwards;
+}
+@keyframes preloader-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.js .preloader {
+    display: none;
+  }
+}
+
+/* Nav underline */
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.6s var(--ease-expo);
+}
+.nav-link:hover::after,
+.nav-link:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.hero-spec {
+  text-shadow: 0 1px 16px rgba(13, 21, 32, 0.9);
+}
+
+.scroll-cue {
+  position: relative;
+  overflow: hidden;
+}
+.scroll-cue::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--color-glacier);
+  transform: translateY(-100%);
+  animation: scroll-cue 2.2s var(--ease-expo) infinite;
+}
+@keyframes scroll-cue {
+  0% { transform: translateY(-100%); }
+  60%, 100% { transform: translateY(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue::after { animation: none; }
 }

@@ -38,7 +38,7 @@ export function MagneticButton({ href, children, className = "", strength = 0.35
       onPointerMove={onMove}
       onPointerLeave={onLeave}
       style={{ x, y }}
-      className={`group relative inline-flex items-center justify-center overflow-hidden rounded-full border border-stone/25 text-stone transition-colors duration-500 hover:text-base ${className}`}
+      className={`group relative inline-flex items-center justify-center overflow-hidden rounded-full border border-stone/25 text-stone transition-colors duration-500 hover:text-ink ${className}`}
     >
       <span
         aria-hidden
