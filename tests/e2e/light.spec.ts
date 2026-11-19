@@ -1,4 +1,8 @@
 import { test, expect } from "@playwright/test";
+import { wakeWebGL } from "./helpers";
+
+// software WebGL on a dev server is slow, especially with parallel workers
+test.describe.configure({ timeout: 60_000 });
 
 test.use({ launchOptions: { args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"] } });
 
@@ -14,7 +18,8 @@ test("light chapter copy and backlit stone", async ({ page }) => {
 test("backlight brightens as the chapter scrolls", async ({ page }) => {
   const sharp = (await import("sharp")).default;
   await page.goto("/");
-  await page.waitForTimeout(4000);
+  await wakeWebGL(page);
+  await page.waitForTimeout(2000);
   const meanAt = async (f: number) => {
     const y = await page.evaluate((ff) => {
       const el = document.getElementById("light")!;

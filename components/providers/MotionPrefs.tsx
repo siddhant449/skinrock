@@ -15,8 +15,16 @@ function subscribeReduced(cb: () => void) {
 }
 
 let webglCache: boolean | null = null;
+/**
+ * WebGL is a desktop and tablet enhancement: screens 768px+ with a fine pointer.
+ * Phones get the DOM version (same motion, no 900 KB scene) to protect battery and frame rate.
+ */
 function detectWebGL(): boolean {
   if (webglCache !== null) return webglCache;
+  if (!window.matchMedia("(min-width: 768px) and (pointer: fine)").matches) {
+    webglCache = false;
+    return webglCache;
+  }
   try {
     const canvas = document.createElement("canvas");
     const gl = canvas.getContext("webgl2") ?? canvas.getContext("webgl");
