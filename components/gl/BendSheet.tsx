@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import type { SiteImage } from "@/content/site";
@@ -19,16 +19,18 @@ type Props = {
 export function BendSheet({ image, progress, className = "relative" }: Props) {
   const wrap = useRef<HTMLDivElement>(null);
   const live = useGLLive();
+  const [ready, setReady] = useState(false);
+  const drawn = live && ready;
   return (
-    <div ref={wrap} data-bend="" data-gl={live ? "on" : undefined} className={className}>
-      {!live ? (
+    <div ref={wrap} data-bend="" data-gl={drawn ? "ready" : undefined} className={className}>
+      {/* the photo stays until WebGL has drawn its first frame, so the chapter never goes blank */}
+      {!drawn ? (
         <Image src={image.src} alt={image.alt} fill sizes="(min-width: 768px) 50vw, 100vw" className="rounded-sm object-cover" />
       ) : (
-        <>
-          {/* keep the alt text for assistive tech when the photo is drawn in WebGL */}
-          <span className="sr-only">{image.alt}</span>
-          <BendSheetView src={image.src} imageRes={[image.width, image.height]} progress={progress} />
-        </>
+        <span className="sr-only">{image.alt}</span>
+      )}
+      {live && (
+        <BendSheetView src={image.src} imageRes={[image.width, image.height]} progress={progress} onReady={() => setReady(true)} />
       )}
     </div>
   );

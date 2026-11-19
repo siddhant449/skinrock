@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import type { SiteImage } from "@/content/site";
@@ -19,18 +19,27 @@ type Props = {
 export function BacklightStone({ image, intensity, className = "relative" }: Props) {
   const wrap = useRef<HTMLDivElement>(null);
   const live = useGLLive();
+  const [ready, setReady] = useState(false);
+  const drawn = live && ready;
   return (
-    <div ref={wrap} data-backlight="" className={`overflow-hidden ${className}`}>
-      {!live ? (
+    <div ref={wrap} data-backlight="" data-gl={drawn ? "ready" : undefined} className={`overflow-hidden ${className}`}>
+      {/* the photo and CSS glow stay until WebGL has drawn its first frame */}
+      {!drawn ? (
         <>
           <Image src={image.src} alt={image.alt} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" />
           <div aria-hidden className="backlight-fallback absolute inset-0" />
         </>
       ) : (
-        <>
-          <span className="sr-only">{image.alt}</span>
-          <BacklightView src={image.src} imageRes={[image.width, image.height]} intensity={intensity} track={wrap} />
-        </>
+        <span className="sr-only">{image.alt}</span>
+      )}
+      {live && (
+        <BacklightView
+          src={image.src}
+          imageRes={[image.width, image.height]}
+          intensity={intensity}
+          track={wrap}
+          onReady={() => setReady(true)}
+        />
       )}
     </div>
   );

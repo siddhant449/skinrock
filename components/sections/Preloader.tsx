@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { markLoaded } from "@/lib/loaded";
+import { PRELOADER_TIMING } from "@/lib/timing";
+import { site } from "@/content/site";
 
 const SEEN_KEY = "sr-loaded";
 
@@ -34,13 +36,13 @@ export function Preloader() {
     const state = { v: 0 };
     const ready = Promise.race([
       Promise.all([document.fonts?.ready, new Promise((r) => (document.readyState === "complete" ? r(0) : window.addEventListener("load", r, { once: true })))]),
-      new Promise((r) => setTimeout(r, 2200)),
+      new Promise((r) => setTimeout(r, (PRELOADER_TIMING.count + PRELOADER_TIMING.holdMax) * 1000)),
     ]);
 
     const tl = gsap.timeline({ paused: true });
     tl.to(state, {
       v: 100,
-      duration: 1.7,
+      duration: PRELOADER_TIMING.count,
       ease: "power2.inOut",
       onUpdate: () => {
         const n = Math.round(state.v);
@@ -48,7 +50,7 @@ export function Preloader() {
         if (bar.current) bar.current.style.transform = `scaleX(${state.v / 100})`;
       },
     });
-    // hold at 100 until fonts and images are in (or 2.2s passed)
+    // hold at 100 until fonts and images are in (capped by PRELOADER_TIMING.holdMax)
     tl.add(() => {
       tl.pause();
       ready.then(() => tl.resume());
@@ -59,7 +61,7 @@ export function Preloader() {
       } catch {}
       markLoaded();
     });
-    tl.to(el, { clipPath: "inset(0% 0% 100% 0%)", duration: 1.1, ease: "expo.inOut" }, "<");
+    tl.to(el, { clipPath: "inset(0% 0% 100% 0%)", duration: PRELOADER_TIMING.wipe, ease: "expo.inOut" }, "<");
     tl.add(() => setDone(true));
     tl.play();
 
@@ -80,7 +82,9 @@ export function Preloader() {
     >
       <div className="text-label flex justify-between text-mute">
         <span className="tracking-[0.16em] text-stone">SKINROCK</span>
-        <span>Chur, Switzerland</span>
+        <span>
+          {site.contact.city}, {site.contact.countryName}
+        </span>
       </div>
       <div className="flex items-end justify-between gap-6">
         <span ref={count} className="text-display text-[clamp(5rem,16vw,15rem)] tabular-nums">

@@ -10,15 +10,15 @@ import { bendFragment, bendVertex } from "./materials/bend";
 const SHEET_W = 2.5;
 const SHEET_H = 1.2;
 
-type ViewProps = { src: string; imageRes: [number, number]; progress: React.RefObject<{ value: number }> };
+type ViewProps = { src: string; imageRes: [number, number]; progress: React.RefObject<{ value: number }>; onReady: () => void };
 
 /** Lazily loaded WebGL half of BendSheet. */
-export default function BendSheetView({ src, imageRes, progress }: ViewProps) {
+export default function BendSheetView({ src, imageRes, progress, onReady }: ViewProps) {
   return (
     <View className="absolute inset-0">
       <PerspectiveCamera makeDefault position={[0, 0, 3.4]} fov={34} />
       <Suspense fallback={null}>
-        <Sheet src={src} imageRes={imageRes} progress={progress} />
+        <Sheet src={src} imageRes={imageRes} progress={progress} onReady={onReady} />
       </Suspense>
     </View>
   );
@@ -28,11 +28,14 @@ function Sheet({
   src,
   imageRes,
   progress,
+  onReady,
 }: {
   src: string;
   imageRes: [number, number];
   progress: React.RefObject<{ value: number }>;
+  onReady: () => void;
 }) {
+  const readyOnce = useRef(false);
   const invalidate = useThree((s) => s.invalidate);
   const tex = useTexture(src, (t) => {
     t.colorSpace = THREE.NoColorSpace;
@@ -75,6 +78,10 @@ function Sheet({
   useFrame((state, dt) => {
     const m = mesh.current;
     if (!m) return;
+    if (!readyOnce.current) {
+      readyOnce.current = true;
+      requestAnimationFrame(onReady);
+    }
     const d = Math.min(dt, 0.05);
     const p = pointer.current;
     p.x = damp(p.x, p.tx, 4, d);

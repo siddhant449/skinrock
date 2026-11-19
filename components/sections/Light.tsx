@@ -26,38 +26,82 @@ export function Light() {
         return;
       }
       const q = gsap.utils.selector(root);
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: root.current,
-          start: "top top",
-          end: () => `+=${window.innerHeight}`,
-          pin: true,
-          scrub: 1,
-        },
-      });
-      tl.fromTo(intensity.current, { value: 0.04 }, { value: 1, ease: "power2.in", duration: 1 }, 0);
-      tl.fromTo(q("[data-switch]"), { scaleY: 0 }, { scaleY: 1, ease: "none", duration: 1 }, 0);
-      tl.fromTo(q("[data-use]"), { color: "#8FA0B3" }, { color: "#EEE9E0", stagger: 0.12, duration: 0.3 }, 0.35);
+      const mm = gsap.matchMedia();
+      const build = (pinned: boolean) => {
+        const tl = gsap.timeline({
+          scrollTrigger: pinned
+            ? {
+                trigger: root.current,
+                start: "top top",
+                end: () => `+=${window.innerHeight}`,
+                pin: true,
+                scrub: 1,
+              }
+            : // phones: no pin; the chapter is taller than the screen
+              {
+                trigger: root.current,
+                start: "top 70%",
+                end: "center center",
+                scrub: 1,
+              },
+        });
+        tl.fromTo(
+          intensity.current,
+          { value: 0.04 },
+          { value: 1, ease: "power2.in", duration: 1 },
+          0,
+        );
+        tl.fromTo(
+          q("[data-switch]"),
+          { scaleY: 0 },
+          { scaleY: 1, ease: "none", duration: 1 },
+          0,
+        );
+        tl.fromTo(
+          q("[data-use]"),
+          { color: "#8FA0B3" },
+          { color: "#EEE9E0", stagger: 0.12, duration: 0.3 },
+          0.35,
+        );
+      };
+      mm.add("(min-width: 768px)", () => build(true));
+      mm.add("(max-width: 767px)", () => build(false));
+      return () => mm.revert();
     },
     { scope: root, dependencies: [reduced] },
   );
 
   return (
-    <section ref={root} id="light" className="relative min-h-svh overflow-hidden">
+    <section
+      ref={root}
+      id="light"
+      className="relative min-h-svh overflow-hidden"
+    >
       <div className="grid min-h-svh grid-cols-1 md:grid-cols-2">
         <div className="relative z-20 flex flex-col justify-between gap-12 px-5 py-24 md:px-8 md:py-[14vh]">
           <div className="flex items-start gap-6">
             <span className="relative mt-1 hidden h-24 w-px bg-stone/15 md:block">
-              <span data-switch className="absolute inset-0 origin-top bg-glacier" />
+              <span
+                data-switch
+                className="absolute inset-0 origin-top bg-glacier"
+              />
             </span>
             <div className="flex flex-col gap-6">
-              <span className="text-label text-glacier">03 / {light.kicker}</span>
-              <SplitReveal as="h2" className="text-headline text-[clamp(2.75rem,6vw,6.5rem)]">
+              <span className="text-label text-glacier">
+                03 / {light.kicker}
+              </span>
+              <SplitReveal
+                as="h2"
+                className="text-headline text-[clamp(2.75rem,6vw,6.5rem)]"
+              >
                 {light.title}
               </SplitReveal>
             </div>
           </div>
-          <ScrollFill text={light.paragraph} className="text-headline max-w-[22ch] text-[clamp(1.6rem,2.6vw,2.6rem)] leading-[1.08]" />
+          <ScrollFill
+            text={light.paragraph}
+            className="text-headline max-w-[22ch] text-[clamp(1.6rem,2.6vw,2.6rem)] leading-[1.08]"
+          />
           <ul className="flex flex-wrap gap-x-6 gap-y-2 text-[13px] font-medium text-mute">
             {light.uses.map((u) => (
               <li key={u} data-use>
@@ -66,7 +110,11 @@ export function Light() {
             ))}
           </ul>
         </div>
-        <BacklightStone image={light.image} intensity={intensity} className="relative min-h-[70svh] md:min-h-svh" />
+        <BacklightStone
+          image={light.image}
+          intensity={intensity}
+          className="relative min-h-[70svh] md:min-h-svh"
+        />
       </div>
     </section>
   );

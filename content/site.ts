@@ -37,6 +37,14 @@ const images = {
   og: img("og.jpg", 1200, 630, "Skinrock slate veneer wall in an Alpine home"),
 } satisfies Record<string, SiteImage>;
 
+/** Values that conflict on the current site. Defined once here; everything else derives from them. */
+const specs = {
+  thickness: { min: 1.5, max: 3, value: "1.5 to 3 mm", pending: true },
+  weight: { kg: 2.8, value: "≈2.8 kg/m²", pending: true },
+  format: { value: "120 × 250 cm", pending: true },
+  headquarters: { value: "Chur", pending: true },
+};
+
 export const site = {
   name: "Skinrock",
   legalName: "Skinrock Official AG",
@@ -60,17 +68,17 @@ export const site = {
     index: "01",
     headline: "Real stone. Thin enough to let light through.",
     accentWord: "light",
-    lede: "Ultra thin veneers of slate, quartzite and marble. Flexible enough to follow a curve, translucent enough to glow, light enough to go almost anywhere.",
-    specLine: ["1.5 to 3 mm", "≈2.8 kg/m²", "Engineered in Chur, Switzerland"],
+    lede: "Ultra thin veneers of slate, quartzite and marble. Flexible enough to follow a curve, light enough to go almost anywhere and, in selected stones, translucent enough to glow.",
+    specLine: [specs.thickness.value, specs.weight.value, "Swiss engineered"],
     image: images.alpsSlate,
   },
 
-  manifesto: ["Stone.", "Bends.", "Glows.", "1.5 mm."],
+  manifesto: ["Stone.", "Bends.", "Glows.", `${specs.thickness.min} mm.`],
   manifestoNotes: [
     "Split from the block. Every sheet unique.",
     "Follows curves and complex surfaces.",
-    "Translucent when backlit.",
-    "Thin from 1.5 mm. Cuts with standard diamond tools.",
+    "Selected stones are translucent when backlit.",
+    `Thin from ${specs.thickness.min} mm. Cuts with standard diamond tools.`,
   ],
 
   flex: {
@@ -78,9 +86,9 @@ export const site = {
     title: "It bends. It is still stone.",
     body: "A layer of real stone, split from the block. It follows curves and complex surfaces, cuts with standard diamond tools and works with many substrates.",
     stats: [
-      { value: 1.5, decimals: 1, unit: "mm", label: "Thin from" },
-      { value: 2.8, decimals: 1, unit: "kg/m²", label: "Approximate weight" },
-      { value: 43, decimals: 0, unit: "", label: "Stones in the collection" },
+      { value: specs.thickness.min, decimals: 1, unit: "mm", label: "Thin from" },
+      { value: specs.weight.kg, decimals: 1, unit: "kg/m²", label: "Approximate weight" },
+      { value: 42, decimals: 0, unit: "", label: "Stones in the collection" },
     ],
     image: images.slateCloseup,
   },
@@ -100,8 +108,8 @@ export const site = {
     { slug: "marble", name: "Marble", count: "24 stones", image: images.marbleSample, href: "https://skinrockofficial.com/product-category/marble/" },
     { slug: "acoustic", name: "Acoustic", count: "Stone faced panel", image: images.acousticSample, href: "https://skinrockofficial.com/product-category/acoustic-panel/" },
   ],
-  collectionTitle: "Forty three stones.",
-  collectionIntro: "Each one split from a real block, so no two sheets are ever alike.",
+  collectionTitle: "Forty two stones.",
+  collectionIntro: "Each one split from a real block, so no two sheets are ever alike. Plus a stone faced acoustic panel.",
 
   projects: [
     { image: images.lobby, use: "Backlit ceiling", setting: "Hospitality, indoor" },
@@ -126,7 +134,7 @@ export const site = {
     { standard: "VKF guideline", result: "RF 2" },
     { standard: "SIA 262/1:2013", result: "Frost and de-icing salt resistance tested" },
     { standard: "SN EN 1931", result: "Water vapour permeability tested" },
-    { standard: "AgBB 2015", result: "Emission requirements fulfilled for slate and quartzite" },
+    { standard: "AgBB 2015", result: "Emission requirements fulfilled" },
     { standard: "ASTM C121", result: "Water absorption 2.5%, unsealed" },
   ],
 
@@ -142,7 +150,7 @@ export const site = {
     company: "Skinrock Official AG",
     street: "Hartbertstrasse 9",
     postal: "7000",
-    city: "Chur",
+    city: specs.headquarters.value,
     country: "CH",
     countryName: "Switzerland",
     // pending: no public email or phone on the current site.
@@ -154,17 +162,12 @@ export const site = {
     { label: "Privacy Policy", href: "https://skinrockofficial.com/privacy-policy/" },
   ],
 
-  specs: {
-    thickness: { value: "1.5 to 3 mm", pending: true },
-    weight: { value: "≈2.8 kg/m²", pending: true },
-    format: { value: "120 × 250 cm", pending: true },
-    headquarters: { value: "Chur", pending: true },
-  },
+  specs,
 
   seo: {
     title: "Skinrock | Flexible natural stone veneer from Switzerland",
     description:
-      "Skinrock makes ultra thin natural stone veneers in slate, quartzite and marble. 1.5 to 3 mm thin, flexible, translucent when backlit and engineered in Chur, Switzerland.",
+      `Skinrock makes ultra thin natural stone veneers in slate, quartzite and marble. ${specs.thickness.value} thin, flexible, with selected stones translucent when backlit. Created in Switzerland.`,
   },
 
   images,

@@ -20,10 +20,14 @@ export function Hero() {
 
   useGSAP(
     () => {
-      if (reduced) return;
+      if (reduced) {
+        root.current?.setAttribute("data-hero-ready", "");
+        return;
+      }
       const q = gsap.utils.selector(root);
       // intro: hairline draws, side copy fades up after the headline starts rising
       gsap.set(q("[data-hero-fade]"), { autoAlpha: 0, y: 18 });
+      root.current?.setAttribute("data-hero-ready", ""); // GSAP owns the fade from here
       gsap.set(q("[data-hero-line]"), { scaleX: 0 });
       const off = onLoaded(() => {
         gsap.to(q("[data-hero-line]"), { scaleX: 1, duration: 1.4, ease: "expo.out", delay: 0.2 });

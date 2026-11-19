@@ -35,6 +35,7 @@ test.describe("phones", () => {
 });
 
 test("hero photo stays visible when webgl takes over after the intro", async ({ page }) => {
+  test.setTimeout(90_000); // several fixed waits plus software WebGL under parallel load
   const sharp = (await import("sharp")).default;
   const hero = page.locator("#hero [data-gl-image]");
   const brightness = async () => {

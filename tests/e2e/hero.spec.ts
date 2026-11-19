@@ -32,7 +32,7 @@ test("hero shows the spec line without dashes", async ({ page }) => {
   await page.goto("/");
   const hero = page.locator("#hero");
   await expect(hero).toContainText("1.5 to 3 mm");
-  await expect(hero).toContainText("Engineered in Chur, Switzerland");
+  await expect(hero).toContainText("Swiss engineered");
 });
 
 test("preloader runs on a first visit even though prefs settle after hydration", async ({ page }) => {

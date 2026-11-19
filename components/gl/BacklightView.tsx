@@ -15,6 +15,7 @@ type ViewProps = {
   imageRes: [number, number];
   intensity: React.RefObject<{ value: number }>;
   track: React.RefObject<HTMLDivElement | null>;
+  onReady: () => void;
 };
 
 /** Lazily loaded WebGL half of BacklightStone. */
@@ -28,17 +29,8 @@ export default function BacklightView(props: ViewProps) {
   );
 }
 
-function Plane({
-  src,
-  imageRes,
-  intensity,
-  track,
-}: {
-  src: string;
-  imageRes: [number, number];
-  intensity: React.RefObject<{ value: number }>;
-  track: React.RefObject<HTMLDivElement | null>;
-}) {
+function Plane({ src, imageRes, intensity, track, onReady }: ViewProps) {
+  const readyOnce = useRef(false);
   const invalidate = useThree((s) => s.invalidate);
   const tex = useTexture(src, (t) => {
     t.colorSpace = THREE.NoColorSpace;
@@ -93,6 +85,10 @@ function Plane({
     const m = mesh.current;
     const el = track.current;
     if (!m || !el) return;
+    if (!readyOnce.current) {
+      readyOnce.current = true;
+      requestAnimationFrame(onReady);
+    }
     const d = Math.min(dt, 0.05);
     const t = state.clock.elapsedTime;
     const L = light.current;
