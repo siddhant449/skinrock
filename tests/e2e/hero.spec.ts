@@ -36,10 +36,9 @@ test("hero shows the spec line without dashes", async ({ page }) => {
 });
 
 test("preloader runs on a first visit even though prefs settle after hydration", async ({ page }) => {
-  await page.goto("/");
-  await page.waitForTimeout(400);
+  // the bug this guards: the preloader skipped itself because prefs read "reduced" during hydration
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   const pre = page.locator("[data-preloader]");
   await expect(pre).toBeVisible();
-  const n = await pre.locator("span.tabular-nums").textContent();
-  expect(Number(n)).toBeLessThan(100);
+  await expect.poll(() => page.evaluate(() => sessionStorage.getItem("sr-loaded")), { timeout: 10_000 }).toBe("1");
 });
