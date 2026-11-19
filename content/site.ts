@@ -42,6 +42,7 @@ export const site = {
   legalName: "Skinrock Official AG",
   url: "https://skinrockofficial.com",
   tagline: "Real Stone. Ultra Thin. Flexible. Translucent.",
+  copyrightYear: 2026,
 
   nav: {
     links: [
