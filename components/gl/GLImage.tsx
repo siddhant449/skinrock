@@ -124,10 +124,18 @@ function StonePlane({
   track,
   onReady,
 }: PlaneProps) {
-  const tex = useTexture(src);
-  const velocity = useScrollVelocity();
   const invalidate = useThree((s) => s.invalidate);
+  const tex = useTexture(src, (t) => {
+    // raw pass-through: the shader works on the photo's stored values
+    t.colorSpace = THREE.NoColorSpace;
+    t.minFilter = THREE.LinearFilter;
+    t.generateMipmaps = false;
+    t.needsUpdate = true;
+    invalidate();
+  });
+  const velocity = useScrollVelocity();
   const readyOnce = useRef(false);
+  const mesh = useRef<THREE.Mesh<THREE.PlaneGeometry, THREE.ShaderMaterial>>(null);
 
   // The material is created imperatively: R3F copies a `uniforms` prop, so mutating our own
   // object would never reach the GPU. Props are written into material.uniforms every frame.
@@ -154,20 +162,12 @@ function StonePlane({
       }),
     [tex],
   );
-  const uniforms = material.uniforms;
   useEffect(() => () => material.dispose(), [material]);
-
-  useEffect(() => {
-    tex.colorSpace = THREE.NoColorSpace;
-    tex.minFilter = THREE.LinearFilter;
-    tex.generateMipmaps = false;
-    tex.needsUpdate = true;
-    invalidate();
-  }, [tex, invalidate]);
 
   useFrame((state) => {
     const el = track.current;
-    if (!el) return;
+    const uniforms = mesh.current?.material.uniforms;
+    if (!el || !uniforms) return;
     const r = el.getBoundingClientRect();
     uniforms.uRes.value.set(r.width, r.height);
     uniforms.uImageRes.value.set(imageWidth, imageHeight);
@@ -185,7 +185,7 @@ function StonePlane({
   });
 
   return (
-    <mesh frustumCulled={false}>
+    <mesh ref={mesh} frustumCulled={false}>
       <planeGeometry args={[1, 1, 24, 24]} />
       <primitive object={material} attach="material" />
     </mesh>
