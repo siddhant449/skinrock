@@ -5,9 +5,14 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   images: {
-    // AVIF is about 25% smaller than WebP for these photos; WebP stays the fallback.
-    // Encoding is slower on the first request of each size, then served from cache.
-    formats: ["image/avif", "image/webp"],
+    // photos are pre-encoded at build time (scripts/optimize-images.mjs): the on-demand
+    // optimizer took 1 to 2.5 s per size on a cold cache, and every deploy starts cold
+    loader: "custom",
+    loaderFile: "./lib/imageLoader.ts",
+  },
+  async headers() {
+    // content-hashed file names, so they never change: cache for a year
+    return [{ source: "/_img/:file*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] }];
   },
   turbopack: {
     rules: {

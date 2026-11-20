@@ -111,3 +111,61 @@ test("nav shows the real Skinrock logo, recoloured to the theme", async ({ page 
   expect(box.width).toBeGreaterThan(110);
   expect(box.width).toBeLessThan(200);
 });
+
+test("nav links are refined uppercase labels, not plain text", async ({ page }) => {
+  await intro(page);
+  const link = page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Projects" });
+  const s = await link.evaluate((el) => {
+    const cs = getComputedStyle(el);
+    return { transform: cs.textTransform, tracking: parseFloat(cs.letterSpacing) / parseFloat(cs.fontSize), size: parseFloat(cs.fontSize) };
+  });
+  expect(s.transform).toBe("uppercase");
+  expect(s.tracking).toBeGreaterThanOrEqual(0.06);
+  expect(s.size).toBeGreaterThanOrEqual(12);
+});
+
+test("hovering a nav link dims the others and marks the one you are on", async ({ page }) => {
+  await intro(page);
+  const nav = page.getByRole("navigation", { name: "Main" });
+  await nav.getByRole("link", { name: "Light" }).hover();
+  await page.waitForTimeout(700);
+  const opacity = (name: string) => nav.getByRole("link", { name }).evaluate((el) => Number(getComputedStyle(el).opacity));
+  expect(await opacity("Light")).toBeGreaterThan(0.95);
+  expect(await opacity("Stones")).toBeLessThan(0.6);
+  const marker = (name: string) =>
+    nav.getByRole("link", { name }).evaluate((el) => (getComputedStyle(el, "::before").content === "none" ? 0 : new DOMMatrixReadOnly(getComputedStyle(el, "::before").transform).a));
+  expect(await marker("Light")).toBeGreaterThan(0.95);
+  expect(await marker("Stones")).toBeLessThan(0.05);
+});
+
+test("the current section also carries the marker without hovering", async ({ page }) => {
+  await intro(page);
+  await scrollToSection(page, "light", 0.2);
+  await page.mouse.wheel(0, -60);
+  await page.mouse.move(700, 600);
+  await page.waitForTimeout(800);
+  const a = await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Light" })
+    .evaluate((el) => (getComputedStyle(el, "::before").content === "none" ? 0 : new DOMMatrixReadOnly(getComputedStyle(el, "::before").transform).a));
+  expect(a).toBeGreaterThan(0.95);
+});
+
+test("the hover roll lands exactly where the label rested (no jump)", async ({ page }) => {
+  await intro(page);
+  const link = page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Light" });
+  const visibleTop = () =>
+    link.evaluate((el) => {
+      const box = el.querySelector(".roll")!.getBoundingClientRect();
+      // the copy that is inside the clipped box is the one you see
+      const shown = [...el.querySelectorAll<HTMLElement>(".roll-a, .roll-b")].find((s) => {
+        const r = s.getBoundingClientRect();
+        return r.top >= box.top - 1 && r.top < box.top + box.height / 2;
+      })!;
+      return shown.getBoundingClientRect().top;
+    });
+  await page.mouse.move(700, 600);
+  await page.waitForTimeout(400);
+  const rest = await visibleTop();
+  await link.hover();
+  await page.waitForTimeout(900);
+  expect(Math.abs((await visibleTop()) - rest)).toBeLessThan(0.5);
+});

@@ -45,3 +45,6 @@ next-env.d.ts
 # tests
 /test-results/
 /playwright-report/
+
+# pre-encoded photos (scripts/optimize-images.mjs), rebuilt on dev/build
+/public/_img/

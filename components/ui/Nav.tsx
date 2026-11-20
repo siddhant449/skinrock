@@ -175,9 +175,7 @@ export function Nav() {
               onClick={(e) => go(e, l.href)}
               aria-current={current === l.href ? "true" : undefined}
               style={{ ["--i" as string]: i + 1 }}
-              className={`nav-item nav-roll hidden transition-opacity duration-500 md:block md:col-span-1 ${i === 0 ? "md:col-start-5" : ""} ${
-                current && current !== l.href ? "opacity-55" : "opacity-100"
-              }`}
+              className={`nav-item nav-roll nav-label hidden justify-self-start md:block md:col-span-1 ${i === 0 ? "md:col-start-5" : ""}`}
             >
               <Roll>{l.label}</Roll>
             </a>
@@ -186,7 +184,7 @@ export function Nav() {
             href={site.nav.cta.href}
             onClick={(e) => go(e, site.nav.cta.href)}
             style={{ ["--i" as string]: 7 }}
-            className="nav-item nav-roll nav-cta hidden justify-self-end whitespace-nowrap md:col-span-2 md:col-start-11 md:inline-flex"
+            className="nav-item nav-roll nav-cta nav-label hidden justify-self-end whitespace-nowrap md:col-span-2 md:col-start-11 md:inline-flex"
           >
             <Roll>{site.nav.cta.label}</Roll>
             <span

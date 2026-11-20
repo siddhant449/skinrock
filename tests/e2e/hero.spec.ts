@@ -19,7 +19,7 @@ test("nav has the agreed links and a plain text cta", async ({ page }) => {
   }
 });
 
-test("preloader counts up then gets out of the way", async ({ page }) => {
+test("preloader plays then gets out of the way", async ({ page }) => {
   await page.goto("/");
   const pre = page.locator("[data-preloader]");
   await expect(pre).toBeVisible();

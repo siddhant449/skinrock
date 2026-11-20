@@ -1,7 +1,8 @@
+import imageLoader from "./imageLoader";
+
 /**
- * WebGL textures are fetched through the Next image optimizer at the size they are drawn,
- * instead of the 2000px originals. Widths must be in next.config `images.deviceSizes`
- * (the defaults below), or the optimizer rejects the request.
+ * WebGL textures are fetched at the size they are drawn instead of the 2000px originals,
+ * from the same pre-encoded files as next/image (lib/imageLoader.ts).
  */
 export const TEXTURE_WIDTHS = [640, 750, 828, 1080, 1200, 1920, 2048, 3840] as const;
 
@@ -32,7 +33,7 @@ export function textureWidth({ boxWidth, boxHeight, imageWidth, imageHeight, dev
   return TEXTURE_WIDTHS.find((w) => w >= needed) ?? TEXTURE_WIDTHS[TEXTURE_WIDTHS.length - 1];
 }
 
-/** URL of the optimised image at `width`, using the default next/image loader format. */
-export function textureUrl(src: string, width: number, quality = 75): string {
-  return `/_next/image?url=${encodeURIComponent(src)}&w=${width}&q=${quality}`;
+/** URL of the pre-encoded image at `width` (or the next size up). */
+export function textureUrl(src: string, width: number): string {
+  return imageLoader({ src, width });
 }

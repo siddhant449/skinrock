@@ -35,7 +35,7 @@ describe("textureWidth", () => {
 });
 
 describe("textureUrl", () => {
-  it("uses the default next/image loader format", () => {
-    expect(textureUrl("/images/a b.jpg", 640)).toBe("/_next/image?url=%2Fimages%2Fa%20b.jpg&w=640&q=75");
+  it("points at a pre-encoded static file, never the on-demand optimizer", () => {
+    expect(textureUrl("/images/lobby.jpg", 640)).toMatch(/^\/_img\/lobby-[0-9a-f]{8}-\d+\.webp$/);
   });
 });

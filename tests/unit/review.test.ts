@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { site } from "@/content/site";
-import { PRELOADER_TIMING } from "@/lib/timing";
+import { PRELOADER_TIMING, introLength } from "@/lib/timing";
 
 describe("pending values come from site.specs", () => {
   it("manifesto, flex and seo use the spec values", () => {
@@ -22,8 +22,11 @@ describe("copy stays within what the current site says", () => {
 });
 
 describe("preloader", () => {
-  it("count plus wipe stays under the spec's 2.2s", () => {
-    expect(PRELOADER_TIMING.count + PRELOADER_TIMING.wipe).toBeLessThanOrEqual(2.2);
+  it("the intro stays under the spec's 2.2s when nothing has to wait", () => {
+    expect(introLength()).toBeLessThanOrEqual(2.2);
+  });
+  it("never holds on the tile for long, even on a slow connection", () => {
+    expect(introLength() + PRELOADER_TIMING.holdMax).toBeLessThanOrEqual(3.5);
   });
 });
 
