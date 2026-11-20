@@ -473,17 +473,13 @@ html:not(.js) .nav-rule {
   .why-photo, .why-photo img { transition: none; }
 }
 
-/* ---------- Flex: studio light behind the bending sheet (components/sections/FlexStory.tsx) ---------- */
-.flex-studio {
-  background: radial-gradient(closest-side, rgb(244 233 210 / 0.075), rgb(191 227 242 / 0.025) 55%, transparent 100%);
-  animation: flex-studio 9s ease-in-out infinite alternate;
-}
-@keyframes flex-studio {
-  from { opacity: 0.75; transform: translate3d(-2%, 1%, 0); }
-  to { opacity: 1; transform: translate3d(2%, -1%, 0); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .flex-studio { animation: none; }
+/* ---------- Flex: still studio light (the user's pick A; components/sections/FlexStory.tsx) ----------
+   a soft pool of warm backlight behind the stone, the corners falling into ink (Zirka, Sobha) */
+.flex-studio-light {
+  background-color: var(--color-deep);
+  background-image:
+    radial-gradient(55% 60% at 50% 46%, rgb(244 233 210 / 0.1) 0%, rgb(191 227 242 / 0.035) 45%, rgb(16 27 42 / 0) 75%),
+    radial-gradient(120% 100% at 50% 45%, var(--color-deep) 55%, var(--color-ink) 100%);
 }
 
 /* ---------- Samples: the sample box (components/sections/Cta.tsx) ---------- */

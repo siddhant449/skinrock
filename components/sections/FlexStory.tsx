@@ -96,7 +96,7 @@ export function FlexStory() {
   );
 
   return (
-    <section ref={root} id="flex" className="relative overflow-hidden bg-deep md:h-svh">
+    <section ref={root} id="flex" className="flex-studio-light relative overflow-hidden bg-deep md:h-svh">
       {/* the stage (after Zirka): the sheet is the object, centred inside a fine measuring dial;
           title top left, body top right, one large figure centred beneath the sheet */}
       <div className="relative z-20 flex flex-col gap-6 px-5 pt-24 md:absolute md:inset-x-8 md:top-[11vh] md:flex-row md:items-start md:justify-between md:gap-10 md:px-0 md:pt-0">
@@ -110,8 +110,7 @@ export function FlexStory() {
       </div>
 
       <div data-flex-stage="" className="relative mx-5 mt-10 h-[46vh] md:absolute md:inset-0 md:m-0 md:h-auto">
-        {/* studio light and the dial sit under the WebGL canvas (z-[5]) */}
-        <div aria-hidden className="flex-studio pointer-events-none absolute left-1/2 top-[47%] z-[5] hidden h-[90vh] w-[90vh] -translate-x-1/2 -translate-y-1/2 md:block" />
+        {/* the dial sits under the WebGL canvas (z-[5]) */}
         <svg
           aria-hidden
           data-dial=""
@@ -145,7 +144,7 @@ export function FlexStory() {
         <BendSheet
           image={flex.image}
           progress={progress}
-          className="absolute inset-0 md:inset-auto md:left-1/2 md:top-[47%] md:h-[64vh] md:w-[56vw] md:-translate-x-1/2 md:-translate-y-1/2"
+          className="absolute inset-0 md:inset-auto md:left-1/2 md:top-[47%] md:h-[72vh] md:w-[60vw] md:-translate-x-1/2 md:-translate-y-1/2"
         />
       </div>
 

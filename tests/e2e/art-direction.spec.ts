@@ -89,3 +89,51 @@ test("why chapter has a quiet silk light behind the grid", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("#why [data-silk]")).toBeAttached();
 });
+
+test("the bending sheet never runs into the flex title or body copy", async ({ page }) => {
+  test.setTimeout(90_000);
+  await page.setViewportSize({ width: 1854, height: 960 });
+  await page.goto("/");
+  await page.waitForTimeout(3500);
+  await page.mouse.move(900, 500);
+  await page.mouse.wheel(0, 200); // wake webgl
+  await page.waitForTimeout(3500);
+  const flex = page.locator("#flex");
+  const top = await flex.evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
+  for (const f of [0, 0.3, 0.6, 0.9]) {
+    await settleAt(page, top + 960 * 1.6 * f);
+    // hide the copy while sampling its boxes, so any warm pixel left there can only be stone
+    const boxes = await flex.evaluate((el) =>
+      [el.querySelector("h2")!, el.querySelector("p")!].map((n) => {
+        const r = n.getBoundingClientRect();
+        (n as HTMLElement).style.visibility = "hidden";
+        return { x: r.left, y: r.top, width: r.width, height: r.height };
+      }),
+    );
+    for (const b of boxes) {
+      const shot = await page.screenshot({ clip: b });
+      // the stone texture is a warm mid tone; the ground behind is dark blue
+      const { default: sharp } = await import("sharp");
+      const { data, info } = await sharp(shot).raw().toBuffer({ resolveWithObject: true });
+      let stone = 0;
+      for (let i = 0; i < data.length; i += info.channels) {
+        const [r, g, bl] = [data[i], data[i + 1], data[i + 2]];
+        if (r > 90 && r < 215 && g > 70 && r - bl > 18) stone++;
+      }
+      expect(stone / (info.width * info.height), `pin ${f}`).toBeLessThan(0.01);
+    }
+    await flex.evaluate((el) => el.querySelectorAll<HTMLElement>("h2, p").forEach((n) => (n.style.visibility = "")));
+  }
+});
+
+test("flex chapter sits in a still studio light (the user's pick A), on the deep palette ground", async ({ page }) => {
+  await page.goto("/");
+  const bg = await page.locator("#flex").evaluate((el) => {
+    const cs = getComputedStyle(el);
+    return { color: cs.backgroundColor, image: cs.backgroundImage };
+  });
+  expect(bg.color).toBe("rgb(16, 27, 42)"); // deep
+  expect(bg.image).toContain("radial-gradient");
+  // nothing animated in the background
+  await expect(page.locator("#flex .flex-studio")).toHaveCount(0);
+});
