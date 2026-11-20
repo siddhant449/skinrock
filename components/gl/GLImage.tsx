@@ -94,7 +94,6 @@ export function GLImage({
           grade={grade}
           parallax={parallax}
           reveal={reveal}
-          track={wrap}
           onReady={() => setReady(true)}
         />
       )}

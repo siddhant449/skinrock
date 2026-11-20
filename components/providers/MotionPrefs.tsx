@@ -27,9 +27,10 @@ function detectWebGL(): boolean {
   }
   try {
     const canvas = document.createElement("canvas");
-    const gl = canvas.getContext("webgl2") ?? canvas.getContext("webgl");
+    // the shared stage draws with WebGL2 only
+    const gl = canvas.getContext("webgl2");
     webglCache = !!gl;
-    (gl as WebGLRenderingContext | null)?.getExtension("WEBGL_lose_context")?.loseContext();
+    gl?.getExtension("WEBGL_lose_context")?.loseContext();
   } catch {
     webglCache = false;
   }

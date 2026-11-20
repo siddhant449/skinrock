@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import type { SiteImage } from "@/content/site";
@@ -17,12 +17,11 @@ type Props = {
 
 /** Translucent stone with a pointer-driven light behind it. DOM image + CSS glow until WebGL is live. */
 export function BacklightStone({ image, intensity, className = "relative" }: Props) {
-  const wrap = useRef<HTMLDivElement>(null);
   const live = useGLLive();
   const [ready, setReady] = useState(false);
   const drawn = live && ready;
   return (
-    <div ref={wrap} data-backlight="" data-gl={drawn ? "ready" : undefined} className={`overflow-hidden ${className}`}>
+    <div data-backlight="" data-gl={drawn ? "ready" : undefined} className={`overflow-hidden ${className}`}>
       {/* the photo and CSS glow stay until WebGL has drawn its first frame */}
       {!drawn ? (
         <>
@@ -37,7 +36,6 @@ export function BacklightStone({ image, intensity, className = "relative" }: Pro
           src={image.src}
           imageRes={[image.width, image.height]}
           intensity={intensity}
-          track={wrap}
           onReady={() => setReady(true)}
         />
       )}

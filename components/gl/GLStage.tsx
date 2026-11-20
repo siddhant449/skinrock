@@ -10,8 +10,8 @@ const GLCanvas = dynamic(() => import("./GLCanvas"), { ssr: false });
 
 /**
  * One persistent, fixed canvas for the whole site. Sits above section backgrounds (z-10)
- * and below content layers (z-20). three.js (about 900 KB) loads after the intro, on the
- * visitor's first interaction or 3 seconds later, so it never competes with first paint.
+ * and below content layers (z-20). The WebGL code loads after the intro, on the visitor's
+ * first interaction or 3 seconds later, so it never competes with first paint.
  */
 export function GLStage() {
   const active = useGLActive();

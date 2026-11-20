@@ -1,127 +1,111 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import * as THREE from "three";
-import { useFrame } from "@react-three/fiber";
-import { View } from "@react-three/drei";
+import { useEffect, useRef } from "react";
 import { damp } from "@/lib/math";
 import { textureUrl, textureWidth } from "@/lib/textureSize";
-import { useStoneTexture } from "./useStoneTexture";
+import { onStage, type GLView } from "./stage";
 import { backlightFragment, backlightVertex } from "./materials/backlight";
 
-const WARM = new THREE.Color(0xf4 / 255, 0xe9 / 255, 0xd2 / 255);
-const COOL = new THREE.Color(0xbf / 255, 0xe3 / 255, 0xf2 / 255);
+const WARM: [number, number, number] = [0xf4 / 255, 0xe9 / 255, 0xd2 / 255];
+const COOL: [number, number, number] = [0xbf / 255, 0xe3 / 255, 0xf2 / 255];
 
-type ViewProps = {
+type Props = {
   src: string;
   imageRes: [number, number];
   intensity: React.RefObject<{ value: number }>;
-  track: React.RefObject<HTMLDivElement | null>;
   onReady: () => void;
 };
 
 /** Lazily loaded WebGL half of BacklightStone. */
-export default function BacklightView(props: ViewProps) {
-  // fetched at drawn size; the shader frames the photo 1.22x tighter
-  const [url] = useState(() => {
-    const r = props.track.current?.getBoundingClientRect();
-    const [iw, ih] = props.imageRes;
-    const w = textureWidth({
-      boxWidth: r?.width ?? iw,
-      boxHeight: r?.height ?? ih,
-      imageWidth: iw,
-      imageHeight: ih,
-      devicePixelRatio: window.devicePixelRatio,
-      zoom: 1.22,
-    });
-    return textureUrl(props.src, w);
+export default function BacklightView({ src, imageRes, intensity, onReady }: Props) {
+  const box = useRef<HTMLDivElement>(null);
+  const ready = useRef(onReady);
+  useEffect(() => {
+    ready.current = onReady;
   });
-  return (
-    <View className="absolute inset-0">
-      <Suspense fallback={null}>
-        <Plane {...props} url={url} />
-      </Suspense>
-    </View>
-  );
-}
-
-function Plane({ url, imageRes, intensity, track, onReady }: ViewProps & { url: string }) {
-  const readyOnce = useRef(false);
-  const tex = useStoneTexture(url);
-  const mesh = useRef<THREE.Mesh<THREE.PlaneGeometry, THREE.ShaderMaterial>>(null);
-  const light = useRef({ x: 0.5, y: 0.6, tx: 0.5, ty: 0.6, inside: false });
   const [iw, ih] = imageRes;
 
-  const material = useMemo(
-    () =>
-      new THREE.ShaderMaterial({
-        vertexShader: backlightVertex,
-        fragmentShader: backlightFragment,
-        depthTest: false,
-        depthWrite: false,
-        uniforms: {
-          uTex: { value: tex },
-          uRes: { value: new THREE.Vector2(1, 1) },
-          uImageRes: { value: new THREE.Vector2(iw, ih) },
-          uLight: { value: new THREE.Vector2(0.5, 0.6) },
-          uIntensity: { value: 0 },
-          uTime: { value: 0 },
-          uOffset: { value: 0 },
-          uWarm: { value: WARM },
-          uCool: { value: COOL },
-        },
-      }),
-    [tex, iw, ih],
-  );
-  useEffect(() => () => material.dispose(), [material]);
-
   useEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const light = { x: 0.5, y: 0.6, tx: 0.5, ty: 0.6, inside: false };
     const onMove = (e: PointerEvent) => {
-      const el = track.current;
-      if (!el) return;
       const r = el.getBoundingClientRect();
       const x = (e.clientX - r.left) / r.width;
       const y = 1 - (e.clientY - r.top) / r.height;
-      light.current.inside = x >= 0 && x <= 1 && y >= 0 && y <= 1;
-      if (light.current.inside) {
-        light.current.tx = x;
-        light.current.ty = y;
+      light.inside = x >= 0 && x <= 1 && y >= 0 && y <= 1;
+      if (light.inside) {
+        light.tx = x;
+        light.ty = y;
       }
     };
     window.addEventListener("pointermove", onMove, { passive: true });
-    return () => window.removeEventListener("pointermove", onMove);
-  }, [track]);
 
-  useFrame((state, dt) => {
-    const m = mesh.current;
-    const el = track.current;
-    if (!m || !el) return;
-    if (!readyOnce.current) {
-      readyOnce.current = true;
-      requestAnimationFrame(onReady);
-    }
-    const d = Math.min(dt, 0.05);
-    const t = state.clock.elapsedTime;
-    const L = light.current;
-    if (!L.inside) {
-      // drift slowly when the pointer is elsewhere
-      L.tx = 0.5 + Math.sin(t * 0.35) * 0.22;
-      L.ty = 0.55 + Math.sin(t * 0.23 + 1.3) * 0.25;
-    }
-    L.x = damp(L.x, L.tx, 3, d);
-    L.y = damp(L.y, L.ty, 3, d);
-    const r = el.getBoundingClientRect();
-    const u = m.material.uniforms;
-    u.uRes.value.set(r.width, r.height);
-    u.uLight.value.set(L.x, L.y);
-    u.uIntensity.value = intensity.current?.value ?? 1;
-    u.uTime.value = t;
-    u.uOffset.value = (r.top + r.height / 2 - window.innerHeight / 2) / window.innerHeight;
-  });
+    let dead = false;
+    let remove = () => {};
+    const cancel = onStage(async (stage) => {
+      // fetched at drawn size; the shader frames the photo 1.22x tighter
+      const r = el.getBoundingClientRect();
+      const w = textureWidth({
+        boxWidth: r.width || iw,
+        boxHeight: r.height || ih,
+        imageWidth: iw,
+        imageHeight: ih,
+        devicePixelRatio: window.devicePixelRatio,
+        zoom: 1.22,
+      });
+      const tex = await stage.texture(textureUrl(src, w));
+      if (dead) return;
+      const gl = stage.gl;
+      const prog = stage.program(backlightVertex, backlightFragment);
+      const mesh = stage.plane(1, 1);
+      const u = (n: string) => prog.uniform(n);
+      // like the old useFrame hooks, a view counts as ready once the stage runs it, on screen
+      // or not, so an off-screen DOM twin is dropped before it would ever be fetched
+      let first = true;
+      const markReady = () => {
+        if (!first) return;
+        first = false;
+        requestAnimationFrame(() => ready.current());
+      };
+      const view: GLView = {
+        el,
+        offscreen: markReady,
+        pointer: true,
+        draw: ({ time: t, dt, rect }) => {
+          if (!light.inside) {
+            // drift slowly when the pointer is elsewhere
+            light.tx = 0.5 + Math.sin(t * 0.35) * 0.22;
+            light.ty = 0.55 + Math.sin(t * 0.23 + 1.3) * 0.25;
+          }
+          light.x = damp(light.x, light.tx, 3, dt);
+          light.y = damp(light.y, light.ty, 3, dt);
+          prog.use();
+          stage.material({ depthTest: false });
+          stage.bindTexture(tex, u("uTex"));
+          gl.uniform2f(u("uRes"), rect.width, rect.height);
+          gl.uniform2f(u("uImageRes"), iw, ih);
+          gl.uniform2f(u("uLight"), light.x, light.y);
+          gl.uniform1f(u("uIntensity"), intensity.current?.value ?? 1);
+          gl.uniform1f(u("uTime"), t);
+          gl.uniform1f(u("uOffset"), (rect.top + rect.height / 2 - window.innerHeight / 2) / window.innerHeight);
+          gl.uniform3f(u("uWarm"), ...WARM);
+          gl.uniform3f(u("uCool"), ...COOL);
+          mesh.draw();
+          markReady();
+          return true; // the lamp breathes and drifts while it is on screen
+        },
+      };
+      stage.add(view);
+      remove = () => stage.remove(view);
+    });
+    return () => {
+      dead = true;
+      window.removeEventListener("pointermove", onMove);
+      cancel();
+      remove();
+    };
+  }, [src, iw, ih, intensity]);
 
-  return (
-    <mesh ref={mesh} material={material} frustumCulled={false}>
-      <planeGeometry args={[1, 1]} />
-    </mesh>
-  );
+  return <div ref={box} className="absolute inset-0" />;
 }
