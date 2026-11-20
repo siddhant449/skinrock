@@ -342,3 +342,62 @@ html:not(.js) .nav-rule {
 @media (prefers-reduced-motion: reduce) {
   .footer-row, .footer-arrow { transition: none; }
 }
+
+/* ---------- Why choose us: Swiss grid with photo reveal (components/sections/WhyUs.tsx) ---------- */
+.why-grid {
+  border-top: 1px solid rgb(238 233 224 / 0.12);
+  border-left: 1px solid rgb(238 233 224 / 0.12);
+}
+.why-cell {
+  --line: 1;
+}
+/* right and bottom hairlines, drawn in by GSAP (--line 0 to 1) */
+.why-cell::before,
+.why-cell::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  background: rgb(238 233 224 / 0.12);
+  pointer-events: none;
+}
+.why-cell::before {
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  transform: scaleY(var(--line));
+  transform-origin: top;
+}
+.why-cell::after {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  transform: scaleX(var(--line));
+  transform-origin: left;
+}
+.why-photo {
+  clip-path: inset(100% 0 0 0);
+  transition: clip-path 0.9s var(--ease-expo);
+}
+.why-photo img {
+  transform: scale(1.08);
+  transition: transform 1.4s var(--ease-expo);
+}
+.why-cell:hover .why-photo,
+.why-cell[data-active="true"] .why-photo {
+  clip-path: inset(0 0 0 0);
+}
+.why-cell:hover .why-photo img,
+.why-cell[data-active="true"] .why-photo img {
+  transform: scale(1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .why-photo, .why-photo img { transition: none; }
+}
+
+/* ---------- Samples: the sample box (components/sections/Cta.tsx) ---------- */
+.sample-pill { transition: transform 0.5s var(--ease-expo); }
+.sample-arrow { transition: transform 0.6s var(--ease-expo); }
+.sample-pill:hover .sample-arrow { transform: translate(3px, -3px); }
+.sample-tile:focus-visible [data-tilt] { outline: 2px solid var(--color-glacier); outline-offset: 4px; }

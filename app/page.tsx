@@ -6,6 +6,7 @@ import { FlexStory } from "@/components/sections/FlexStory";
 import { Light } from "@/components/sections/Light";
 import { Collection } from "@/components/sections/Collection";
 import { Projects } from "@/components/sections/Projects";
+import { WhyUs } from "@/components/sections/WhyUs";
 import { SwissProof } from "@/components/sections/SwissProof";
 import { Cta } from "@/components/sections/Cta";
 import { Footer } from "@/components/sections/Footer";
@@ -22,6 +23,7 @@ export default function Home() {
         <Light />
         <Collection />
         <Projects />
+        <WhyUs />
         <SwissProof />
         <Cta />
       </main>

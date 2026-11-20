@@ -124,6 +124,55 @@ export const site = {
   ],
   projectsTitle: "Indoors and out. Flat or curved. Lit or not.",
 
+  // "Why choose us": the seven reasons from the current site, lightly shortened, no dashes
+  whyKicker: "Why Skinrock",
+  whyTitle: "Real stone. Revolutionary flexibility.",
+  whyIntro: "Hover any reason to see it in a real project.",
+  why: [
+    {
+      key: "Swiss",
+      title: "Swiss innovation.",
+      body: "Developed through Swiss expertise and innovation, combining premium quality with global manufacturing capabilities.",
+      image: images.alpsSlate,
+    },
+    {
+      key: `${specs.thickness.min} mm`,
+      title: "Ultra thin natural stone.",
+      body: `Real natural stone from ${specs.thickness.value}, with the authentic beauty of stone at ${specs.weight.value}.`,
+      image: images.slateCloseup,
+    },
+    {
+      key: "Curves",
+      title: "Flexible and bendable.",
+      body: "Applied on curved and complex surfaces, opening new possibilities for architects and designers.",
+      image: images.fireplace,
+    },
+    {
+      key: "Backlit",
+      title: "Translucent options.",
+      body: "Selected stones allow backlighting for walls, feature panels, bars, furniture and installations.",
+      image: images.onyxColumn,
+    },
+    {
+      key: "Diamond",
+      title: "Easy installation.",
+      body: "Compatible with a wide range of substrates and cut with standard diamond tools.",
+      image: images.kitchenIsland,
+    },
+    {
+      key: "Less",
+      title: "Sustainable solution.",
+      body: "Thin and light, it reduces material consumption, transport emissions and overall carbon footprint.",
+      image: images.facadeCorner,
+    },
+    {
+      key: "Lasting",
+      title: "Durable and long lasting.",
+      body: "The timeless beauty of natural stone with excellent durability and fewer replacements.",
+      image: images.stairHall,
+    },
+  ],
+
   proofTitle: "Independently tested.",
   proofIntro:
     "Tested by laboratories in Switzerland, Germany, Austria and India. Full reports are available on request.",

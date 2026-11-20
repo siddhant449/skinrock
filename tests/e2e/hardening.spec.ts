@@ -47,9 +47,13 @@ test("rendered text has no dashes and there is a single h1", async ({ page }) =>
   await expect(page.locator("h1")).toHaveCount(1);
 });
 
-test("every section heading level is h2 under the single h1", async ({ page }) => {
+test("headings form a proper outline: one h1 first, no skipped levels", async ({ page }) => {
   await page.goto("/");
-  const levels = await page.evaluate(() => [...document.querySelectorAll("main h1, main h2, main h3")].map((h) => h.tagName));
-  expect(levels[0]).toBe("H1");
-  expect(levels.slice(1).every((l) => l === "H2")).toBe(true);
+  const levels = await page.evaluate(() =>
+    [...document.querySelectorAll("main h1, main h2, main h3, main h4, main h5, main h6")].map((h) => Number(h.tagName[1])),
+  );
+  expect(levels[0]).toBe(1);
+  expect(levels.filter((l) => l === 1)).toHaveLength(1);
+  // each heading may go at most one level deeper than the one before it
+  levels.forEach((l, i) => i > 0 && expect(l, `heading ${i}`).toBeLessThanOrEqual(levels[i - 1] + 1));
 });
