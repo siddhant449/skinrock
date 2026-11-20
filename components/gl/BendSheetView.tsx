@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { damp } from "@/lib/math";
 import { TEXTURE_WIDTHS, textureUrl } from "@/lib/textureSize";
 import { onStage, type GLView } from "./stage";
-import { bendFragment, bendVertex } from "./materials/bend";
+import { bendEdgeFragment, bendFragment, bendVertex } from "./materials/bend";
 
 const SHEET_W = 2.5;
 const SHEET_H = 1.2;
@@ -76,6 +76,7 @@ export default function BendSheetView({ src, imageRes, progress, onReady }: Prop
       if (dead) return;
       const gl = stage.gl;
       const prog = stage.program(bendVertex, bendFragment);
+      const edgeProg = stage.program(bendVertex, bendEdgeFragment);
       const mesh = stage.plane(SHEET_W, SHEET_H, 96, 24);
       const u = (n: string) => prog.uniform(n);
       const proj = new Float32Array(16);
@@ -98,6 +99,16 @@ export default function BendSheetView({ src, imageRes, progress, onReady }: Prop
           const bend = progress.current?.value ?? 0;
           perspective(proj, rect.width / rect.height);
           modelView(mv, -0.12 + pointer.y * 0.12, -0.35 + bend * 0.9 + pointer.x * 0.18, 0.06 - bend * 0.1);
+          // the edge layer first, a hair behind the sheet: it shows only at the rim, as thickness
+          edgeProg.use();
+          stage.material({ depthTest: true });
+          gl.uniformMatrix4fv(edgeProg.uniform("projectionMatrix"), false, proj);
+          gl.uniformMatrix4fv(edgeProg.uniform("modelViewMatrix"), false, mv);
+          gl.uniform1f(edgeProg.uniform("uBend"), bend);
+          gl.uniform1f(edgeProg.uniform("uTime"), time);
+          gl.uniform2f(edgeProg.uniform("uPointer"), pointer.x, pointer.y);
+          gl.uniform1f(edgeProg.uniform("uOffset"), 0.016);
+          mesh.draw();
           prog.use();
           stage.material({ depthTest: true });
           stage.bindTexture(tex, u("uTex"));
@@ -109,6 +120,7 @@ export default function BendSheetView({ src, imageRes, progress, onReady }: Prop
           gl.uniform1f(u("uBend"), bend);
           gl.uniform1f(u("uTime"), time);
           gl.uniform2f(u("uPointer"), pointer.x, pointer.y);
+          gl.uniform1f(u("uOffset"), 0);
           mesh.draw();
           markReady();
           return true; // the sheet breathes while it is on screen

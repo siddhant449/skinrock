@@ -72,7 +72,7 @@ export function Projects() {
   );
 
   return (
-    <section ref={root} id="projects" aria-label="Projects" className="relative">
+    <section ref={root} id="projects" aria-label="Projects" className="relative bg-ink">
       {/* A. floating collage behind a large statement */}
       <div data-collage className="relative h-[170svh] overflow-clip">
         {/* soft ink pool behind the statement: photos still drift through, the words stay readable.

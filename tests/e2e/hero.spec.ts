@@ -28,11 +28,11 @@ test("preloader counts up then gets out of the way", async ({ page }) => {
   await expect.poll(() => page.evaluate(() => document.documentElement.dataset.loaded)).toBe("true");
 });
 
-test("hero shows the spec line without dashes", async ({ page }) => {
+test("hero carries no spec list beside the headline (the user removed it)", async ({ page }) => {
   await page.goto("/");
   const hero = page.locator("#hero");
-  await expect(hero).toContainText("1.5 to 3 mm");
-  await expect(hero).toContainText("Swiss engineered");
+  await expect(hero).not.toContainText("Swiss engineered");
+  await expect(hero).not.toContainText("kg/m²");
 });
 
 test("preloader runs on a first visit even though prefs settle after hydration", async ({ page }) => {

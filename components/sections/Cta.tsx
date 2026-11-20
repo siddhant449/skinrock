@@ -73,7 +73,7 @@ export function Cta() {
   };
 
   return (
-    <section ref={root} id="samples" className="relative overflow-hidden px-5 py-24 md:px-8 md:py-[16vh]">
+    <section ref={root} id="samples" className="relative overflow-hidden bg-ink px-5 py-24 md:px-8 md:py-[16vh]">
       <div className="relative z-20 grid grid-cols-1 items-center gap-16 lg:grid-cols-[1fr_1.15fr]">
         <div className="flex flex-col items-start gap-7">
           <span className="text-label text-glacier">Samples</span>

@@ -7,6 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { site } from "@/content/site";
 import { SplitReveal } from "@/components/ui/SplitReveal";
+import { SilkLight } from "@/components/gl/SilkLight";
 import { useMotionPrefs } from "@/components/providers/MotionPrefs";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -60,6 +61,7 @@ export function WhyUs() {
 
   return (
     <section ref={root} id="why" className="relative bg-deep px-5 py-24 md:px-8 md:py-[16vh]">
+      <SilkLight />
       <div className="relative z-20 mb-12 flex flex-col gap-6 md:mb-16 md:flex-row md:items-end md:justify-between">
         <div className="flex flex-col gap-6">
           <span className="text-label text-glacier">{site.whyKicker}</span>

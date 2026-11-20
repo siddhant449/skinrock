@@ -168,10 +168,6 @@ html.js:not(.sr-seen) .preloader {
   transform-origin: left;
 }
 
-.hero-spec {
-  text-shadow: 0 1px 16px rgba(13, 21, 32, 0.9);
-}
-
 .scroll-cue {
   position: relative;
   overflow: hidden;
@@ -394,6 +390,19 @@ html:not(.js) .nav-rule {
 }
 @media (prefers-reduced-motion: reduce) {
   .why-photo, .why-photo img { transition: none; }
+}
+
+/* ---------- Flex: studio light behind the bending sheet (components/sections/FlexStory.tsx) ---------- */
+.flex-studio {
+  background: radial-gradient(closest-side, rgb(244 233 210 / 0.075), rgb(191 227 242 / 0.025) 55%, transparent 100%);
+  animation: flex-studio 9s ease-in-out infinite alternate;
+}
+@keyframes flex-studio {
+  from { opacity: 0.75; transform: translate3d(-2%, 1%, 0); }
+  to { opacity: 1; transform: translate3d(2%, -1%, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flex-studio { animation: none; }
 }
 
 /* ---------- Samples: the sample box (components/sections/Cta.tsx) ---------- */

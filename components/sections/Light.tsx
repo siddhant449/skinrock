@@ -52,12 +52,6 @@ export function Light() {
           0,
         );
         tl.fromTo(
-          q("[data-switch]"),
-          { scaleY: 0 },
-          { scaleY: 1, ease: "none", duration: 1 },
-          0,
-        );
-        tl.fromTo(
           q("[data-use]"),
           { color: "#8FA0B3" },
           { color: "#EEE9E0", stagger: 0.12, duration: 0.3 },
@@ -75,17 +69,11 @@ export function Light() {
     <section
       ref={root}
       id="light"
-      className="relative min-h-svh overflow-hidden"
+      className="relative min-h-svh overflow-hidden bg-ink"
     >
       <div className="grid min-h-svh grid-cols-1 md:grid-cols-2">
         <div className="relative z-20 flex flex-col justify-between gap-12 px-5 py-24 md:px-8 md:py-[14vh]">
           <div className="flex items-start gap-6">
-            <span className="relative mt-1 hidden h-24 w-px bg-stone/15 md:block">
-              <span
-                data-switch
-                className="absolute inset-0 origin-top bg-glacier"
-              />
-            </span>
             <div className="flex flex-col gap-6">
               <span className="text-label text-glacier">
                 {light.kicker}

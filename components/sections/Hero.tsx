@@ -86,14 +86,6 @@ export function Hero() {
             <span className="text-glacier">{hero.accentWord}</span>
             {after}
           </SplitReveal>
-
-          <ul className="flex shrink-0 flex-col gap-1.5 text-[15px] font-medium md:items-end md:text-right">
-            {hero.specLine.map((s) => (
-              <li data-hero-fade key={s} className="hero-spec">
-                {s}
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
 

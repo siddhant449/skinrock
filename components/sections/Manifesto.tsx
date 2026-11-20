@@ -74,9 +74,10 @@ export function Manifesto() {
       ref={root}
       id="manifesto"
       aria-label="What Skinrock is"
-      className="relative flex min-h-svh flex-col overflow-hidden px-5 py-24 md:px-8 md:py-10"
+      data-theme="cream"
+      className="relative flex min-h-svh flex-col overflow-hidden bg-cream px-5 py-24 text-ink md:px-8 md:py-10"
     >
-      <p className="text-label relative z-20 text-mute md:pt-16">Real stone, reimagined</p>
+      <p className="text-label relative z-20 text-glacier-ink md:pt-16">Real stone, reimagined</p>
 
       {/* One container, words and notes interleaved: on phones a plain list where each note
           sits under its word; on desktop a grid stacking all words in one cell and all notes
@@ -92,7 +93,7 @@ export function Manifesto() {
               <p
                 data-word
                 className={`text-display whitespace-nowrap text-[clamp(4.5rem,19vw,24rem)] ${
-                  i === words.length - 1 ? "text-glacier" : ""
+                  i === words.length - 1 ? "text-glacier-ink" : ""
                 }`}
               >
                 {w}
@@ -100,7 +101,7 @@ export function Manifesto() {
             </div>
             <p
               data-note
-              className={`max-w-[32ch] text-[17px] text-stone/90 md:text-lg ${
+              className={`max-w-[32ch] text-[17px] text-ink/90 md:text-lg ${
                 stacked ? "col-start-1 row-start-2 md:ml-[50%]" : "-mt-9"
               }`}
             >

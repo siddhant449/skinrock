@@ -3,9 +3,7 @@ import { site } from "@/content/site";
 import { PRELOADER_TIMING } from "@/lib/timing";
 
 describe("pending values come from site.specs", () => {
-  it("hero spec line and manifesto use the spec values", () => {
-    expect(site.hero.specLine).toContain(site.specs.thickness.value);
-    expect(site.hero.specLine).toContain(site.specs.weight.value);
+  it("manifesto, flex and seo use the spec values", () => {
     expect(site.manifesto[3]).toBe(`${site.specs.thickness.min} mm.`);
     expect(site.flex.stats[0].value).toBe(site.specs.thickness.min);
     expect(site.seo.description).toContain(site.specs.thickness.value);
@@ -16,9 +14,6 @@ describe("copy stays within what the current site says", () => {
   it("translucency is attributed to selected stones, not the whole range", () => {
     expect(site.hero.lede).toMatch(/selected stones/i);
     expect(site.manifestoNotes[2]).toMatch(/selected stones/i);
-  });
-  it("does not claim a manufacturing location", () => {
-    expect(site.hero.specLine.join(" ")).not.toMatch(/engineered in chur/i);
   });
   it("does not name stone types for the AgBB result", () => {
     const agbb = site.proof.find((p) => p.standard.startsWith("AgBB"))!;
