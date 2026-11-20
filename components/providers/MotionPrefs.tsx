@@ -2,17 +2,27 @@
 
 import { createContext, useContext, useSyncExternalStore, type ReactNode } from "react";
 
-type MotionPrefs = { reduced: boolean; webgl: boolean };
+type MotionPrefs = {
+  reduced: boolean;
+  webgl: boolean;
+  /** no hover or a coarse pointer (phones, tablets): gets touch versions of hover effects */
+  touch: boolean;
+};
 
-const MotionPrefsContext = createContext<MotionPrefs>({ reduced: true, webgl: false });
+const MotionPrefsContext = createContext<MotionPrefs>({ reduced: true, webgl: false, touch: false });
 
 const QUERY = "(prefers-reduced-motion: reduce)";
+/** touch devices: no hover, or a coarse primary pointer (phones, iPads) */
+export const TOUCH_QUERY = "(hover: none), (pointer: coarse)";
 
-function subscribeReduced(cb: () => void) {
-  const mq = window.matchMedia(QUERY);
+const subscribeTo = (query: string) => (cb: () => void) => {
+  const mq = window.matchMedia(query);
   mq.addEventListener("change", cb);
   return () => mq.removeEventListener("change", cb);
-}
+};
+const subscribeReduced = subscribeTo(QUERY);
+// reactive: an iPad that connects a trackpad, or a laptop with touch, switches live
+const subscribeTouch = subscribeTo(TOUCH_QUERY);
 
 let webglCache: boolean | null = null;
 /**
@@ -43,7 +53,8 @@ export function MotionPrefsProvider({ children }: { children: ReactNode }) {
   // Server snapshot is "reduced, no webgl" so SSR HTML is the static, fully visible version.
   const reduced = useSyncExternalStore(subscribeReduced, () => window.matchMedia(QUERY).matches, () => true);
   const webgl = useSyncExternalStore(noop, detectWebGL, () => false);
-  return <MotionPrefsContext.Provider value={{ reduced, webgl }}>{children}</MotionPrefsContext.Provider>;
+  const touch = useSyncExternalStore(subscribeTouch, () => window.matchMedia(TOUCH_QUERY).matches, () => false);
+  return <MotionPrefsContext.Provider value={{ reduced, webgl, touch }}>{children}</MotionPrefsContext.Provider>;
 }
 
 export const useMotionPrefs = () => useContext(MotionPrefsContext);

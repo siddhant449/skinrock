@@ -8,6 +8,7 @@ import { gsap } from "gsap";
 import type { SiteImage } from "@/content/site";
 import { isLoaded, onLoaded } from "@/lib/loaded";
 import { useGLLive } from "./useGLActive";
+import { useMotionPrefs } from "@/components/providers/MotionPrefs";
 import { useNear } from "./useNear";
 
 const GLImageView = dynamic(() => import("./GLImageView"), { ssr: false });
@@ -48,6 +49,31 @@ export function GLImage({
   const active = live && near;
   const [ready, setReady] = useState(false);
   const reveal = useRef({ value: revealOn === "none" ? 1 : 0 });
+  const { touch, reduced } = useMotionPrefs();
+
+  // touch has no WebGL: the photo itself wipes up into view once as it enters, then drifts
+  // gently inside its frame while the page scrolls (the shader's reveal and parallax, in DOM)
+  useEffect(() => {
+    const el = wrap.current;
+    const img = el?.querySelector("img");
+    if (!touch || reduced || !el || !img) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        img,
+        { yPercent: -5, scale: 1.12 },
+        { yPercent: 5, scale: 1.12, ease: "none", scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true } },
+      );
+      const r = el.getBoundingClientRect();
+      const seen = r.top < window.innerHeight && r.bottom > 0;
+      if (revealOn !== "scroll" || seen) return;
+      gsap.fromTo(
+        img,
+        { clipPath: "inset(100% 0% 0% 0%)" },
+        { clipPath: "inset(0% 0% 0% 0%)", duration: 1.3, ease: "expo.out", scrollTrigger: { trigger: el, start: "top 88%", once: true } },
+      );
+    }, el);
+    return () => ctx.revert();
+  }, [touch, reduced, revealOn]);
 
   useEffect(() => {
     if (!active || !ready || !wrap.current || revealOn === "none") return;
@@ -83,7 +109,8 @@ export function GLImage({
         alt={image.alt}
         fill
         sizes={sizes}
-        priority={priority}
+        loading={priority ? "eager" : undefined}
+        fetchPriority={priority ? "high" : undefined}
         className="object-cover transition-opacity duration-300"
       />
       {active && (

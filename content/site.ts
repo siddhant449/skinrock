@@ -67,7 +67,7 @@ export const site = {
     eyebrow: "Natural stone veneer",
     headline: "Real stone. Thin enough to let light through.",
     accentWord: "light",
-    lede: "Ultra thin veneers of slate, quartzite and marble. Flexible enough to follow a curve, light enough to go almost anywhere and, in selected stones, translucent enough to glow.",
+    lede: "Experience the next generation of natural stone surfaces. Engineered to combine the timeless beauty of genuine stone with exceptional flexibility, lightweight performance, and innovative design freedom for extraordinary spaces.",
     image: images.alpsSlate,
   },
 
@@ -127,6 +127,7 @@ export const site = {
   whyKicker: "Why Skinrock",
   whyTitle: "Real stone. Revolutionary flexibility.",
   whyIntro: "Hover any reason to see it in a real project.",
+  whyIntroTouch: "Scroll through the reasons to see each one in a real project.",
   why: [
     {
       key: "Swiss",

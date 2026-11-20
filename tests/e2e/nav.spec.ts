@@ -169,3 +169,15 @@ test("the hover roll lands exactly where the label rested (no jump)", async ({ p
   await page.waitForTimeout(900);
   expect(Math.abs((await visibleTop()) - rest)).toBeLessThan(0.5);
 });
+
+test("the request samples arrow rests in place and only nudges on hover", async ({ page }) => {
+  await intro(page);
+  const cta = page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: /request samples/i });
+  const shift = () => cta.locator(".nav-arrow").evaluate((el) => new DOMMatrixReadOnly(getComputedStyle(el).transform).m41);
+  await page.mouse.move(700, 600);
+  await page.waitForTimeout(800);
+  expect(Math.abs(await shift())).toBeLessThan(0.5);
+  await cta.hover();
+  await page.waitForTimeout(900);
+  expect(await shift()).toBeGreaterThan(2);
+});

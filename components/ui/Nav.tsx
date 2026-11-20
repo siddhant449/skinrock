@@ -163,7 +163,7 @@ export function Nav() {
           <a
             href="#hero"
             onClick={(e) => go(e, "#hero")}
-            className="nav-item block w-[136px] md:col-span-3 md:w-[150px]"
+            className="nav-item tap block w-[136px] md:col-span-3 md:w-[150px]"
             aria-label="Skinrock, back to top"
           >
             <Logo className="block h-auto w-full" />
@@ -175,7 +175,7 @@ export function Nav() {
               onClick={(e) => go(e, l.href)}
               aria-current={current === l.href ? "true" : undefined}
               style={{ ["--i" as string]: i + 1 }}
-              className={`nav-item nav-roll nav-label hidden justify-self-start md:block md:col-span-1 ${i === 0 ? "md:col-start-5" : ""}`}
+              className={`nav-item nav-roll nav-label hidden justify-self-start xl:block md:col-span-1 ${i === 0 ? "md:col-start-5" : ""}`}
             >
               <Roll>{l.label}</Roll>
             </a>
@@ -184,7 +184,7 @@ export function Nav() {
             href={site.nav.cta.href}
             onClick={(e) => go(e, site.nav.cta.href)}
             style={{ ["--i" as string]: 7 }}
-            className="nav-item nav-roll nav-cta nav-label hidden justify-self-end whitespace-nowrap md:col-span-2 md:col-start-11 md:inline-flex"
+            className="nav-item nav-roll nav-cta nav-label hidden justify-self-end whitespace-nowrap md:col-span-2 md:col-start-11 xl:inline-flex"
           >
             <Roll>{site.nav.cta.label}</Roll>
             <span
@@ -200,7 +200,7 @@ export function Nav() {
             aria-expanded={open}
             aria-controls="mobile-menu"
             onClick={() => setOpen((o) => !o)}
-            className="nav-item flex items-center gap-3 md:hidden"
+            className="nav-item tap flex items-center gap-3 xl:hidden"
           >
             <span className={`burger ${open ? "is-open" : ""}`} aria-hidden>
               <i />
@@ -223,7 +223,7 @@ export function Nav() {
         aria-modal="true"
         aria-label="Menu"
         hidden={!open}
-        className="mobile-menu fixed inset-0 z-40 flex flex-col justify-between bg-deep px-5 pb-8 pt-24 text-stone md:hidden"
+        className="mobile-menu fixed inset-0 z-40 flex flex-col justify-between bg-deep px-5 pb-8 pt-24 text-stone xl:hidden"
       >
         <ul>
           {[...site.nav.links, site.nav.cta].map((l, i) => (

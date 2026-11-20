@@ -49,7 +49,7 @@ export function SwissProof() {
             {site.proofTitle}
           </SplitReveal>
           <p className="max-w-[36ch] text-[17px] leading-relaxed md:text-lg text-ink/85">{site.proofIntro}</p>
-          <a href={site.cta.href} target="_blank" rel="noopener" className="nav-link self-start text-[15px] font-medium">
+          <a href={site.cta.href} target="_blank" rel="noopener" className="nav-link tap self-start text-[15px] font-medium">
             Ask for the reports ↗
           </a>
         </div>

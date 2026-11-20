@@ -14,7 +14,7 @@ export function MagneticButton({ href, children, className = "", strength = 0.35
   const ref = useRef<HTMLAnchorElement>(null);
   const label = useRef<HTMLSpanElement>(null);
   const spring = useRef<ReturnType<typeof springFollow> | null>(null);
-  const { reduced } = useMotionPrefs();
+  const { reduced, touch } = useMotionPrefs();
 
   useEffect(() => {
     const s = springFollow(SPRING, (x, y) => {
@@ -29,7 +29,8 @@ export function MagneticButton({ href, children, className = "", strength = 0.35
   }, []);
 
   const onMove = (e: PointerEvent<HTMLAnchorElement>) => {
-    if (reduced || !ref.current) return;
+    // touch: the pull would only twitch while a finger is down
+    if (reduced || touch || !ref.current) return;
     const r = ref.current.getBoundingClientRect();
     spring.current?.set((e.clientX - (r.left + r.width / 2)) * strength, (e.clientY - (r.top + r.height / 2)) * strength);
   };

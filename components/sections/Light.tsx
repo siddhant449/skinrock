@@ -45,10 +45,18 @@ export function Light() {
                 scrub: 1,
               },
         });
+        // the shader reads intensity directly; without WebGL (touch) the photo's glow reads it
+        // through --glow, so the lamp switches on with scroll on every device
+        const lamp = q<HTMLElement>("[data-backlight]")[0];
         tl.fromTo(
           intensity.current,
           { value: 0.04 },
-          { value: 1, ease: "power2.in", duration: 1 },
+          {
+            value: 1,
+            ease: "power2.in",
+            duration: 1,
+            onUpdate: () => lamp?.style.setProperty("--glow", intensity.current.value.toFixed(3)),
+          },
           0,
         );
         tl.fromTo(

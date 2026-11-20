@@ -7,7 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { site } from "@/content/site";
 import { SplitReveal } from "@/components/ui/SplitReveal";
-import { SilkLight } from "@/components/gl/SilkLight";
+import { StudioStage } from "@/components/ui/StudioStage";
 import { useMotionPrefs } from "@/components/providers/MotionPrefs";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -19,7 +19,7 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
  */
 export function WhyUs() {
   const root = useRef<HTMLElement>(null);
-  const { reduced } = useMotionPrefs();
+  const { reduced, touch } = useMotionPrefs();
 
   useGSAP(
     () => {
@@ -46,22 +46,46 @@ export function WhyUs() {
     { scope: root, dependencies: [reduced] },
   );
 
-  // touch screens have no hover: the cell nearest the middle of the screen shows its photo
+  // touch screens have no hover: the one cell nearest the middle of the screen shows its photo
+  // (a band observer lit a whole row at once in the two-column tablet grid)
   useEffect(() => {
-    if (window.matchMedia("(hover: hover)").matches) return;
-    const cells = root.current?.querySelectorAll<HTMLElement>("[data-why-cell]");
-    if (!cells) return;
-    const io = new IntersectionObserver(
-      (entries) => entries.forEach((e) => (e.target as HTMLElement).setAttribute("data-active", String(e.isIntersecting))),
-      { rootMargin: "-40% 0px -40% 0px" },
-    );
-    cells.forEach((c) => io.observe(c));
-    return () => io.disconnect();
-  }, []);
+    if (!touch) return;
+    const cells = Array.from(root.current?.querySelectorAll<HTMLElement>("[data-why-cell]") ?? []);
+    if (!cells.length) return;
+    let frame = 0;
+    const pick = () => {
+      frame = 0;
+      const mid = window.innerHeight / 2;
+      let best: HTMLElement | null = null;
+      let bestDist = Infinity;
+      for (const c of cells) {
+        const r = c.getBoundingClientRect();
+        // only cells that cover the middle third of the screen take part
+        if (r.bottom < window.innerHeight / 3 || r.top > (window.innerHeight * 2) / 3) continue;
+        const d = Math.abs((r.top + r.bottom) / 2 - mid) + Math.abs((r.left + r.right) / 2 - window.innerWidth / 2) * 0.25;
+        if (d < bestDist) {
+          bestDist = d;
+          best = c;
+        }
+      }
+      cells.forEach((c) => c.setAttribute("data-active", String(c === best)));
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(pick);
+    };
+    pick();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [touch]);
 
   return (
     <section ref={root} id="why" className="relative bg-deep px-5 py-24 md:px-8 md:py-[16vh]">
-      <SilkLight />
+      <StudioStage floor strength={0.6} />
       <div className="relative z-20 mb-12 flex flex-col gap-6 md:mb-16 md:flex-row md:items-end md:justify-between">
         <div className="flex flex-col gap-6">
           <span className="text-label text-glacier">{site.whyKicker}</span>
@@ -69,7 +93,7 @@ export function WhyUs() {
             {site.whyTitle}
           </SplitReveal>
         </div>
-        <p className="hidden max-w-[30ch] text-[17px] leading-relaxed text-stone/90 md:block">{site.whyIntro}</p>
+        <p className="hidden max-w-[30ch] text-[17px] leading-relaxed text-stone/90 md:block">{touch ? site.whyIntroTouch : site.whyIntro}</p>
       </div>
 
       <div data-why-grid className="why-grid relative z-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
@@ -79,7 +103,7 @@ export function WhyUs() {
             data-why-cell=""
             data-active="false"
             className={`why-cell group relative flex min-h-[260px] flex-col justify-between gap-10 overflow-hidden p-6 md:min-h-[300px] md:p-7 ${
-              i === 0 ? "lg:col-span-2" : ""
+              i === 0 ? "lg:col-span-2" : i === site.why.length - 1 ? "sm:col-span-2 lg:col-span-1" : ""
             }`}
           >
             <div data-why-photo="" aria-hidden className="why-photo absolute inset-0">

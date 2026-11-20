@@ -12,7 +12,6 @@ describe("pending values come from site.specs", () => {
 
 describe("copy stays within what the current site says", () => {
   it("translucency is attributed to selected stones, not the whole range", () => {
-    expect(site.hero.lede).toMatch(/selected stones/i);
     expect(site.manifestoNotes[2]).toMatch(/selected stones/i);
   });
   it("does not name stone types for the AgBB result", () => {
@@ -35,5 +34,13 @@ describe("collection count", () => {
     const stones = site.flex.stats.find((s) => s.label.startsWith("Stones"))!;
     expect(stones.value).toBe(42);
     expect(site.collectionTitle).toMatch(/forty two stones/i);
+  });
+});
+
+describe("hero copy", () => {
+  it("uses the client's wording", () => {
+    expect(site.hero.lede).toBe(
+      "Experience the next generation of natural stone surfaces. Engineered to combine the timeless beauty of genuine stone with exceptional flexibility, lightweight performance, and innovative design freedom for extraordinary spaces.",
+    );
   });
 });

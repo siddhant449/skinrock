@@ -25,7 +25,7 @@ export function Projects() {
   const root = useRef<HTMLElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const rail = useRef<HTMLDivElement>(null);
-  const { reduced } = useMotionPrefs();
+  const { reduced, touch } = useMotionPrefs();
   const collage = site.projects.slice(0, COLLAGE.length);
 
   useGSAP(
@@ -46,9 +46,9 @@ export function Projects() {
         );
       });
 
-      // horizontal gallery, desktop only
+      // pinned horizontal gallery: desktop with a mouse only (touch gets a native swipe gallery)
       const mm = gsap.matchMedia();
-      mm.add("(min-width: 768px)", () => {
+      mm.add("(min-width: 768px) and (hover: hover) and (pointer: fine)", () => {
         const t = track.current;
         const r = rail.current;
         if (!t || !r) return;
@@ -74,10 +74,15 @@ export function Projects() {
   return (
     <section ref={root} id="projects" aria-label="Projects" className="relative bg-ink">
       {/* A. floating collage behind a large statement */}
-      <div data-collage className="relative h-[170svh] overflow-clip">
+      <div data-collage className={`relative overflow-clip ${touch ? "h-[140svh]" : "h-[170svh]"}`}>
         {/* soft ink pool behind the statement: photos still drift through, the words stay readable.
             z-[15] sits above the WebGL canvas (z-10) and below the text (z-20). */}
-        <div aria-hidden data-statement-backdrop className="pointer-events-none sticky top-0 z-[15] -mb-[100svh] h-svh" style={{ background: "radial-gradient(ellipse 46% 34% at 50% 50%, rgba(13,21,32,0.82) 0%, rgba(13,21,32,0.55) 45%, rgba(13,21,32,0) 100%)" }} />
+        <div aria-hidden data-statement-backdrop className="pointer-events-none sticky top-0 z-[15] -mb-[100svh] h-svh" style={{
+            background: touch
+              ? // touch: photos are larger on smaller screens, so the pool behind the words is deeper
+                "radial-gradient(ellipse 64% 40% at 50% 50%, rgba(13,21,32,0.93) 0%, rgba(13,21,32,0.72) 50%, rgba(13,21,32,0) 100%)"
+              : "radial-gradient(ellipse 46% 34% at 50% 50%, rgba(13,21,32,0.82) 0%, rgba(13,21,32,0.55) 45%, rgba(13,21,32,0) 100%)",
+          }} />
         <div className="sticky top-0 z-20 flex h-svh flex-col items-center justify-center gap-6 px-5 text-center">
           <span className="text-label text-glacier">Projects</span>
           <SplitReveal as="h2" className="text-display max-w-[16ch] text-[clamp(2.75rem,7vw,8rem)]">
@@ -91,7 +96,7 @@ export function Projects() {
               key={p.image.src}
               data-float=""
               data-speed={c.speed}
-              className="absolute w-[calc(var(--w)*2.3vw)] md:w-[calc(var(--w)*1vw)]"
+              className={`absolute w-[calc(var(--w)*2.3vw)] ${touch ? "md:w-[calc(var(--w)*1.7vw)]" : "md:w-[calc(var(--w)*1vw)]"}`}
               style={{ left: `${c.left}%`, top: `${c.top}%`, ["--w" as string]: c.w }}
             >
               <GLImage image={p.image} sizes="22vw" grade={0.45} parallax={0.06} className={`relative w-full ${c.ratio}`} />
@@ -100,24 +105,44 @@ export function Projects() {
         })}
       </div>
 
-      {/* B. captioned gallery: pinned horizontal on desktop, stacked on phones */}
-      <div ref={rail} className="relative overflow-hidden md:h-svh">
-        <div className="relative z-20 flex items-baseline justify-between px-5 pb-6 pt-16 md:absolute md:inset-x-0 md:top-0 md:px-8 md:pt-24">
+      {/* B. captioned gallery: pinned horizontal on desktop; on touch a native swipe gallery
+          whose cards snap to the centre and settle into focus (after the touch galleries in
+          the reference research) instead of ten photos stacked down the page */}
+      <div ref={rail} className={touch ? "relative pb-12" : "relative overflow-hidden md:h-svh"}>
+        <div
+          className={
+            touch
+              ? "relative z-20 flex items-baseline justify-between px-5 pb-6 pt-16 md:px-8"
+              : "relative z-20 flex items-baseline justify-between px-5 pb-6 pt-16 md:absolute md:inset-x-0 md:top-0 md:px-8 md:pt-24"
+          }
+        >
           <span className="text-label text-mute">Selected work</span>
           <span className="text-label text-mute">{site.projects.length} projects</span>
         </div>
         <div
           ref={track}
-          className="flex flex-col gap-10 px-5 pb-24 md:h-full md:w-max md:flex-row md:items-center md:gap-[4vw] md:px-[8vw] md:pb-0 md:pt-16"
+          data-rail-track=""
+          className={
+            touch
+              ? "rail-swipe flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 md:gap-6 md:px-8"
+              : "flex flex-col gap-10 px-5 pb-24 md:h-full md:w-max md:flex-row md:items-center md:gap-[4vw] md:px-[8vw] md:pb-0 md:pt-16"
+          }
         >
           {site.projects.map((p, i) => (
-            <figure key={p.image.src} className="flex shrink-0 flex-col gap-4 md:w-[30vw] md:even:mt-[12vh]">
+            <figure
+              key={p.image.src}
+              className={
+                touch
+                  ? "rail-card flex w-[80vw] shrink-0 snap-center flex-col gap-4 md:w-[44vw]"
+                  : "flex shrink-0 flex-col gap-4 md:w-[30vw] md:even:mt-[12vh]"
+              }
+            >
               <GLImage
                 image={p.image}
-                sizes="(min-width: 768px) 30vw, 100vw"
+                sizes={touch ? "(min-width: 768px) 44vw, 80vw" : "(min-width: 768px) 30vw, 100vw"}
                 grade={0.4}
                 parallax={0.05}
-                className={`relative w-full ${i % 3 === 0 ? "aspect-[4/5]" : "aspect-[4/3]"}`}
+                className={`relative w-full ${touch ? "aspect-[4/5]" : i % 3 === 0 ? "aspect-[4/5]" : "aspect-[4/3]"}`}
               />
               <figcaption className="relative z-20 flex items-baseline justify-between gap-4 text-[15px] font-medium">
                 <span>

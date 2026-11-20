@@ -162,10 +162,15 @@ html.js:not(.sr-seen) .preloader {
   transform-origin: right;
   transition: transform 0.6s var(--ease-expo);
 }
-.nav-link:hover::after,
 .nav-link:focus-visible::after {
   transform: scaleX(1);
   transform-origin: left;
+}
+@media (hover: hover) {
+  .nav-link:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
 }
 
 .scroll-cue {
@@ -188,18 +193,15 @@ html.js:not(.sr-seen) .preloader {
   .scroll-cue::after { animation: none; }
 }
 
-/* Light chapter without WebGL: a breathing warm glow over the photo */
+/* Light chapter without WebGL (touch): the lamp switches on with scroll. --glow (0 to 1) is
+   written by the chapter's timeline; without it (reduced motion) the lamp is simply on. */
 .backlight-fallback {
-  background: radial-gradient(60% 45% at 50% 55%, rgba(244, 233, 210, 0.28), transparent 70%);
+  background: radial-gradient(60% 45% at 50% 55%, rgba(244, 233, 210, 0.42), transparent 70%);
   mix-blend-mode: screen;
-  animation: backlight-breathe 6s ease-in-out infinite;
+  opacity: var(--glow, 1);
 }
-@keyframes backlight-breathe {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .backlight-fallback { animation: none; }
+[data-backlight] > img {
+  filter: brightness(calc(0.25 + 0.75 * var(--glow, 1))) saturate(calc(0.6 + 0.4 * var(--glow, 1)));
 }
 
 .proof-cell {
@@ -245,13 +247,21 @@ html.js #hero:not([data-hero-ready]) [data-hero-fade] {
   top: 0;
   transform: translateY(110%);
 }
-.nav-roll:hover .roll-a,
 .nav-roll:focus-visible .roll-a {
   transform: translateY(-110%);
 }
-.nav-roll:hover .roll-b,
+@media (hover: hover) {
+  .nav-roll:hover .roll-a {
+    transform: translateY(-110%);
+  }
+}
 .nav-roll:focus-visible .roll-b {
   transform: translateY(0);
+}
+@media (hover: hover) {
+  .nav-roll:hover .roll-b {
+    transform: translateY(0);
+  }
 }
 /* nav labels (after ESR Bespoke): small tracked capitals; hovering one dims the others and a
    small square marks it, the same mark the current section carries */
@@ -280,62 +290,36 @@ html[data-loaded] .nav-label {
 [data-nav-theme="cream"] .nav-label::before {
   background: var(--color-glacier-ink);
 }
-.nav-label:hover::before,
 .nav-label:focus-visible::before,
 .nav-label[aria-current="true"]::before {
   transform: scale(1);
 }
-nav:has(.nav-label:hover) .nav-label:not(:hover)::before {
-  transform: scale(0);
+@media (hover: hover) {
+  .nav-label:hover::before {
+    transform: scale(1);
+  }
 }
-nav:has(.nav-label:hover) .nav-label:not(:hover) {
-  opacity: 0.4;
+@media (hover: hover) {
+  nav:has(.nav-label:hover) .nav-label:not(:hover)::before {
+    transform: scale(0);
+  }
+}
+@media (hover: hover) {
+  nav:has(.nav-label:hover) .nav-label:not(:hover) {
+    opacity: 0.4;
+  }
 }
 .nav-arrow {
   display: inline-block;
   transition: transform 0.6s var(--ease-expo);
 }
-.nav-cta:hover .nav-arrow,
-.nav-cta:focus-visible /* nav labels (after ESR Bespoke): small tracked capitals; hovering one dims the others and a
-   small square marks it, the same mark the current section carries */
-.nav-label {
-  position: relative;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-html[data-loaded] .nav-label {
-  transition: opacity 0.45s var(--ease-expo);
-}
-.nav-label:not(.nav-cta)::before {
-  content: "";
-  position: absolute;
-  left: -13px;
-  top: 50%;
-  width: 5px;
-  height: 5px;
-  margin-top: -3px;
-  background: var(--color-glacier);
-  transform: scale(0);
-  transition: transform 0.5s var(--ease-expo);
-}
-[data-nav-theme="cream"] .nav-label::before {
-  background: var(--color-glacier-ink);
-}
-.nav-label:hover::before,
-.nav-label:focus-visible::before,
-.nav-label[aria-current="true"]::before {
-  transform: scale(1);
-}
-nav:has(.nav-label:hover) .nav-label:not(:hover)::before {
-  transform: scale(0);
-}
-nav:has(.nav-label:hover) .nav-label:not(:hover) {
-  opacity: 0.4;
-}
-.nav-arrow {
+.nav-cta:focus-visible .nav-arrow {
   transform: translate(3px, -3px);
+}
+@media (hover: hover) {
+  .nav-cta:hover .nav-arrow {
+    transform: translate(3px, -3px);
+  }
 }
 /* intro: items drop in one after another once the preloader is done */
 .nav-item {
@@ -402,19 +386,29 @@ html:not(.js) .nav-rule {
 .footer-row {
   transition: padding 0.6s var(--ease-expo), color 0.4s;
 }
-.footer-row:hover,
 .footer-row:focus-visible {
   padding-left: 14px;
   color: var(--color-glacier);
+}
+@media (hover: hover) {
+  .footer-row:hover {
+    padding-left: 14px;
+    color: var(--color-glacier);
+  }
 }
 .footer-arrow {
   display: inline-block;
   transition: transform 0.6s var(--ease-expo), color 0.4s;
 }
-.footer-row:hover .footer-arrow,
 .footer-row:focus-visible .footer-arrow {
   transform: translate(3px, -3px);
   color: var(--color-glacier);
+}
+@media (hover: hover) {
+  .footer-row:hover .footer-arrow {
+    transform: translate(3px, -3px);
+    color: var(--color-glacier);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .footer-row, .footer-arrow { transition: none; }
@@ -461,29 +455,188 @@ html:not(.js) .nav-rule {
   transform: scale(1.08);
   transition: transform 1.4s var(--ease-expo);
 }
-.why-cell:hover .why-photo,
 .why-cell[data-active="true"] .why-photo {
   clip-path: inset(0 0 0 0);
 }
-.why-cell:hover .why-photo img,
+@media (hover: hover) {
+  .why-cell:hover .why-photo {
+    clip-path: inset(0 0 0 0);
+  }
+}
 .why-cell[data-active="true"] .why-photo img {
   transform: scale(1);
+}
+@media (hover: hover) {
+  .why-cell:hover .why-photo img {
+    transform: scale(1);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .why-photo, .why-photo img { transition: none; }
 }
 
-/* ---------- Flex: still studio light (the user's pick A; components/sections/FlexStory.tsx) ----------
-   a soft pool of warm backlight behind the stone, the corners falling into ink (Zirka, Sobha) */
-.flex-studio-light {
-  background-color: var(--color-deep);
-  background-image:
-    radial-gradient(55% 60% at 50% 46%, rgb(244 233 210 / 0.1) 0%, rgb(191 227 242 / 0.035) 45%, rgb(16 27 42 / 0) 75%),
-    radial-gradient(120% 100% at 50% 45%, var(--color-deep) 55%, var(--color-ink) 100%);
+/* ---------- The studio (components/ui/StudioStage.tsx, from the user's reference image) ----------
+   dark navy room, light shafts from the top corners, a dark stone floor with a lit horizon.
+   Static, palette only; --studio (0 to 1) sets how strongly a section shows it. */
+.studio-pool {
+  background: radial-gradient(55% 60% at 50% 44%, rgb(244 233 210 / calc(0.09 * var(--studio))) 0%, rgb(191 227 242 / calc(0.03 * var(--studio))) 45%, transparent 75%);
+}
+/* the beam's shape is cut on ::before and the blur sits on the parent, so the blur softens
+   the cut edges (blur on the clipped element itself leaves them razor sharp) */
+.studio-beam {
+  position: absolute;
+  top: -12%;
+  width: 38%;
+  height: 118%;
+  filter: blur(22px);
+  mix-blend-mode: screen;
+}
+.studio-beam::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(244 233 210 / calc(0.15 * var(--studio))) 0%, rgb(238 233 224 / calc(0.06 * var(--studio))) 50%, transparent 88%);
+}
+.studio-beam-left {
+  left: 2%;
+}
+.studio-beam-left::before {
+  clip-path: polygon(0% 0%, 30% 0%, 100% 100%, 62% 100%);
+}
+.studio-beam-right {
+  right: 2%;
+}
+.studio-beam-right::before {
+  clip-path: polygon(70% 0%, 100% 0%, 38% 100%, 0% 100%);
+}
+.studio-floor {
+  height: 32%;
+  perspective: 520px;
+  perspective-origin: 50% 0%;
+}
+/* the floor fades in from the dark at its horizon and out at the sides */
+.studio-floor-mask {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 30%), linear-gradient(90deg, transparent 0%, #000 22%, #000 78%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(180deg, transparent 0%, #000 30%), linear-gradient(90deg, transparent 0%, #000 22%, #000 78%, transparent 100%);
+  mask-composite: intersect;
+}
+.studio-floor-plane {
+  position: absolute;
+  left: -40%;
+  right: -40%;
+  top: 0;
+  height: 420%;
+  transform: rotateX(68deg);
+  transform-origin: 50% 0%;
+  opacity: calc(0.85 * var(--studio));
+}
+.studio-floor-plane::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(13 21 32 / 0.7), rgb(13 21 32 / 0.9) 55%);
+}
+.studio-floor-plane img {
+  filter: grayscale(0.5) brightness(0.7);
+}
+/* where the light from above meets the floor: a soft lit band, brightest under the object */
+.studio-horizon {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 22%;
+  height: 26px;
+  background: radial-gradient(50% 50% at 50% 50%, rgb(244 233 210 / calc(0.12 * var(--studio))), transparent 70%);
+  filter: blur(6px);
+}
+
+/* ---------- Flex without WebGL (touch): the photo turns like a sheet ----------
+   --bend (0 to 1) comes from the chapter's scroll; a soft sheen slides across as it turns */
+[data-bend] {
+  perspective: 1100px;
+}
+/* the sheet's own proportions, centred in its stage, so it clears the copy on tablets */
+.bend-dom {
+  left: 0;
+  right: 0;
+  top: 50%;
+  aspect-ratio: 2.08;
+  translate: 0 -50%;
+  transform: rotateY(calc(-18deg + 32deg * var(--bend, 0.5))) rotateX(calc(7deg - 10deg * var(--bend, 0.5)))
+    scale(calc(0.9 + 0.08 * var(--bend, 0.5)));
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.bend-dom::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  background: linear-gradient(105deg, transparent 30%, rgb(244 233 210 / 0.22) 50%, transparent 70%) no-repeat;
+  background-size: 260% 100%;
+  background-position: calc(130% - 160% * var(--bend, 0.5)) 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* ---------- Projects on touch: a native swipe gallery ----------
+   cards snap to the centre; where the browser supports scroll-driven animation, each card
+   settles into focus as it reaches the centre and eases back as it leaves */
+.rail-swipe {
+  /* the neighbours fade at the edges, so cut-off captions never read as broken */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding-inline: 20px;
+}
+.rail-swipe::-webkit-scrollbar {
+  display: none;
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .rail-card {
+      animation: rail-focus linear both;
+      animation-timeline: view(inline);
+    }
+  }
+}
+@keyframes rail-focus {
+  0% { transform: scale(0.9); opacity: 0.55; }
+  50% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.55; }
+}
+
+/* finger-sized hit area around small links, without changing how they look */
+.tap {
+  position: relative;
+}
+.tap::before {
+  content: "";
+  position: absolute;
+  inset: -12px -6px;
+}
+@media (min-width: 768px) {
+  .bend-dom {
+    left: 15%;
+    right: 15%;
+  }
+}
+/* tall tablets have room below the copy: the sheet can use the whole stage width */
+@media (min-width: 768px) and (orientation: portrait) {
+  .bend-dom {
+    left: -10%;
+    right: -10%;
+  }
 }
 
 /* ---------- Samples: the sample box (components/sections/Cta.tsx) ---------- */
 .sample-pill { transition: transform 0.5s var(--ease-expo); }
 .sample-arrow { transition: transform 0.6s var(--ease-expo); }
-.sample-pill:hover .sample-arrow { transform: translate(3px, -3px); }
+@media (hover: hover) {
+  .sample-pill:hover .sample-arrow { transform: translate(3px, -3px); }
+}
 .sample-tile:focus-visible [data-tilt] { outline: 2px solid var(--color-glacier); outline-offset: 4px; }

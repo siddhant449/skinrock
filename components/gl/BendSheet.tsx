@@ -25,7 +25,10 @@ export function BendSheet({ image, progress, className = "relative" }: Props) {
     <div ref={wrap} data-bend="" data-gl={drawn ? "ready" : undefined} className={className}>
       {/* the photo stays until WebGL has drawn its first frame, so the chapter never goes blank */}
       {!drawn ? (
-        <Image src={image.src} alt={image.alt} fill sizes="(min-width: 768px) 50vw, 100vw" className="rounded-sm object-cover" />
+        // without WebGL (touch) the photo turns like a sheet in 3D, posed by --bend from the scroll
+        <div data-bend-dom="" className="bend-dom absolute">
+          <Image src={image.src} alt={image.alt} fill sizes="(min-width: 768px) 50vw, 100vw" className="rounded-sm object-cover" />
+        </div>
       ) : (
         <span className="sr-only">{image.alt}</span>
       )}

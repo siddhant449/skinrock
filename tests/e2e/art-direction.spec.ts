@@ -85,10 +85,6 @@ test("flex figures never pile up, even if the scroll animation's inline styles a
   expect(shown).toBe(1);
 });
 
-test("why chapter has a quiet silk light behind the grid", async ({ page }) => {
-  await page.goto("/");
-  await expect(page.locator("#why [data-silk]")).toBeAttached();
-});
 
 test("the bending sheet never runs into the flex title or body copy", async ({ page }) => {
   test.setTimeout(90_000);
@@ -126,14 +122,25 @@ test("the bending sheet never runs into the flex title or body copy", async ({ p
   }
 });
 
-test("flex chapter sits in a still studio light (the user's pick A), on the deep palette ground", async ({ page }) => {
+test("dark chapters share one studio (the user's reference): beams and a stone floor, toned per section", async ({ page }) => {
   await page.goto("/");
-  const bg = await page.locator("#flex").evaluate((el) => {
-    const cs = getComputedStyle(el);
-    return { color: cs.backgroundColor, image: cs.backgroundImage };
-  });
-  expect(bg.color).toBe("rgb(16, 27, 42)"); // deep
-  expect(bg.image).toContain("radial-gradient");
-  // nothing animated in the background
-  await expect(page.locator("#flex .flex-studio")).toHaveCount(0);
+  const studio = (id: string) =>
+    page.locator(`#${id} [data-studio]`).evaluate((el) => ({
+      beams: el.querySelectorAll("[data-studio-beam]").length,
+      floor: el.querySelectorAll("[data-studio-floor]").length,
+      behind: Number(getComputedStyle(el).zIndex) <= 0 || getComputedStyle(el).zIndex === "auto",
+    }));
+  expect(await studio("flex")).toEqual({ beams: 2, floor: 1, behind: true });
+  // the user wants Light on its plain single-colour ground: no studio there
+  await expect(page.locator("#light [data-studio]")).toHaveCount(0);
+  expect(await studio("why")).toMatchObject({ beams: 0, floor: 1 });
+  expect(await studio("samples")).toMatchObject({ beams: 0, floor: 1 });
+  // the silk light it replaces in Why is gone; nothing in the studio animates
+  await expect(page.locator("#why [data-silk]")).toHaveCount(0);
+  const animated = await page.locator("[data-studio] *").evaluateAll((els) =>
+    els.filter((e) => getComputedStyle(e).animationName !== "none").length,
+  );
+  expect(animated).toBe(0);
+  // the floor photo waits until it is near the viewport
+  expect(await page.locator("#flex [data-studio-floor] img").getAttribute("loading")).toBe("lazy");
 });

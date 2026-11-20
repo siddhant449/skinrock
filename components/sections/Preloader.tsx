@@ -95,7 +95,8 @@ export function Preloader() {
           src={hero.image.src}
           alt=""
           fill
-          priority
+          loading="eager"
+          fetchPriority="high"
           sizes="(min-width: 768px) 60vw, 100vw"
           className="object-cover"
         />

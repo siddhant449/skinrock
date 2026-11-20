@@ -89,7 +89,7 @@ export function Hero() {
         </div>
       </div>
 
-      <div data-hero-fade className="text-label absolute bottom-10 left-1/2 z-20 hidden -translate-x-1/2 flex-col items-center gap-3 text-mute md:flex">
+      <div data-hero-fade className="text-label absolute bottom-10 left-1/2 z-20 hidden -translate-x-1/2 flex-col items-center gap-3 text-mute xl:flex">
         <span>Scroll</span>
         <span className="scroll-cue block h-10 w-px bg-stone/30" />
       </div>

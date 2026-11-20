@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { site } from "@/content/site";
 import { BendSheet } from "@/components/gl/BendSheet";
+import { StudioStage } from "@/components/ui/StudioStage";
 import { SplitReveal } from "@/components/ui/SplitReveal";
 import { useMotionPrefs } from "@/components/providers/MotionPrefs";
 
@@ -47,6 +48,10 @@ export function FlexStory() {
         },
       });
       // the first figure is on stage when you arrive; the others count up as they come in
+      // the DOM sheet (touch, no WebGL) reads the bend through --bend
+      const sheet = q<HTMLElement>("[data-bend]")[0];
+      const poseSheet = () => sheet?.style.setProperty("--bend", progress.current.value.toFixed(3));
+      poseSheet();
       nums.forEach((n, i) => i > 0 && (n.textContent = fmt(0, Number(n.dataset.decimals))));
       counters[0].v = flex.stats[0].value;
 
@@ -68,7 +73,7 @@ export function FlexStory() {
             scrub: 1,
           },
         });
-        tl.to(progress.current, { value: 1, ease: "power1.inOut", duration: 1 }, 0);
+        tl.to(progress.current, { value: 1, ease: "power1.inOut", duration: 1, onUpdate: poseSheet }, 0);
         tl.to("[data-dial-ticks]", { rotate: -48, svgOrigin: "50 50", duration: 1 }, 0);
         MORPHS.forEach((at, k) => {
           const out = figures[k];
@@ -87,7 +92,7 @@ export function FlexStory() {
         const tl = gsap.timeline({
           scrollTrigger: { trigger: root.current, start: "top 75%", end: "center 40%", scrub: 1 },
         });
-        tl.to(progress.current, { value: 1, ease: "power1.inOut", duration: 1 }, 0);
+        tl.to(progress.current, { value: 1, ease: "power1.inOut", duration: 1, onUpdate: poseSheet }, 0);
         counters.forEach((_, i) => tl.to(counters[i], { ...count(i), duration: 0.5 }, 0.15 + i * 0.18));
       });
       return () => mm.revert();
@@ -96,7 +101,9 @@ export function FlexStory() {
   );
 
   return (
-    <section ref={root} id="flex" className="flex-studio-light relative overflow-hidden bg-deep md:h-svh">
+    <section ref={root} id="flex" className="relative overflow-hidden bg-deep md:h-svh">
+      {/* the studio from the reference: light shafts, a pool of light, a dark stone floor */}
+      <StudioStage beams floor pool />
       {/* the stage (after Zirka): the sheet is the object, centred inside a fine measuring dial;
           title top left, body top right, one large figure centred beneath the sheet */}
       <div className="relative z-20 flex flex-col gap-6 px-5 pt-24 md:absolute md:inset-x-8 md:top-[11vh] md:flex-row md:items-start md:justify-between md:gap-10 md:px-0 md:pt-0">

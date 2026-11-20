@@ -84,10 +84,10 @@ export function Footer() {
             Let&apos;s talk <span className="text-glacier">stone.</span>
           </p>
           <div className="mt-7 flex flex-wrap gap-x-8 gap-y-3 text-[17px]">
-            <a href={site.cta.href} target="_blank" rel="noopener" className="nav-link">
+            <a href={site.cta.href} target="_blank" rel="noopener" className="nav-link tap">
               Request samples ↗
             </a>
-            <button type="button" onClick={toTop} className="nav-link cursor-pointer">
+            <button type="button" onClick={toTop} className="nav-link tap cursor-pointer">
               Back to top ↑
             </button>
           </div>
@@ -107,7 +107,7 @@ export function Footer() {
               <ul className="flex flex-col gap-1">
                 {site.legal.map((l) => (
                   <li key={l.href}>
-                    <a href={l.href} target="_blank" rel="noopener" className="nav-link">
+                    <a href={l.href} target="_blank" rel="noopener" className="nav-link tap">
                       {l.label}
                     </a>
                   </li>

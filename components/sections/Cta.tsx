@@ -9,6 +9,7 @@ import { site } from "@/content/site";
 import { SplitReveal } from "@/components/ui/SplitReveal";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 import { useMotionPrefs } from "@/components/providers/MotionPrefs";
+import { StudioStage } from "@/components/ui/StudioStage";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -35,7 +36,7 @@ export function Cta() {
   const { cta } = site;
   const root = useRef<HTMLElement>(null);
   const fan = useRef<HTMLDivElement>(null);
-  const { reduced } = useMotionPrefs();
+  const { reduced, touch } = useMotionPrefs();
 
   useGSAP(
     () => {
@@ -47,19 +48,23 @@ export function Cta() {
       }
       tiles.forEach((t, i) => gsap.set(t, { x: STACKED[i].x, y: STACKED[i].y + 40, rotate: STACKED[i].r, opacity: 0 }));
       const tl = gsap.timeline({
-        scrollTrigger: { trigger: fan.current, start: "top 85%", end: "center 55%", scrub: 0.8, invalidateOnRefresh: true },
+        scrollTrigger: { trigger: fan.current, start: touch ? "top 98%" : "top 85%", end: "center 55%", scrub: 0.8, invalidateOnRefresh: true },
       });
       tiles.forEach((t, i) => {
         tl.to(t, { opacity: 1, y: STACKED[i].y, duration: 0.25, ease: "power2.out" }, i * 0.05);
         tl.to(t, { x: () => FANNED[i].x * spread(), y: FANNED[i].y, rotate: FANNED[i].r, duration: 0.75, ease: "power3.inOut" }, 0.3);
       });
+      // touch has no hover tilt: the samples lift one after another as the fan opens instead
+      if (touch) {
+        tl.to(gsap.utils.toArray<HTMLElement>("[data-tilt]", root.current), { y: -16, duration: 0.3, stagger: 0.08, ease: "power2.out" }, 0.62);
+      }
     },
-    { scope: root, dependencies: [reduced] },
+    { scope: root, dependencies: [reduced, touch] },
   );
 
   // hover: lift the sample and tilt it toward the cursor
   const onMove = (e: PointerEvent<HTMLAnchorElement>) => {
-    if (reduced) return;
+    if (reduced || touch) return; // touch gets the lift as the fan opens instead
     const el = e.currentTarget.querySelector<HTMLElement>("[data-tilt]");
     if (!el) return;
     const r = e.currentTarget.getBoundingClientRect();
@@ -73,7 +78,9 @@ export function Cta() {
   };
 
   return (
-    <section ref={root} id="samples" className="relative overflow-hidden bg-ink px-5 py-24 md:px-8 md:py-[16vh]">
+    <section ref={root} id="samples" className={`relative overflow-hidden bg-ink px-5 md:px-8 ${touch ? "py-20 md:py-[9vh]" : "py-24 md:py-[16vh]"}`}>
+      {/* the same studio, floor only: the samples rest above it */}
+      <StudioStage floor strength={0.8} />
       <div className="relative z-20 grid grid-cols-1 items-center gap-16 lg:grid-cols-[1fr_1.15fr]">
         <div className="flex flex-col items-start gap-7">
           <span className="text-label text-glacier">Samples</span>
@@ -106,7 +113,7 @@ export function Cta() {
               <span data-tilt="" className="relative block h-full w-full overflow-hidden rounded-md shadow-[0_30px_60px_rgba(0,0,0,0.45)] [transform-style:preserve-3d]">
                 <Image src={c.image.src} alt={c.image.alt} fill sizes="230px" className="object-cover" />
                 <span className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 to-transparent" />
-                <span className="absolute bottom-3 left-4 text-[16px] font-medium text-white">{c.name}</span>
+                <span className="absolute bottom-3 left-4 text-[16px] font-medium text-white max-sm:left-2 max-sm:rotate-180 max-sm:text-[14px] max-sm:[writing-mode:vertical-rl]">{c.name}</span>
               </span>
             </a>
           ))}
