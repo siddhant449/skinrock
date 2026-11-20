@@ -19,8 +19,8 @@ const MORPH_LENGTH = 0.12;
 const TICKS = 120;
 
 /**
- * Pinned (after Zirka): a sheet of real stone curls inside a fine measuring dial while its
- * figures take the stage one at a time. Each figure hands over to the next with a soft focus
+ * Pinned (after Zirka): a sheet of real stone bends at the centre of a fine measuring dial
+ * while its figures take the stage beneath it one at a time. Each figure hands over to the next with a soft focus
  * pull (the blur half of Originkit's Text Morph; its alpha threshold made numerals look broken).
  */
 export function FlexStory() {
@@ -73,10 +73,10 @@ export function FlexStory() {
         MORPHS.forEach((at, k) => {
           const out = figures[k];
           const inn = figures[k + 1];
-          // out first, in second: they only overlap while both are soft
-          tl.to(out, { autoAlpha: 0, filter: "blur(12px)", scale: 1.06, ease: "power2.in", duration: MORPH_LENGTH * 0.6 }, at);
-          tl.to(inn, { autoAlpha: 1, filter: "blur(0px)", scale: 1, ease: "power2.out", duration: MORPH_LENGTH * 0.6 }, at + MORPH_LENGTH * 0.4);
-          tl.to(counters[k + 1], { ...count(k + 1), duration: MORPH_LENGTH }, at + MORPH_LENGTH * 0.4);
+          // strictly one after the other: the old figure has gone before the new one arrives
+          tl.to(out, { autoAlpha: 0, filter: "blur(12px)", scale: 1.06, ease: "power2.in", duration: MORPH_LENGTH * 0.5 }, at);
+          tl.to(inn, { autoAlpha: 1, filter: "blur(0px)", scale: 1, ease: "power2.out", duration: MORPH_LENGTH * 0.5 }, at + MORPH_LENGTH * 0.5);
+          tl.to(counters[k + 1], { ...count(k + 1), duration: MORPH_LENGTH * 0.6 }, at + MORPH_LENGTH * 0.5);
         });
         tl.to({}, { duration: 0.0001 }, 1);
         return () => setStacked(false);
@@ -96,76 +96,91 @@ export function FlexStory() {
   );
 
   return (
-    <section ref={root} id="flex" className="relative min-h-svh overflow-hidden bg-deep">
-      <div className="grid min-h-svh grid-cols-1 gap-10 px-5 py-24 md:grid-cols-12 md:gap-6 md:px-8 md:py-[14vh]">
-        <div className="relative z-20 flex flex-col justify-between gap-12 md:col-span-5">
-          <div className="flex flex-col gap-6">
-            <span className="text-label text-glacier">{flex.kicker}</span>
-            <SplitReveal as="h2" className="text-headline text-[clamp(2.6rem,5vw,5.25rem)]">
-              {flex.title}
-            </SplitReveal>
-            <p className="max-w-[40ch] text-[17px] leading-relaxed text-stone/90 md:text-lg">{flex.body}</p>
-          </div>
-
-          <dl data-figures="" className={stacked ? "grid" : "grid grid-cols-3 gap-4"}>
-            {flex.stats.map((s) => (
-              <div
-                key={s.label}
-                data-figure=""
-                className={stacked ? "col-start-1 row-start-1 flex origin-left flex-col gap-3" : "flex flex-col gap-2"}
-              >
-                <dt className={stacked ? "text-label text-mute" : "text-[14px] leading-snug text-mute"}>{s.label}</dt>
-                <dd
-                  className={`tabular-nums ${
-                    stacked ? "text-display text-[clamp(4.5rem,8.5vw,9rem)]" : "text-headline text-[clamp(1.75rem,3vw,3rem)]"
-                  }`}
-                >
-                  <span data-stat data-decimals={s.decimals}>
-                    {fmt(s.value, s.decimals)}
-                  </span>
-                  {s.unit && <span className="ml-2 text-[0.3em] tracking-normal text-mute">{s.unit}</span>}
-                </dd>
-              </div>
-            ))}
-          </dl>
+    <section ref={root} id="flex" className="relative overflow-hidden bg-deep md:h-svh">
+      {/* the stage (after Zirka): the sheet is the object, centred inside a fine measuring dial;
+          title top left, body top right, one large figure centred beneath the sheet */}
+      <div className="relative z-20 flex flex-col gap-6 px-5 pt-24 md:absolute md:inset-x-8 md:top-[11vh] md:flex-row md:items-start md:justify-between md:gap-10 md:px-0 md:pt-0">
+        <div className="flex flex-col gap-5">
+          <span className="text-label text-glacier">{flex.kicker}</span>
+          <SplitReveal as="h2" className="text-headline max-w-[11ch] text-[clamp(2.6rem,4vw,4.25rem)]">
+            {flex.title}
+          </SplitReveal>
         </div>
-
-        <div className="relative min-h-[46vh] md:col-span-7 md:col-start-6 md:min-h-0">
-          {/* studio light and a fine measuring dial behind the sheet (z-[5]: under the WebGL canvas) */}
-          <div aria-hidden className="flex-studio pointer-events-none absolute inset-[-10%] z-[5]" />
-          <svg
-            aria-hidden
-            data-dial=""
-            viewBox="0 0 100 100"
-            className="pointer-events-none absolute left-1/2 top-1/2 z-[5] hidden aspect-square w-[min(100%,78vh)] -translate-x-1/2 -translate-y-1/2 md:block"
-          >
-            <g data-dial-ticks="">
-              {Array.from({ length: TICKS }, (_, i) => {
-                const major = i % 10 === 0;
-                const a = (i / TICKS) * Math.PI * 2;
-                const r1 = major ? 45.2 : 46.6;
-                const r2 = 48;
-                return (
-                  <line
-                    key={i}
-                    data-tick=""
-                    x1={(50 + Math.sin(a) * r1).toFixed(3)}
-                    y1={(50 - Math.cos(a) * r1).toFixed(3)}
-                    x2={(50 + Math.sin(a) * r2).toFixed(3)}
-                    y2={(50 - Math.cos(a) * r2).toFixed(3)}
-                    stroke="#EEE9E0"
-                    strokeOpacity={major ? 0.42 : 0.18}
-                    strokeWidth={major ? 0.16 : 0.1}
-                  />
-                );
-              })}
-            </g>
-            {/* the fixed reading mark the ticks turn past */}
-            <line x1="50" y1="0.6" x2="50" y2="4.4" stroke="#BFE3F2" strokeWidth="0.22" />
-          </svg>
-          <BendSheet image={flex.image} progress={progress} className="absolute inset-0" />
-        </div>
+        <p className="max-w-[34ch] text-[17px] leading-relaxed text-stone/90 md:mt-9 md:text-right md:text-lg">{flex.body}</p>
       </div>
+
+      <div data-flex-stage="" className="relative mx-5 mt-10 h-[46vh] md:absolute md:inset-0 md:m-0 md:h-auto">
+        {/* studio light and the dial sit under the WebGL canvas (z-[5]) */}
+        <div aria-hidden className="flex-studio pointer-events-none absolute left-1/2 top-[47%] z-[5] hidden h-[90vh] w-[90vh] -translate-x-1/2 -translate-y-1/2 md:block" />
+        <svg
+          aria-hidden
+          data-dial=""
+          viewBox="0 0 100 100"
+          className="pointer-events-none absolute left-1/2 top-[47%] z-[5] hidden aspect-square w-[min(76vh,58vw)] -translate-x-1/2 -translate-y-1/2 md:block"
+        >
+          <g data-dial-ticks="">
+            {Array.from({ length: TICKS }, (_, i) => {
+              const major = i % 10 === 0;
+              const a = (i / TICKS) * Math.PI * 2;
+              const r1 = major ? 45.2 : 46.6;
+              const r2 = 48;
+              return (
+                <line
+                  key={i}
+                  data-tick=""
+                  x1={(50 + Math.sin(a) * r1).toFixed(3)}
+                  y1={(50 - Math.cos(a) * r1).toFixed(3)}
+                  x2={(50 + Math.sin(a) * r2).toFixed(3)}
+                  y2={(50 - Math.cos(a) * r2).toFixed(3)}
+                  stroke="#EEE9E0"
+                  strokeOpacity={major ? 0.42 : 0.18}
+                  strokeWidth={major ? 0.16 : 0.1}
+                />
+              );
+            })}
+          </g>
+          {/* the fixed reading mark the ticks turn past */}
+          <line x1="50" y1="0.6" x2="50" y2="4.4" stroke="#BFE3F2" strokeWidth="0.22" />
+        </svg>
+        <BendSheet
+          image={flex.image}
+          progress={progress}
+          className="absolute inset-0 md:inset-auto md:left-1/2 md:top-[47%] md:h-[64vh] md:w-[56vw] md:-translate-x-1/2 md:-translate-y-1/2"
+        />
+      </div>
+
+      <dl
+        data-figures=""
+        className={`relative z-20 px-5 pb-24 pt-10 md:absolute md:inset-x-0 md:bottom-[6vh] md:p-0 ${
+          stacked ? "grid justify-items-center text-center" : "grid grid-cols-3 gap-4"
+        }`}
+      >
+        {flex.stats.map((s, i) => (
+          <div
+            key={s.label}
+            data-figure=""
+            className={
+              stacked
+                ? // only the first figure shows until the scroll timeline takes over (its inline
+                  // styles win); if that timeline is ever torn down, figures still never pile up
+                  `col-start-1 row-start-1 flex flex-col items-center gap-2 ${i > 0 ? "invisible opacity-0" : ""}`
+                : "flex flex-col gap-2"
+            }
+          >
+            <dt className={stacked ? "text-label text-mute" : "text-[14px] leading-snug text-mute"}>{s.label}</dt>
+            <dd
+              className={`tabular-nums ${
+                stacked ? "text-display text-[clamp(4rem,7vw,7.5rem)]" : "text-headline text-[clamp(1.75rem,3vw,3rem)]"
+              }`}
+            >
+              <span data-stat data-decimals={s.decimals}>
+                {fmt(s.value, s.decimals)}
+              </span>
+              {s.unit && <span className="ml-2 text-[0.3em] tracking-normal text-mute">{s.unit}</span>}
+            </dd>
+          </div>
+        ))}
+      </dl>
     </section>
   );
 }

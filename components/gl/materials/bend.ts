@@ -1,33 +1,36 @@
 import { coverGLSL } from "./stone";
 
 /**
- * A stone sheet that curls around a cylinder as uBend goes 0 → 1.
+ * A stone sheet that curls as uBend grows (limits in lib/bend.ts).
  * The back face shows the pale flexible backing, which is the product's secret.
  */
 export const bendVertex = /* glsl */ `
 uniform float uBend;
 uniform float uTime;
 uniform vec2 uPointer;
+uniform float uMinRadius; // limits from lib/bend.ts
+uniform float uFlatRadius;
+uniform float uTwist;
 uniform float uOffset; // pushes the surface along its normal: the edge layer sits a hair behind
 varying vec2 vUv;
 varying float vShade;
 void main() {
   vUv = uv;
   vec3 p = position;
-  // radius shrinks from almost flat to a tight curl
+  // radius shrinks from almost flat to a curl (the scroll stops it before it folds over)
   float t = smoothstep(0.0, 1.0, uBend);
-  float R = mix(9.0, 0.62, t);
+  float R = mix(uFlatRadius, uMinRadius, t);
   float theta = p.x / R;
   vec3 bent = vec3(R * sin(theta), p.y, R * (1.0 - cos(theta)));
-  // a gentle counter curve, so the sheet makes a soft S instead of a plain roll
-  bent.z -= sin(p.x * 1.6) * 0.12 * t;
+  // the edge layer moves back along the true front normal of the arc, before the twist,
+  // so it always stays behind the stone and only shows at the rim
+  bent -= vec3(-sin(theta), 0.0, cos(theta)) * uOffset;
   // a gentle diagonal twist so it reads as a flexible sheet, not a tube
-  float twist = uBend * 0.35 * p.y;
+  float twist = uBend * uTwist * p.y;
   bent.xz = mat2(cos(twist), -sin(twist), sin(twist), cos(twist)) * bent.xz;
   // breathing
   bent.y += sin(uTime * 0.8 + p.x * 1.4) * 0.015;
   vec3 n = normalize(vec3(sin(theta), 0.0, cos(theta)));
-  bent -= n * uOffset;
   vec3 L = normalize(vec3(-0.4 + uPointer.x * 0.6, 0.5 + uPointer.y * 0.4, 0.9));
   vShade = 0.45 + 0.65 * max(dot(n, L), 0.0);
   gl_Position = projectionMatrix * modelViewMatrix * vec4(bent, 1.0);

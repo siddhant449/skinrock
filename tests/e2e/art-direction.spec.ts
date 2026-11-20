@@ -53,6 +53,38 @@ test("flex chapter shows one figure at a time inside a tick dial", async ({ page
   await expect(figures.nth(2)).toContainText("42");
 });
 
+test("flex figures hand over one after the other: never two visible at once", async ({ page }) => {
+  test.setTimeout(120_000);
+  await page.goto("/");
+  await page.waitForTimeout(3500);
+  const flex = page.locator("#flex");
+  const top = await flex.evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
+  // densely through both handovers (at 0.36 and 0.68 of the pin, 0.12 long)
+  const points = [0.36, 0.68].flatMap((at) => Array.from({ length: 9 }, (_, i) => at + i * 0.015));
+  for (const f of points) {
+    await settleAt(page, top + 900 * 1.6 * f);
+    const visible = await flex.locator("[data-figure]").evaluateAll(
+      (els) => els.filter((e) => Number(getComputedStyle(e).opacity) > 0.02).length,
+    );
+    expect(visible, `pin ${f.toFixed(2)}`).toBeLessThanOrEqual(1);
+  }
+});
+
+test("flex figures never pile up, even if the scroll animation's inline styles are lost", async ({ page }) => {
+  await page.goto("/");
+  await page.waitForTimeout(3500);
+  const figures = page.locator("#flex [data-figure]");
+  // what a hot reload or a torn-down timeline leaves behind: no inline styles at all
+  await figures.evaluateAll((els) => els.forEach((e) => e.removeAttribute("style")));
+  const shown = await figures.evaluateAll((els) =>
+    els.filter((e) => {
+      const cs = getComputedStyle(e);
+      return cs.visibility !== "hidden" && Number(cs.opacity) > 0.1;
+    }).length,
+  );
+  expect(shown).toBe(1);
+});
+
 test("why chapter has a quiet silk light behind the grid", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("#why [data-silk]")).toBeAttached();

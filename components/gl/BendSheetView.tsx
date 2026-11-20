@@ -2,12 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import { damp } from "@/lib/math";
+import { BEND, sheetBend, sheetRotation } from "@/lib/bend";
 import { TEXTURE_WIDTHS, textureUrl } from "@/lib/textureSize";
 import { onStage, type GLView } from "./stage";
 import { bendEdgeFragment, bendFragment, bendVertex } from "./materials/bend";
 
-const SHEET_W = 2.5;
-const SHEET_H = 1.2;
+const SHEET_W = BEND.width;
+const SHEET_H = BEND.height;
 // the camera the sheet was designed with: perspective, fov 34, at z 3.4
 const FOV = 34;
 const CAMERA_Z = 3.4;
@@ -96,9 +97,15 @@ export default function BendSheetView({ src, imageRes, progress, onReady }: Prop
         draw: ({ time, dt, rect }) => {
           pointer.x = damp(pointer.x, pointer.tx, 4, dt);
           pointer.y = damp(pointer.y, pointer.ty, 4, dt);
-          const bend = progress.current?.value ?? 0;
+          // the original curl, stopped before it folds over (lib/bend.ts)
+          const bend = sheetBend(progress.current?.value ?? 0);
           perspective(proj, rect.width / rect.height);
-          modelView(mv, -0.12 + pointer.y * 0.12, -0.35 + bend * 0.9 + pointer.x * 0.18, 0.06 - bend * 0.1);
+          modelView(mv, ...sheetRotation(bend, pointer.x, pointer.y));
+          const limits = (p: typeof prog) => {
+            gl.uniform1f(p.uniform("uFlatRadius"), BEND.flatRadius);
+            gl.uniform1f(p.uniform("uMinRadius"), BEND.minRadius);
+            gl.uniform1f(p.uniform("uTwist"), BEND.twist);
+          };
           // the edge layer first, a hair behind the sheet: it shows only at the rim, as thickness
           edgeProg.use();
           stage.material({ depthTest: true });
@@ -108,6 +115,7 @@ export default function BendSheetView({ src, imageRes, progress, onReady }: Prop
           gl.uniform1f(edgeProg.uniform("uTime"), time);
           gl.uniform2f(edgeProg.uniform("uPointer"), pointer.x, pointer.y);
           gl.uniform1f(edgeProg.uniform("uOffset"), 0.016);
+          limits(edgeProg);
           mesh.draw();
           prog.use();
           stage.material({ depthTest: true });
@@ -121,6 +129,7 @@ export default function BendSheetView({ src, imageRes, progress, onReady }: Prop
           gl.uniform1f(u("uTime"), time);
           gl.uniform2f(u("uPointer"), pointer.x, pointer.y);
           gl.uniform1f(u("uOffset"), 0);
+          limits(prog);
           mesh.draw();
           markReady();
           return true; // the sheet breathes while it is on screen
