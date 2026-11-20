@@ -10,13 +10,18 @@ import { useMotionPrefs } from "@/components/providers/MotionPrefs";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-/** Wordmark geometry in SVG units. Inter's cap height is 0.727 em; the box shows the top half. */
+/**
+ * Wordmark geometry in SVG units. Inter's cap height is 0.727 em. The letters sit on the
+ * page edge with only a sliver of their bottom trimmed (about 12%), the way current
+ * editorial footers bleed a wordmark without chopping it.
+ */
 const WM = (() => {
   const width = 1000;
   const size = 206;
   const cap = size * 0.727;
   const top = 2; // a hair of air above the letters
-  return { width, size, baseline: top + cap, boxHeight: Math.round(top + cap / 2) };
+  const visible = 0.88; // share of the letter height shown above the page edge
+  return { width, size, baseline: top + cap, boxHeight: Math.round(top + cap * visible) };
 })();
 
 /** Section links shown as rows (Studio is this footer itself). */
@@ -37,7 +42,7 @@ export function Footer() {
     () => {
       if (reduced) return;
       const q = gsap.utils.selector(root);
-      // the word rises into its half-cut resting place as the page ends
+      // the word rises into its resting place on the page edge as the page ends
       gsap.fromTo(
         q("[data-wordmark]"),
         { yPercent: 60 },
@@ -140,9 +145,9 @@ export function Footer() {
         <span>Created in Switzerland</span>
       </div>
 
-      {/* Edge to edge and cut in half by the end of the page. An SVG so the word fills the
-          exact width at any screen size (letter spacing adjusts, glyphs keep their shape). */}
-      <div className="-mx-5 overflow-hidden md:-mx-8">
+      {/* Edge to edge, resting on the end of the page. An SVG so the word fills the exact
+          width at any screen size (letter spacing adjusts, glyphs keep their shape). */}
+      <div className="-mx-5 mt-8 overflow-hidden md:-mx-8 md:mt-14">
         <svg
           data-wordmark=""
           aria-hidden
@@ -154,7 +159,7 @@ export function Footer() {
             y={WM.baseline}
             textLength={WM.width}
             lengthAdjust="spacing"
-            fill="rgba(238, 233, 224, 0.07)"
+            fill="rgba(238, 233, 224, 0.09)"
             style={{ font: `500 ${WM.size}px var(--font-sans)` }}
           >
             SKINROCK

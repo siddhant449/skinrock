@@ -38,7 +38,7 @@ test("footer keeps the address, legal links and faint wordmark", async ({ page }
 });
 
 for (const width of [1440, 1865, 390]) {
-  test(`wordmark runs edge to edge and is cut in half by the page end at ${width}px`, async ({ page }) => {
+  test(`wordmark runs edge to edge and only a sliver is trimmed by the page end at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/");
     // pinned sections recalculate the page height after a jump, so repeat until truly at the end
@@ -76,8 +76,9 @@ for (const width of [1440, 1865, 390]) {
     expect(Math.abs(m.left)).toBeLessThan(1.5);
     expect(Math.abs(m.right - m.vw)).toBeLessThan(1.5);
     expect(m.textW / m.vbW).toBeGreaterThan(0.97); // letters span the full width
-    expect(m.visibleShare).toBeGreaterThan(0.4);
-    expect(m.visibleShare).toBeLessThan(0.6); // roughly half cut
+    // letters nearly whole, sitting on the page edge: only a sliver of the bottom trimmed
+    expect(m.visibleShare).toBeGreaterThan(0.84);
+    expect(m.visibleShare).toBeLessThan(0.93);
     expect(Math.abs(m.bottomGap)).toBeLessThan(1.5); // flush with the very bottom
   });
 }
