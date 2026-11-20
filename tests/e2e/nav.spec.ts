@@ -99,3 +99,15 @@ test.describe("phone menu", () => {
     expect(box.height).toBeGreaterThanOrEqual(843);
   });
 });
+
+test("nav shows the real Skinrock logo, recoloured to the theme", async ({ page }) => {
+  await intro(page);
+  const logo = page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: /Skinrock/ }).locator("svg");
+  await expect(logo).toBeVisible();
+  // vector paths in currentColor: stone on the ink bar
+  const fill = await logo.evaluate((el) => getComputedStyle(el).color);
+  expect(fill).toMatch(/238, 233, 224|eee9e0/i);
+  const box = (await logo.boundingBox())!;
+  expect(box.width).toBeGreaterThan(110);
+  expect(box.width).toBeLessThan(200);
+});

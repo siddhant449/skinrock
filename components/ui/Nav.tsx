@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useLenis } from "lenis/react";
 import { site } from "@/content/site";
+import { Logo } from "./Logo";
 
 const SECTION_OF: Record<string, string> = Object.fromEntries(
   site.nav.links.map((l) => [l.href.slice(1), l.href]),
@@ -162,10 +163,10 @@ export function Nav() {
           <a
             href="#hero"
             onClick={(e) => go(e, "#hero")}
-            className="nav-item tracking-[0.16em] md:col-span-3"
+            className="nav-item block w-[136px] md:col-span-3 md:w-[150px]"
             aria-label="Skinrock, back to top"
           >
-            SKINROCK
+            <Logo className="block h-auto w-full" />
           </a>
           {site.nav.links.map((l, i) => (
             <a
@@ -188,7 +189,10 @@ export function Nav() {
             className="nav-item nav-roll nav-cta hidden justify-self-end whitespace-nowrap md:col-span-2 md:col-start-11 md:inline-flex"
           >
             <Roll>{site.nav.cta.label}</Roll>
-            <span aria-hidden className={`nav-arrow ml-2 ${onCream ? "text-glacier-ink" : "text-glacier"}`}>
+            <span
+              aria-hidden
+              className={`nav-arrow ml-2 ${onCream ? "text-glacier-ink" : "text-glacier"}`}
+            >
               ↗
             </span>
           </a>

@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { markLoaded } from "@/lib/loaded";
 import { PRELOADER_TIMING } from "@/lib/timing";
 import { site } from "@/content/site";
+import { Logo } from "@/components/ui/Logo";
 
 const SEEN_KEY = "sr-loaded";
 
@@ -81,7 +82,7 @@ export function Preloader() {
       style={{ clipPath: "inset(0% 0% 0% 0%)" }}
     >
       <div className="text-label flex justify-between text-mute">
-        <span className="tracking-[0.16em] text-stone">SKINROCK</span>
+        <Logo className="block h-auto w-[132px] text-stone" />
         <span>
           {site.contact.city}, {site.contact.countryName}
         </span>
