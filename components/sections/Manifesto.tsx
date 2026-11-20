@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -74,41 +74,39 @@ export function Manifesto() {
       ref={root}
       id="manifesto"
       aria-label="What Skinrock is"
-      className="relative flex min-h-svh flex-col justify-between overflow-hidden px-5 py-24 md:px-8 md:py-10"
+      className="relative flex min-h-svh flex-col overflow-hidden px-5 py-24 md:px-8 md:py-10"
     >
       <p className="text-label relative z-20 text-mute md:pt-16">Real stone, reimagined</p>
 
+      {/* One container, words and notes interleaved: on phones a plain list where each note
+          sits under its word; on desktop a grid stacking all words in one cell and all notes
+          in another, so the pinned timeline can swap them in place (same DOM either way). */}
       <div
-        className={`relative z-20 ${stacked ? "grid" : "flex flex-col gap-6 py-16"}`}
+        className={`relative z-20 ${
+          stacked ? "grid flex-1 grid-cols-1 grid-rows-[1fr_auto] pb-6" : "flex flex-col gap-12 py-14"
+        }`}
       >
         {words.map((w, i) => (
-          <div
-            key={w}
-            className={stacked ? "col-start-1 row-start-1 overflow-hidden" : ""}
-          >
+          <Fragment key={w}>
+            <div className={stacked ? "col-start-1 row-start-1 self-center overflow-hidden" : ""}>
+              <p
+                data-word
+                className={`text-display whitespace-nowrap text-[clamp(4.5rem,19vw,24rem)] ${
+                  i === words.length - 1 ? "text-glacier" : ""
+                }`}
+              >
+                {w}
+              </p>
+            </div>
             <p
-              data-word
-              className={`text-display whitespace-nowrap text-[clamp(4.5rem,19vw,24rem)] ${
-                i === words.length - 1 ? "text-glacier" : ""
+              data-note
+              className={`max-w-[32ch] text-[17px] text-stone/90 md:text-lg ${
+                stacked ? "col-start-1 row-start-2 md:ml-[50%]" : "-mt-9"
               }`}
             >
-              {w}
+              {notes[i]}
             </p>
-          </div>
-        ))}
-      </div>
-
-      <div
-        className={`relative z-20 ${stacked ? "grid" : "flex flex-col gap-2"} md:ml-[50%]`}
-      >
-        {notes.map((n) => (
-          <p
-            key={n}
-            data-note
-            className={`max-w-[32ch] text-[17px] text-stone/90 md:text-lg ${stacked ? "col-start-1 row-start-1" : ""}`}
-          >
-            {n}
-          </p>
+          </Fragment>
         ))}
       </div>
     </section>

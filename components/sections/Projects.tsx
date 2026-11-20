@@ -75,6 +75,9 @@ export function Projects() {
     <section ref={root} id="projects" aria-label="Projects" className="relative">
       {/* A. floating collage behind a large statement */}
       <div data-collage className="relative h-[170svh] overflow-clip">
+        {/* soft ink pool behind the statement: photos still drift through, the words stay readable.
+            z-[15] sits above the WebGL canvas (z-10) and below the text (z-20). */}
+        <div aria-hidden data-statement-backdrop className="pointer-events-none sticky top-0 z-[15] -mb-[100svh] h-svh" style={{ background: "radial-gradient(ellipse 46% 34% at 50% 50%, rgba(13,21,32,0.82) 0%, rgba(13,21,32,0.55) 45%, rgba(13,21,32,0) 100%)" }} />
         <div className="sticky top-0 z-20 flex h-svh flex-col items-center justify-center gap-6 px-5 text-center">
           <span className="text-label text-glacier">Projects</span>
           <SplitReveal as="h2" className="text-display max-w-[16ch] text-[clamp(2.75rem,7vw,8rem)]">
