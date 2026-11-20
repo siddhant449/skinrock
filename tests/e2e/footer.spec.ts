@@ -38,7 +38,7 @@ test("footer keeps the address, legal links and faint wordmark", async ({ page }
 });
 
 for (const width of [1440, 1865, 390]) {
-  test(`wordmark runs edge to edge and only a sliver is trimmed by the page end at ${width}px`, async ({ page }) => {
+  test(`wordmark runs edge to edge and its bottom is trimmed by the page end at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/");
     // pinned sections recalculate the page height after a jump, so repeat until truly at the end
@@ -76,9 +76,9 @@ for (const width of [1440, 1865, 390]) {
     expect(Math.abs(m.left)).toBeLessThan(1.5);
     expect(Math.abs(m.right - m.vw)).toBeLessThan(1.5);
     expect(m.textW / m.vbW).toBeGreaterThan(0.97); // letters span the full width
-    // letters nearly whole, sitting on the page edge: only a sliver of the bottom trimmed
-    expect(m.visibleShare).toBeGreaterThan(0.84);
-    expect(m.visibleShare).toBeLessThan(0.93);
+    // letters clearly readable, sitting on the page edge with the bottom quarter or so trimmed
+    expect(m.visibleShare).toBeGreaterThan(0.66);
+    expect(m.visibleShare).toBeLessThan(0.78);
     expect(Math.abs(m.bottomGap)).toBeLessThan(1.5); // flush with the very bottom
   });
 }
@@ -102,3 +102,24 @@ test.describe("phone", () => {
     expect(over).toEqual([]);
   });
 });
+
+for (const [w, h] of [[1366, 768], [1440, 900], [1920, 1080]]) {
+  test(`whole footer fits one screen at the end of the page on ${w}x${h}`, async ({ page }) => {
+    // the browser's own toolbars take ~120px of a 1080 screen
+    await page.setViewportSize({ width: w, height: h === 1080 ? 960 : h - 80 });
+    await page.goto("/");
+    await expect
+      .poll(
+        async () => {
+          await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+          await page.waitForTimeout(700);
+          return page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - window.scrollY);
+        },
+        { timeout: 15_000 },
+      )
+      .toBeLessThan(2);
+    await page.waitForTimeout(600);
+    const top = await page.locator("footer#footer").getByText("Let's talk stone.").evaluate((el) => el.getBoundingClientRect().top);
+    expect(top).toBeGreaterThanOrEqual(16); // fully readable, not cut by the top of the screen
+  });
+}

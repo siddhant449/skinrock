@@ -12,15 +12,15 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 /**
  * Wordmark geometry in SVG units. Inter's cap height is 0.727 em. The letters sit on the
- * page edge with only a sliver of their bottom trimmed (about 12%), the way current
- * editorial footers bleed a wordmark without chopping it.
+ * page edge with the bottom quarter or so trimmed (about 28%), the way current editorial
+ * footers bleed a wordmark off the page while it stays clearly readable.
  */
 const WM = (() => {
   const width = 1000;
   const size = 206;
   const cap = size * 0.727;
   const top = 2; // a hair of air above the letters
-  const visible = 0.88; // share of the letter height shown above the page edge
+  const visible = 0.72; // share of the letter height shown above the page edge
   return { width, size, baseline: top + cap, boxHeight: Math.round(top + cap * visible) };
 })();
 
@@ -75,13 +75,15 @@ export function Footer() {
   const toTop = () => (lenis ? lenis.scrollTo(0, { duration: 2 }) : window.scrollTo({ top: 0, behavior: "smooth" }));
 
   return (
-    <footer ref={root} id="footer" className="relative overflow-hidden bg-deep px-5 pt-20 md:px-8 md:pt-28">
-      <div className="relative z-20 grid grid-cols-1 gap-14 md:grid-cols-[1.25fr_1fr] md:gap-16">
-        <div>
-          <p className="text-display text-[clamp(3.25rem,6.6vw,7rem)] leading-[0.92]">
+    <footer ref={root} id="footer" className="relative overflow-hidden bg-deep px-5 pt-16 md:px-8 md:pt-[clamp(48px,9vh,104px)]">
+      {/* Fits one screen on laptops and desktops, so arriving at the end of the page shows the
+          invitation, the links and the wordmark together. Spacing scales with screen height. */}
+      <div className="relative z-20 grid grid-cols-1 gap-12 md:grid-cols-[1.2fr_1fr] md:gap-16">
+        <div className="flex flex-col">
+          <p className="text-display text-[clamp(3rem,5.4vw,6rem)] leading-[0.92]">
             Let&apos;s talk <span className="text-glacier">stone.</span>
           </p>
-          <div className="mt-9 flex flex-wrap gap-x-8 gap-y-3 text-[17px]">
+          <div className="mt-7 flex flex-wrap gap-x-8 gap-y-3 text-[17px]">
             <a href={site.cta.href} target="_blank" rel="noopener" className="nav-link">
               Request samples ↗
             </a>
@@ -89,16 +91,40 @@ export function Footer() {
               Back to top ↑
             </button>
           </div>
+          <div className="mt-10 grid grid-cols-1 gap-8 text-[16px] leading-relaxed text-stone/90 sm:grid-cols-2 md:mt-[clamp(32px,6vh,64px)]">
+            <div>
+              <span className="text-label mb-3 block text-mute">Studio</span>
+              <address className="not-italic">
+                {c.company}
+                <br />
+                {c.street}, {c.postal} {c.city}
+                <br />
+                {c.countryName}
+              </address>
+            </div>
+            <div>
+              <span className="text-label mb-3 block text-mute">Legal</span>
+              <ul className="flex flex-col gap-1">
+                {site.legal.map((l) => (
+                  <li key={l.href}>
+                    <a href={l.href} target="_blank" rel="noopener" className="nav-link">
+                      {l.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
 
-        <nav aria-label="Footer" data-rows>
+        <nav aria-label="Footer" data-rows className="md:self-start">
           {ROWS.map((l) => (
             <a
               key={l.href}
               data-row
               href={l.href}
               onClick={(e) => go(e, l.href)}
-              className="footer-row group grid grid-cols-[1fr_auto] items-center border-t border-stone/12 py-4 text-[clamp(1.5rem,2.2vw,2rem)] font-medium tracking-[-0.03em] last:border-b md:py-5"
+              className="footer-row group grid grid-cols-[1fr_auto] items-center border-t border-stone/12 py-3 text-[clamp(1.4rem,1.9vw,1.85rem)] font-medium tracking-[-0.03em] last:border-b md:py-[clamp(10px,1.7vh,18px)]"
             >
               <span>{l.label}</span>
               <span aria-hidden className="footer-arrow text-[18px] text-mute">
@@ -109,45 +135,17 @@ export function Footer() {
         </nav>
       </div>
 
-      <div className="relative z-20 mt-20 grid grid-cols-1 gap-10 text-[16px] leading-relaxed text-stone/90 sm:grid-cols-3 md:mt-24">
-        <div>
-          <span className="text-label mb-4 block text-mute">Studio</span>
-          <address className="not-italic">
-            {c.company}
-            <br />
-            {c.street}, {c.postal} {c.city}
-            <br />
-            {c.countryName}
-          </address>
-        </div>
-        <div>
-          <span className="text-label mb-4 block text-mute">Legal</span>
-          <ul className="flex flex-col gap-1.5">
-            {site.legal.map((l) => (
-              <li key={l.href}>
-                <a href={l.href} target="_blank" rel="noopener" className="nav-link">
-                  {l.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <span className="text-label mb-4 block text-mute">Material</span>
-          <p>{site.tagline}</p>
-        </div>
-      </div>
-
-      <div className="relative z-20 mt-16 flex flex-wrap items-end justify-between gap-x-6 gap-y-2 border-t border-stone/10 py-5 text-[14px] text-mute md:mt-20">
+      <div className="relative z-20 mt-12 flex flex-wrap items-end justify-between gap-x-6 gap-y-2 border-t border-stone/10 py-5 text-[14px] text-mute md:mt-[clamp(32px,6vh,64px)]">
         <span>
           © {site.copyrightYear} {c.company}
         </span>
+        <span className="hidden md:inline">{site.tagline}</span>
         <span>Created in Switzerland</span>
       </div>
 
       {/* Edge to edge, resting on the end of the page. An SVG so the word fills the exact
           width at any screen size (letter spacing adjusts, glyphs keep their shape). */}
-      <div className="-mx-5 mt-8 overflow-hidden md:-mx-8 md:mt-14">
+      <div className="-mx-5 mt-4 overflow-hidden md:-mx-8 md:mt-6">
         <svg
           data-wordmark=""
           aria-hidden
