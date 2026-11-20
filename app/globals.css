@@ -320,3 +320,25 @@ html:not(.js) .nav-rule {
   html.js:not([data-loaded]) .nav-item { opacity: 1; transform: none; animation: none; }
   .mobile-menu:not([hidden]), .mobile-menu:not([hidden]) .mobile-item { animation: none; }
 }
+
+/* ---------- Footer: invitation with link rows (components/sections/Footer.tsx) ---------- */
+.footer-row {
+  transition: padding 0.6s var(--ease-expo), color 0.4s;
+}
+.footer-row:hover,
+.footer-row:focus-visible {
+  padding-left: 14px;
+  color: var(--color-glacier);
+}
+.footer-arrow {
+  display: inline-block;
+  transition: transform 0.6s var(--ease-expo), color 0.4s;
+}
+.footer-row:hover .footer-arrow,
+.footer-row:focus-visible .footer-arrow {
+  transform: translate(3px, -3px);
+  color: var(--color-glacier);
+}
+@media (prefers-reduced-motion: reduce) {
+  .footer-row, .footer-arrow { transition: none; }
+}
