@@ -117,8 +117,11 @@ html.js [data-reveal]:not([data-revealed]) {
 
 /* SplitText word masks: leave room for descenders (g, j, p, y) */
 .sr-word-mask {
-  padding-bottom: 0.16em;
-  margin-bottom: -0.16em;
+  /* room for ink outside the word box: descenders below, and side bearings that tight
+     negative tracking pushes past the box (the last "s" of a word was being clipped).
+     Negative margins cancel the padding so layout and word spacing are unchanged. */
+  padding: 0 0.1em 0.16em;
+  margin: 0 -0.1em -0.16em;
 }
 
 /* Preloader: only when JS runs, motion is allowed and it hasn't played this session */
