@@ -65,7 +65,6 @@ export const site = {
 
   hero: {
     eyebrow: "Natural stone veneer",
-    index: "01",
     headline: "Real stone. Thin enough to let light through.",
     accentWord: "light",
     lede: "Ultra thin veneers of slate, quartzite and marble. Flexible enough to follow a curve, light enough to go almost anywhere and, in selected stones, translucent enough to glow.",

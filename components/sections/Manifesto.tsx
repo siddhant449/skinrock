@@ -33,8 +33,6 @@ export function Manifesto() {
         const q = gsap.utils.selector(root);
         const items = q<HTMLElement>("[data-word]");
         const captions = q<HTMLElement>("[data-note]");
-        const counter = q<HTMLElement>("[data-count]")[0];
-        const bar = q<HTMLElement>("[data-bar]")[0];
 
         gsap.set(items.slice(1), { yPercent: 105 });
         gsap.set(captions.slice(1), { autoAlpha: 0, y: 16 });
@@ -47,14 +45,6 @@ export function Manifesto() {
             end: () => `+=${window.innerHeight * (words.length - 0.5)}`,
             pin: true,
             scrub: 0.8,
-            onUpdate: (self) => {
-              const i = Math.min(
-                words.length - 1,
-                Math.floor(self.progress * words.length),
-              );
-              if (counter) counter.textContent = `0${i + 1}`;
-              if (bar) bar.style.transform = `scaleX(${self.progress})`;
-            },
           },
         });
         for (let i = 1; i < words.length; i++) {
@@ -86,21 +76,7 @@ export function Manifesto() {
       aria-label="What Skinrock is"
       className="relative flex min-h-svh flex-col justify-between overflow-hidden px-5 py-24 md:px-8 md:py-10"
     >
-      <div className="text-label relative z-20 flex items-center justify-between text-mute md:pt-16">
-        <span>
-          <span data-count className="text-stone">
-            01
-          </span>{" "}
-          / 0{words.length}
-        </span>
-        <span className="relative hidden h-px w-[28vw] bg-stone/15 md:block">
-          <span
-            data-bar
-            className="absolute inset-0 origin-left scale-x-0 bg-glacier"
-          />
-        </span>
-        <span>Real stone, reimagined</span>
-      </div>
+      <p className="text-label relative z-20 text-mute md:pt-16">Real stone, reimagined</p>
 
       <div
         className={`relative z-20 ${stacked ? "grid" : "flex flex-col gap-6 py-16"}`}
@@ -129,7 +105,7 @@ export function Manifesto() {
           <p
             key={n}
             data-note
-            className={`max-w-[32ch] text-base text-stone/75 md:text-lg ${stacked ? "col-start-1 row-start-1" : ""}`}
+            className={`max-w-[32ch] text-[17px] text-stone/90 md:text-lg ${stacked ? "col-start-1 row-start-1" : ""}`}
           >
             {n}
           </p>

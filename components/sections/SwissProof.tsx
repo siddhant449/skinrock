@@ -44,12 +44,12 @@ export function SwissProof() {
     <section ref={root} id="proof" data-theme="cream" className="relative bg-cream px-5 py-24 text-ink md:px-8 md:py-[16vh]">
       <div className="relative z-20 grid grid-cols-1 gap-12 md:grid-cols-12">
         <div className="flex flex-col gap-6 md:col-span-4">
-          <span className="text-label text-glacier-ink">06 / Swiss proof</span>
+          <span className="text-label text-glacier-ink">Swiss proof</span>
           <SplitReveal as="h2" className="text-headline text-[clamp(2.5rem,4.6vw,4.75rem)]">
             {site.proofTitle}
           </SplitReveal>
-          <p className="max-w-[34ch] text-base leading-relaxed text-ink/70">{site.proofIntro}</p>
-          <a href={site.cta.href} target="_blank" rel="noopener" className="nav-link self-start text-[13px] font-medium">
+          <p className="max-w-[36ch] text-[17px] leading-relaxed md:text-lg text-ink/85">{site.proofIntro}</p>
+          <a href={site.cta.href} target="_blank" rel="noopener" className="nav-link self-start text-[15px] font-medium">
             Ask for the reports ↗
           </a>
         </div>
@@ -63,7 +63,7 @@ export function SwissProof() {
               </div>
             ))}
           </dl>
-          <ul className="mt-12 flex flex-wrap gap-x-10 gap-y-3 border-t border-ink/15 pt-6 text-[13px] font-medium text-ink/75">
+          <ul className="mt-12 flex flex-wrap gap-x-10 gap-y-3 border-t border-ink/15 pt-6 text-[15px] font-medium text-ink/85">
             {specs.map((s) => (
               <li key={s}>{s}</li>
             ))}

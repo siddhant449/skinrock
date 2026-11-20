@@ -28,9 +28,7 @@ export function Hero() {
       // intro: hairline draws, side copy fades up after the headline starts rising
       gsap.set(q("[data-hero-fade]"), { autoAlpha: 0, y: 18 });
       root.current?.setAttribute("data-hero-ready", ""); // GSAP owns the fade from here
-      gsap.set(q("[data-hero-line]"), { scaleX: 0 });
       const off = onLoaded(() => {
-        gsap.to(q("[data-hero-line]"), { scaleX: 1, duration: 1.4, ease: "expo.out", delay: 0.2 });
         gsap.to(q("[data-hero-fade]"), { autoAlpha: 1, y: 0, duration: 1.2, ease: "expo.out", stagger: 0.08, delay: 0.55 });
       });
       // exit: copy drifts up and dims as the page leaves the hero (parallax layer)
@@ -71,12 +69,8 @@ export function Hero() {
 
       <div data-hero-copy className="relative z-20 flex h-full flex-col justify-between px-5 pb-8 pt-28 md:px-8 md:pb-10 md:pt-[18vh]">
         <div className="flex flex-col gap-8 md:max-w-[34vw]">
-          <div className="text-label flex items-center gap-4 text-mute">
-            <span className="text-stone">{hero.index}</span>
-            <span data-hero-line className="h-px w-20 origin-left bg-glacier" />
-            <span>{hero.eyebrow}</span>
-          </div>
-          <p data-hero-fade className="max-w-[34ch] text-[15px] leading-relaxed text-stone/80 md:text-base">
+          <p className="text-label text-mute">{hero.eyebrow}</p>
+          <p data-hero-fade className="max-w-[34ch] text-[17px] leading-relaxed text-stone/90 md:text-lg">
             {hero.lede}
           </p>
         </div>
@@ -93,7 +87,7 @@ export function Hero() {
             {after}
           </SplitReveal>
 
-          <ul className="flex shrink-0 flex-col gap-1.5 text-[13px] font-medium md:items-end md:text-right">
+          <ul className="flex shrink-0 flex-col gap-1.5 text-[15px] font-medium md:items-end md:text-right">
             {hero.specLine.map((s) => (
               <li data-hero-fade key={s} className="hero-spec">
                 {s}

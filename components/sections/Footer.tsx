@@ -39,10 +39,10 @@ export function Footer() {
 
   return (
     <footer ref={root} id="footer" className="relative overflow-hidden border-t border-stone/10 bg-ink px-5 pt-16 md:px-8 md:pt-24">
-      <div className="relative z-20 grid grid-cols-2 gap-10 text-[13px] leading-relaxed md:grid-cols-12">
+      <div className="relative z-20 grid grid-cols-2 gap-10 text-[15px] leading-relaxed md:grid-cols-12">
         <div className="col-span-2 flex flex-col gap-3 md:col-span-4">
           <span className="text-label text-mute">Studio</span>
-          <address className="not-italic text-stone/85">
+          <address className="not-italic text-stone/90">
             {c.company}
             <br />
             {c.street}
@@ -84,7 +84,7 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="relative z-20 mt-16 flex items-end justify-between gap-6 border-t border-stone/10 py-5 text-[12px] text-mute md:mt-24">
+      <div className="relative z-20 mt-16 flex items-end justify-between gap-6 border-t border-stone/10 py-5 text-[14px] text-mute md:mt-24">
         <span>© {site.copyrightYear} {c.company}</span>
         <span>Created in Switzerland</span>
       </div>

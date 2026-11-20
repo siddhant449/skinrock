@@ -92,14 +92,14 @@ export function FlexStory() {
       <div className="grid min-h-svh grid-cols-1 gap-10 px-5 py-24 md:grid-cols-12 md:gap-6 md:px-8 md:py-[14vh]">
         <div className="relative z-20 flex flex-col justify-between gap-10 md:col-span-5">
           <div className="flex flex-col gap-6">
-            <span className="text-label text-glacier">02 / {flex.kicker}</span>
+            <span className="text-label text-glacier">{flex.kicker}</span>
             <SplitReveal
               as="h2"
               className="text-headline text-[clamp(2.6rem,5vw,5.25rem)]"
             >
               {flex.title}
             </SplitReveal>
-            <p className="max-w-[40ch] text-base leading-relaxed text-stone/75">
+            <p className="max-w-[40ch] text-[17px] leading-relaxed md:text-lg text-stone/90">
               {flex.body}
             </p>
           </div>
@@ -113,7 +113,7 @@ export function FlexStory() {
             <dl className="grid grid-cols-3 gap-4">
               {flex.stats.map((s) => (
                 <div key={s.label} className="flex flex-col gap-2">
-                  <dt className="text-[12px] leading-snug text-mute">
+                  <dt className="text-[14px] leading-snug text-mute">
                     {s.label}
                   </dt>
                   <dd className="text-headline text-[clamp(1.75rem,3vw,3rem)] tabular-nums">

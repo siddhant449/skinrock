@@ -47,16 +47,15 @@ export function Nav() {
         onCream ? "text-ink" : "text-stone"
       } ${hidden ? "-translate-y-full" : "translate-y-0"}`}
     >
-      <nav aria-label="Main" className="flex items-center justify-between px-5 py-5 text-[13px] font-medium md:px-8 md:py-6">
+      <nav aria-label="Main" className="flex items-center justify-between px-5 py-5 text-[15px] font-medium md:px-8 md:py-6">
         <a href="#hero" className="tracking-[0.16em]" aria-label="Skinrock, back to top">
           SKINROCK
         </a>
         <ul className="hidden gap-8 md:flex">
-          {site.nav.links.map((l, i) => (
+          {site.nav.links.map((l) => (
             <li key={l.href}>
               <a href={l.href} className="nav-link inline-flex items-start gap-1">
                 <span>{l.label}</span>
-                <sup className="text-[9px] opacity-50">0{i + 1}</sup>
               </a>
             </li>
           ))}

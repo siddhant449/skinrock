@@ -76,7 +76,7 @@ export function Projects() {
       {/* A. floating collage behind a large statement */}
       <div data-collage className="relative h-[170svh] overflow-clip">
         <div className="sticky top-0 z-20 flex h-svh flex-col items-center justify-center gap-6 px-5 text-center">
-          <span className="text-label text-glacier">05 / Projects</span>
+          <span className="text-label text-glacier">Projects</span>
           <SplitReveal as="h2" className="text-display max-w-[16ch] text-[clamp(2.75rem,7vw,8rem)]">
             {site.projectsTitle}
           </SplitReveal>
@@ -116,9 +116,8 @@ export function Projects() {
                 parallax={0.05}
                 className={`relative w-full ${i % 3 === 0 ? "aspect-[4/5]" : "aspect-[4/3]"}`}
               />
-              <figcaption className="relative z-20 flex items-baseline justify-between gap-4 text-[13px] font-medium">
+              <figcaption className="relative z-20 flex items-baseline justify-between gap-4 text-[15px] font-medium">
                 <span>
-                  <span className="mr-3 text-glacier">{String(i + 1).padStart(2, "0")}</span>
                   {p.use}
                 </span>
                 <span className="text-mute">{p.setting}</span>
