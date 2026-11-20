@@ -225,3 +225,98 @@ html.js #hero:not([data-hero-ready]) [data-hero-fade] {
     animation: none;
   }
 }
+
+/* ---------- Navbar: Swiss grid bar (see components/ui/Nav.tsx) ---------- */
+/* text roll: the label slides up and an identical copy rises from below */
+.roll {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding: 0 0.06em 0.12em;
+  margin: 0 -0.06em -0.12em;
+}
+.roll-a,
+.roll-b {
+  display: block;
+  transition: transform 0.7s var(--ease-expo);
+}
+.roll-b {
+  position: absolute;
+  left: 0.06em;
+  top: 100%;
+}
+.nav-roll:hover .roll-a,
+.nav-roll:hover .roll-b,
+.nav-roll:focus-visible .roll-a,
+.nav-roll:focus-visible .roll-b {
+  transform: translateY(-100%);
+}
+.nav-arrow {
+  display: inline-block;
+  transition: transform 0.6s var(--ease-expo);
+}
+.nav-cta:hover .nav-arrow,
+.nav-cta:focus-visible .nav-arrow {
+  transform: translate(3px, -3px);
+}
+/* intro: items drop in one after another once the preloader is done */
+.nav-item {
+  transition:
+    opacity 0.9s var(--ease-expo) calc(var(--i, 0) * 60ms),
+    transform 0.9s var(--ease-expo) calc(var(--i, 0) * 60ms);
+}
+html.js:not([data-loaded]) .nav-item {
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: reveal-fallback 0.6s 4s forwards;
+}
+.nav-rule {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1.6s var(--ease-expo) 0.3s;
+}
+html[data-loaded] .nav-rule,
+html:not(.js) .nav-rule {
+  transform: scaleX(1);
+}
+/* burger: two lines that cross into an X */
+.burger {
+  position: relative;
+  display: inline-block;
+  width: 22px;
+  height: 10px;
+}
+.burger i {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  background: currentColor;
+  transition: transform 0.6s var(--ease-expo), top 0.6s var(--ease-expo);
+}
+.burger i:first-child { top: 0; }
+.burger i:last-child { top: 8px; }
+.burger.is-open i:first-child { top: 4px; transform: rotate(45deg); }
+.burger.is-open i:last-child { top: 4px; transform: rotate(-45deg); }
+/* phone menu: wipes down, items follow */
+.mobile-menu:not([hidden]) {
+  animation: menu-in 0.8s var(--ease-expo);
+}
+.mobile-menu:not([hidden]) .mobile-item {
+  animation: menu-item-in 0.9s var(--ease-expo) both;
+  animation-delay: calc(0.15s + var(--i, 0) * 60ms);
+}
+@keyframes menu-in {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes menu-item-in {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-item, .nav-rule, .roll-a, .roll-b, .burger i { transition: none; }
+  html.js:not([data-loaded]) .nav-item { opacity: 1; transform: none; animation: none; }
+  .mobile-menu:not([hidden]), .mobile-menu:not([hidden]) .mobile-item { animation: none; }
+}
