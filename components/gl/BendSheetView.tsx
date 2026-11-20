@@ -2,9 +2,11 @@
 
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { useFrame, useThree } from "@react-three/fiber";
-import { PerspectiveCamera, View, useTexture } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
+import { PerspectiveCamera, View } from "@react-three/drei";
 import { damp } from "@/lib/math";
+import { TEXTURE_WIDTHS, textureUrl } from "@/lib/textureSize";
+import { useStoneTexture } from "./useStoneTexture";
 import { bendFragment, bendVertex } from "./materials/bend";
 
 const SHEET_W = 2.5;
@@ -36,12 +38,8 @@ function Sheet({
   onReady: () => void;
 }) {
   const readyOnce = useRef(false);
-  const invalidate = useThree((s) => s.invalidate);
-  const tex = useTexture(src, (t) => {
-    t.colorSpace = THREE.NoColorSpace;
-    t.needsUpdate = true;
-    invalidate();
-  });
+  // the close-up is smaller than the sheet is drawn, so it comes at full size (re-encoded)
+  const tex = useStoneTexture(textureUrl(src, TEXTURE_WIDTHS.find((w) => w >= imageRes[0]) ?? 2048));
   const mesh = useRef<THREE.Mesh<THREE.PlaneGeometry, THREE.ShaderMaterial>>(null);
   const pointer = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
   const [iw, ih] = imageRes;

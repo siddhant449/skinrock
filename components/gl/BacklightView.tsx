@@ -1,10 +1,12 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { useFrame, useThree } from "@react-three/fiber";
-import { View, useTexture } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
+import { View } from "@react-three/drei";
 import { damp } from "@/lib/math";
+import { textureUrl, textureWidth } from "@/lib/textureSize";
+import { useStoneTexture } from "./useStoneTexture";
 import { backlightFragment, backlightVertex } from "./materials/backlight";
 
 const WARM = new THREE.Color(0xf4 / 255, 0xe9 / 255, 0xd2 / 255);
@@ -20,23 +22,32 @@ type ViewProps = {
 
 /** Lazily loaded WebGL half of BacklightStone. */
 export default function BacklightView(props: ViewProps) {
+  // fetched at drawn size; the shader frames the photo 1.22x tighter
+  const [url] = useState(() => {
+    const r = props.track.current?.getBoundingClientRect();
+    const [iw, ih] = props.imageRes;
+    const w = textureWidth({
+      boxWidth: r?.width ?? iw,
+      boxHeight: r?.height ?? ih,
+      imageWidth: iw,
+      imageHeight: ih,
+      devicePixelRatio: window.devicePixelRatio,
+      zoom: 1.22,
+    });
+    return textureUrl(props.src, w);
+  });
   return (
     <View className="absolute inset-0">
       <Suspense fallback={null}>
-        <Plane {...props} />
+        <Plane {...props} url={url} />
       </Suspense>
     </View>
   );
 }
 
-function Plane({ src, imageRes, intensity, track, onReady }: ViewProps) {
+function Plane({ url, imageRes, intensity, track, onReady }: ViewProps & { url: string }) {
   const readyOnce = useRef(false);
-  const invalidate = useThree((s) => s.invalidate);
-  const tex = useTexture(src, (t) => {
-    t.colorSpace = THREE.NoColorSpace;
-    t.needsUpdate = true;
-    invalidate();
-  });
+  const tex = useStoneTexture(url);
   const mesh = useRef<THREE.Mesh<THREE.PlaneGeometry, THREE.ShaderMaterial>>(null);
   const light = useRef({ x: 0.5, y: 0.6, tx: 0.5, ty: 0.6, inside: false });
   const [iw, ih] = imageRes;
