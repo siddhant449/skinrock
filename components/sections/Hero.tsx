@@ -52,8 +52,10 @@ export function Hero() {
         parallax={0.1}
         grade={0.42}
         sizes="(min-width: 768px) 60vw, 100vw"
-        className="absolute inset-y-0 right-0 w-full md:w-[60%]"
+        className="hero-photo absolute inset-y-0 right-0 w-full md:w-[60%]"
       />
+      {/* touch: once the intro hands over, a soft band of light sweeps across the stone */}
+      <div aria-hidden data-hero-sheen="" className="hero-sheen pointer-events-none absolute inset-0 z-20" />
       {/* phones: the photo is full width, so ink rises from the bottom under the headline */}
       <div
         aria-hidden
@@ -67,7 +69,8 @@ export function Hero() {
         style={{ backgroundImage: "linear-gradient(90deg, #0D1520 0%, rgba(13,21,32,0.55) 14%, rgba(13,21,32,0) 38%), linear-gradient(0deg, rgba(13,21,32,0.75) 0%, rgba(13,21,32,0) 35%), linear-gradient(180deg, rgba(13,21,32,0.7) 0%, rgba(13,21,32,0) 22%)" }}
       />
 
-      <div data-hero-copy className="relative z-20 flex h-full flex-col justify-between px-5 pb-8 pt-28 md:px-8 md:pb-10 md:pt-[18vh]">
+      {/* phones: the copy gathers at the bottom so the stone owns the screen; desktop unchanged */}
+      <div data-hero-copy className="relative z-20 flex h-full flex-col justify-end gap-8 px-5 pb-8 pt-28 md:justify-between md:gap-0 md:px-8 md:pb-10 md:pt-[18vh]">
         <div className="flex flex-col gap-8 md:max-w-[34vw]">
           <p className="text-label text-mute">{hero.eyebrow}</p>
           <p data-hero-fade className="max-w-[34ch] text-[17px] leading-relaxed text-stone/90 md:text-lg">

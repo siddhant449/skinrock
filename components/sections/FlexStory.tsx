@@ -57,8 +57,9 @@ export function FlexStory() {
 
       const mm = gsap.matchMedia();
 
-      // desktop: pinned, one figure at a time, morphing into the next
-      mm.add("(min-width: 768px)", () => {
+      // every screen: pinned, one figure at a time, morphing into the next (phones too: the
+      // curling sheet and the figures are what make this chapter move there)
+      mm.add("(min-width: 0px)", () => {
         setStacked(true);
         const figures = q<HTMLElement>("[data-figure]");
         gsap.set(figures.slice(1), { autoAlpha: 0, filter: "blur(12px)", scale: 0.94 });
@@ -73,7 +74,9 @@ export function FlexStory() {
             scrub: 1,
           },
         });
-        tl.to(progress.current, { value: 1, ease: "power1.inOut", duration: 1, onUpdate: poseSheet }, 0);
+        // fromTo: a first pass with reduced motion (before the preference settles) parks the
+        // bend at 0.55, and a plain to() would then start the sheet half curled
+        tl.fromTo(progress.current, { value: 0 }, { value: 1, ease: "power1.inOut", duration: 1, onUpdate: poseSheet }, 0);
         tl.to("[data-dial-ticks]", { rotate: -48, svgOrigin: "50 50", duration: 1 }, 0);
         MORPHS.forEach((at, k) => {
           const out = figures[k];
@@ -86,27 +89,18 @@ export function FlexStory() {
         tl.to({}, { duration: 0.0001 }, 1);
         return () => setStacked(false);
       });
-
-      // phones: no pin, the three figures count up in a row as the section passes
-      mm.add("(max-width: 767px)", () => {
-        const tl = gsap.timeline({
-          scrollTrigger: { trigger: root.current, start: "top 75%", end: "center 40%", scrub: 1 },
-        });
-        tl.to(progress.current, { value: 1, ease: "power1.inOut", duration: 1, onUpdate: poseSheet }, 0);
-        counters.forEach((_, i) => tl.to(counters[i], { ...count(i), duration: 0.5 }, 0.15 + i * 0.18));
-      });
       return () => mm.revert();
     },
     { scope: root, dependencies: [reduced] },
   );
 
   return (
-    <section ref={root} id="flex" className="relative overflow-hidden bg-deep md:h-svh">
+    <section ref={root} id="flex" className="relative flex h-svh flex-col overflow-hidden bg-deep md:block">
       {/* the studio from the reference: light shafts, a pool of light, a dark stone floor */}
       <StudioStage beams floor pool />
       {/* the stage (after Zirka): the sheet is the object, centred inside a fine measuring dial;
           title top left, body top right, one large figure centred beneath the sheet */}
-      <div className="relative z-20 flex flex-col gap-6 px-5 pt-24 md:absolute md:inset-x-8 md:top-[11vh] md:flex-row md:items-start md:justify-between md:gap-10 md:px-0 md:pt-0">
+      <div className="relative z-20 flex flex-col gap-6 px-5 pt-20 md:absolute md:inset-x-8 md:top-[11vh] md:flex-row md:items-start md:justify-between md:gap-10 md:px-0 md:pt-0">
         <div className="flex flex-col gap-5">
           <span className="text-label text-glacier">{flex.kicker}</span>
           <SplitReveal as="h2" className="text-headline max-w-[11ch] text-[clamp(2.6rem,4vw,4.25rem)]">
@@ -116,7 +110,7 @@ export function FlexStory() {
         <p className="max-w-[34ch] text-[17px] leading-relaxed text-stone/90 md:mt-9 md:text-right md:text-lg">{flex.body}</p>
       </div>
 
-      <div data-flex-stage="" className="relative mx-5 mt-10 h-[46vh] md:absolute md:inset-0 md:m-0 md:h-auto">
+      <div data-flex-stage="" className="relative mx-5 mt-4 min-h-0 flex-1 md:absolute md:inset-0 md:m-0 md:h-auto">
         {/* the dial sits under the WebGL canvas (z-[5]) */}
         <svg
           aria-hidden
@@ -151,13 +145,13 @@ export function FlexStory() {
         <BendSheet
           image={flex.image}
           progress={progress}
-          className="absolute inset-0 md:inset-auto md:left-1/2 md:top-[47%] md:h-[72vh] md:w-[60vw] md:-translate-x-1/2 md:-translate-y-1/2"
+          className="absolute inset-0 md:inset-auto md:left-1/2 md:top-[47%] md:h-[70vh] md:w-[57vw] md:-translate-x-1/2 md:-translate-y-1/2"
         />
       </div>
 
       <dl
         data-figures=""
-        className={`relative z-20 px-5 pb-24 pt-10 md:absolute md:inset-x-0 md:bottom-[6vh] md:p-0 ${
+        className={`relative z-20 px-5 pb-10 pt-4 md:absolute md:inset-x-0 md:bottom-[6vh] md:p-0 ${
           stacked ? "grid justify-items-center text-center" : "grid grid-cols-3 gap-4"
         }`}
       >

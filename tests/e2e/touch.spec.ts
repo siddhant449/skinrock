@@ -198,7 +198,7 @@ for (const [name, device] of [["tablet", TABLET], ["tablet landscape", LANDSCAPE
       for (const f of [0, 0.5, 1.0, 1.5]) {
         await scrollToY(page, top + device.viewport.height * f);
         const hit = await page.locator("#flex").evaluate((el) => {
-          const sheet = el.querySelector("[data-bend-dom] img")!.getBoundingClientRect();
+          const sheet = el.querySelector("[data-bend-dom]")!.getBoundingClientRect(); // the curling strips live inside it
           return [el.querySelector("h2")!, el.querySelector("p")!].some((n) => {
             const r = n.getBoundingClientRect();
             return sheet.right > r.left && sheet.left < r.right && sheet.bottom > r.top && sheet.top < r.bottom;

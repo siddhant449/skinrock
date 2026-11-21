@@ -560,8 +560,8 @@ html:not(.js) .nav-rule {
 }
 /* the sheet's own proportions, centred in its stage, so it clears the copy on tablets */
 .bend-dom {
-  left: 0;
-  right: 0;
+  left: 7%;
+  right: 7%;
   top: 50%;
   aspect-ratio: 2.08;
   translate: 0 -50%;
@@ -569,17 +569,6 @@ html:not(.js) .nav-rule {
     scale(calc(0.9 + 0.08 * var(--bend, 0.5)));
   transform-style: preserve-3d;
   will-change: transform;
-}
-.bend-dom::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 2px;
-  background: linear-gradient(105deg, transparent 30%, rgb(244 233 210 / 0.22) 50%, transparent 70%) no-repeat;
-  background-size: 260% 100%;
-  background-position: calc(130% - 160% * var(--bend, 0.5)) 0;
-  mix-blend-mode: screen;
-  pointer-events: none;
 }
 
 /* ---------- Projects on touch: a native swipe gallery ----------
@@ -631,6 +620,96 @@ html:not(.js) .nav-rule {
     left: -10%;
     right: -10%;
   }
+}
+
+/* ---------- Hero on touch: the stone drifts slowly and a band of light passes once ---------- */
+.hero-sheen {
+  display: none;
+}
+@media ((hover: none) or (pointer: coarse)) and (prefers-reduced-motion: no-preference) {
+  .hero-photo {
+    animation: hero-drift 18s ease-in-out infinite alternate;
+  }
+  .hero-sheen {
+    display: block;
+    background: linear-gradient(115deg, transparent 35%, rgb(244 233 210 / 0.16) 50%, transparent 65%) no-repeat;
+    background-size: 260% 100%;
+    background-position: 130% 0;
+    mix-blend-mode: screen;
+  }
+  html[data-loaded] .hero-sheen {
+    animation: hero-sheen 3.4s cubic-bezier(0.45, 0, 0.2, 1) 0.5s both;
+  }
+}
+@keyframes hero-drift {
+  from { transform: scale(1.04) translate3d(0, 0, 0); }
+  to { transform: scale(1.14) translate3d(-3%, -2%, 0); }
+}
+@keyframes hero-sheen {
+  from { background-position: 130% 0; }
+  to { background-position: -30% 0; }
+}
+
+/* ---------- The curling sheet on touch (components/gl/CssBendSheet.tsx) ----------
+   strips hinge on each other; each turns --step further as --bend grows, so the sheet curves
+   and its edges come toward you. Shading is a pseudo-element, so the 3D is never flattened. */
+.bend-strips {
+  transform-style: preserve-3d;
+  --step: 12deg;
+}
+.bend-strip {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: calc(100% + 2px); /* overlap so no hairline of background shows at a hinge */
+  background-repeat: no-repeat;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+.bend-strip-root {
+  width: calc(100% / 14 + 2px);
+}
+.bend-strip-root.bend-strip-left {
+  right: 50%;
+}
+.bend-strip-root.bend-strip-right {
+  left: calc(50% - 1px); /* the two halves overlap at the centre line too */
+}
+.bend-strip-right:not(.bend-strip-root) {
+  left: calc(100% - 2px);
+}
+.bend-strip-left:not(.bend-strip-root) {
+  right: calc(100% - 2px);
+}
+.bend-strip-right {
+  transform-origin: 0% 50%;
+  transform: rotateY(calc(var(--bend, 0) * var(--step) * -1));
+}
+.bend-strip-left {
+  transform-origin: 100% 50%;
+  transform: rotateY(calc(var(--bend, 0) * var(--step)));
+}
+/* shading runs as a gradient across each strip, from where its inner neighbour's ends to its
+   own outer edge, so the curve darkens smoothly with no step (a flat shade per strip showed seams) */
+.bend-strip::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.bend-strip-right::after {
+  background: linear-gradient(90deg, rgb(8 12 18 / calc(var(--bend, 0) * (var(--d) - 1) * 0.06)), rgb(8 12 18 / calc(var(--bend, 0) * var(--d) * 0.06)));
+}
+.bend-strip-left::after {
+  background: linear-gradient(270deg, rgb(8 12 18 / calc(var(--bend, 0) * (var(--d) - 1) * 0.06)), rgb(8 12 18 / calc(var(--bend, 0) * var(--d) * 0.06)));
+}
+/* the root strips sit on the crest of the curve: they catch the light */
+.bend-strip-root::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgb(244 233 210 / calc(0.14 * var(--bend, 0))), transparent);
+  pointer-events: none;
 }
 
 /* ---------- Samples: the sample box (components/sections/Cta.tsx) ---------- */

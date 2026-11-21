@@ -19,7 +19,8 @@ const MORPH = 0.55;
  * the next (Originkit's Text Morph, driven by scroll): both words blur and cross over, and an
  * alpha threshold fuses them into one liquid shape. The threshold only runs during a switch,
  * so the words are crisp at rest; the notes are hidden while it runs.
- * Without JS or with reduced motion it is a plain stacked list.
+ * Phones get it too (it is what makes the chapter move there). Without JS or with reduced
+ * motion it is a plain stacked list.
  */
 export function Manifesto() {
   const root = useRef<HTMLElement>(null);
@@ -37,8 +38,8 @@ export function Manifesto() {
         return;
       }
       const mm = gsap.matchMedia();
-      // phones: the plain stacked list; the pinned one-word sequence needs a tall, wide screen
-      mm.add("(min-width: 768px)", () => {
+      // every screen gets the pinned one-word sequence; reduced motion and no-JS keep the plain list
+      mm.add("(min-width: 0px)", () => {
         setStacked(true);
         const q = gsap.utils.selector(root);
         const items = q<HTMLElement>("[data-word]");

@@ -25,10 +25,10 @@ test("hero side copy is hidden before hydration so it never pops on repeat visit
 
 test.describe("phones", () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
-  test("tall chapters are not pinned on phones", async ({ page }) => {
+  test("the light chapter is not pinned on phones (manifesto and flex pin to play their motion)", async ({ page }) => {
     await page.goto("/");
     await page.waitForTimeout(3500);
-    for (const id of ["manifesto", "flex", "light"]) {
+    for (const id of ["light"]) {
       const pinned = await page.locator(`#${id}`).evaluate((el) => el.parentElement!.classList.contains("pin-spacer"));
       expect(pinned, id).toBe(false);
     }

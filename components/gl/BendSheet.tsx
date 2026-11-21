@@ -5,6 +5,9 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import type { SiteImage } from "@/content/site";
 import { useGLLive } from "./useGLActive";
+import { CssBendSheet } from "./CssBendSheet";
+import { useMotionPrefs } from "@/components/providers/MotionPrefs";
+import imageLoader from "@/lib/imageLoader";
 
 const BendSheetView = dynamic(() => import("./BendSheetView"), { ssr: false });
 
@@ -21,13 +24,22 @@ export function BendSheet({ image, progress, className = "relative" }: Props) {
   const live = useGLLive();
   const [ready, setReady] = useState(false);
   const drawn = live && ready;
+  const { touch, reduced } = useMotionPrefs();
   return (
     <div ref={wrap} data-bend="" data-gl={drawn ? "ready" : undefined} className={className}>
       {/* the photo stays until WebGL has drawn its first frame, so the chapter never goes blank */}
       {!drawn ? (
         // without WebGL (touch) the photo turns like a sheet in 3D, posed by --bend from the scroll
         <div data-bend-dom="" className="bend-dom absolute">
-          <Image src={image.src} alt={image.alt} fill sizes="(min-width: 768px) 50vw, 100vw" className="rounded-sm object-cover" />
+          {touch && !reduced ? (
+            // touch: the sheet curls for real, cut into strips that hinge in 3D (no WebGL)
+            <>
+              <span className="sr-only">{image.alt}</span>
+              <CssBendSheet src={imageLoader({ src: image.src, width: 1080 })} />
+            </>
+          ) : (
+            <Image src={image.src} alt={image.alt} fill sizes="(min-width: 768px) 50vw, 100vw" className="rounded-sm object-cover" />
+          )}
         </div>
       ) : (
         <span className="sr-only">{image.alt}</span>

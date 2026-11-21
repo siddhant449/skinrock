@@ -3,14 +3,22 @@ import { test, expect } from "@playwright/test";
 test.describe("phone", () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
 
-  test("each manifesto note sits directly under its word", async ({ page }) => {
+  test("the manifesto shows one word with its own note at a time, the note under the word", async ({ page }) => {
     await page.goto("/");
-    await page.waitForTimeout(2500);
-    const order = await page.locator("#manifesto").evaluate((root) => {
-      const items = [...root.querySelectorAll<HTMLElement>("[data-word], [data-note]")].filter((el) => el.offsetParent);
-      return items.sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top).map((el) => (el.hasAttribute("data-word") ? "W" : "N"));
+    await page.waitForTimeout(3500);
+    const s = await page.locator("#manifesto").evaluate((root) => {
+      const vis = (el: Element) => Number(getComputedStyle(el).opacity) > 0.5;
+      const words = [...root.querySelectorAll("[data-word]")];
+      const notes = [...root.querySelectorAll("[data-note]")];
+      const w = words.findIndex(vis);
+      const n = notes.findIndex(vis);
+      return {
+        words: words.filter(vis).length,
+        same: w === n,
+        below: notes[n].getBoundingClientRect().top >= words[w].getBoundingClientRect().bottom - 4,
+      };
     });
-    expect(order.join("")).toBe("WNWNWNWN");
+    expect(s).toEqual({ words: 1, same: true, below: true });
   });
 });
 
