@@ -28,34 +28,32 @@ async function flick(page: Page, dy = 260) {
 test.describe("phone scroll feel", () => {
   test.use({ viewport: { width: 390, height: 664 }, isMobile: true, hasTouch: true });
 
-  test("the page carries the thumb's scroll itself, instead of handing it to the phone's native fling", async ({ page }) => {
+  test("touch scrolling is the phone's own: the page never takes the thumb's moves over", async ({ page }) => {
     await page.goto("/");
     await loaded(page);
     const y0 = await settleInCollection(page);
-    // listening after the scroller: a move it takes over arrives already claimed (defaultPrevented)
+    // listening after any scroller: a move it took over would arrive already claimed
     await page.evaluate(() => {
       const w = window as unknown as { claimed: boolean[] };
       w.claimed = [];
       window.addEventListener("touchmove", (e) => w.claimed.push(e.defaultPrevented), { passive: true });
     });
     await flick(page);
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1500);
     const claimed = await page.evaluate(() => (window as unknown as { claimed: boolean[] }).claimed);
     expect(claimed.length).toBeGreaterThan(0);
-    expect(claimed.every(Boolean)).toBe(true);
-    // and the page still follows the thumb
-    expect((await page.evaluate(() => window.scrollY)) - y0).toBeGreaterThan(220);
+    expect(claimed.some(Boolean)).toBe(false);
+    expect((await page.evaluate(() => window.scrollY)) - y0).toBeGreaterThan(200); // and the page moves with the thumb
   });
 });
 
-test("desktop: one turn of the wheel moves the page a measured step", async ({ page }) => {
+test("desktop: the wheel scrolls the page straight away, by the browser's own step", async ({ page }) => {
   await page.goto("/");
   await loaded(page);
   const y0 = await settleInCollection(page);
   await page.mouse.move(700, 450);
   await page.mouse.wheel(0, 400);
-  await page.waitForTimeout(2200);
-  const travel = (await page.evaluate(() => window.scrollY)) - y0;
-  expect(travel).toBeGreaterThan(355); // just a touch shorter than the raw 400px the wheel asks for
-  expect(travel).toBeLessThan(392);
+  // no glide to wait for: the page is already there a moment later
+  await page.waitForTimeout(150);
+  expect((await page.evaluate(() => window.scrollY)) - y0).toBeGreaterThan(390);
 });

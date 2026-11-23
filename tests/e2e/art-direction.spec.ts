@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 
-/** Settle Lenis at an absolute scroll position (it overrides scrollTo while animating). */
+/** Settle at an absolute scroll position (pinned chapters re-measure after a jump). */
 async function settleAt(page: Page, y: number) {
   for (let k = 0; k < 6; k++) {
     await page.evaluate((v) => window.scrollTo(0, v), y);

@@ -65,18 +65,6 @@
   }
 }
 
-/* Lenis */
-html.lenis,
-html.lenis body {
-  height: auto;
-}
-.lenis:not(.lenis-autoToggle).lenis-stopped {
-  overflow: clip;
-}
-.lenis [data-lenis-prevent] {
-  overscroll-behavior: contain;
-}
-
 /* Text waiting for its reveal: hidden only when JS is running, with a safety fallback. */
 html.js [data-reveal]:not([data-revealed]) {
   opacity: 0;
@@ -122,6 +110,13 @@ html.js [data-reveal]:not([data-revealed]) {
 }
 
 /* WebGL twin has drawn: let the shader carry the image */
+/* photo frames clip without becoming a scroll container (overflow: hidden would), so a photo's
+   drift can follow the page's own scrolling (touch photos below); hidden first for old browsers */
+.gl-image,
+.clip-box {
+  overflow: hidden;
+  overflow: clip;
+}
 .gl-image[data-gl="ready"] > img {
   opacity: 0;
 }
@@ -147,6 +142,25 @@ html.js:not(.sr-seen) .preloader {
   to {
     opacity: 0;
     visibility: hidden;
+  }
+}
+/* the mark rises and the labels fade in from the very first paint, before any script runs, so
+   the intro moves at once (on a slow phone the scripts take a couple of seconds to start); the
+   script then carries on with the stone window instead of starting the mark over */
+html.js:not(.sr-seen) .preloader [data-loader-mark] {
+  animation: loader-mark 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s backwards;
+}
+html.js:not(.sr-seen) .preloader [data-loader-meta] {
+  animation: loader-meta 0.7s ease 0.25s backwards;
+}
+@keyframes loader-mark {
+  from {
+    transform: translateY(105%);
+  }
+}
+@keyframes loader-meta {
+  from {
+    opacity: 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1050,5 +1064,50 @@ html:not(.js) .nav-rule {
   }
   .dock-chapter {
     animation: none;
+  }
+}
+
+/* ---------- Touch photos (components/gl/GLImage.tsx) ----------
+   the sweep in: a slanted edge from the right while the photo slides the other way, started
+   once by an IntersectionObserver; it holds no end state, so nothing lingers on the photo.
+   The drift: the photo moves gently inside its frame on the page's own scroll timeline, using
+   the separate translate and scale properties so it never competes with the sweep. */
+@media ((hover: none) or (pointer: coarse)) and (prefers-reduced-motion: no-preference) {
+  [data-wipe="waiting"] img {
+    clip-path: polygon(100% 0%, 100% 0%, 100% 100%, 112% 100%);
+    transform: translateX(60px);
+  }
+  [data-wipe="go"] img {
+    animation: gl-wipe 1.15s cubic-bezier(0.215, 0.61, 0.355, 1) backwards;
+  }
+  [data-drift] img {
+    animation: gl-drift linear both;
+    animation-timeline: view();
+  }
+  [data-drift][data-wipe="go"] img {
+    animation:
+      gl-wipe 1.15s cubic-bezier(0.215, 0.61, 0.355, 1) backwards,
+      gl-drift linear both;
+    animation-timeline: auto, view();
+  }
+}
+@keyframes gl-wipe {
+  from {
+    clip-path: polygon(100% 0%, 100% 0%, 100% 100%, 112% 100%);
+    transform: translateX(60px);
+  }
+  to {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+    transform: none;
+  }
+}
+@keyframes gl-drift {
+  from {
+    translate: 0 -5%;
+    scale: 1.12;
+  }
+  to {
+    translate: 0 5%;
+    scale: 1.12;
   }
 }

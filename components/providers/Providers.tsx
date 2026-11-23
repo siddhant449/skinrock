@@ -3,13 +3,13 @@
 import { useEffect, type ReactNode } from "react";
 import { scheduleLoadedFallback } from "@/lib/loaded";
 import { MotionPrefsProvider } from "./MotionPrefs";
-import { SmoothScroll } from "./SmoothScroll";
+import { ScrollSetup } from "./ScrollSetup";
 
 export function Providers({ children }: { children: ReactNode }) {
   useEffect(() => scheduleLoadedFallback(), []);
   return (
     <MotionPrefsProvider>
-      <SmoothScroll>{children}</SmoothScroll>
+      <ScrollSetup>{children}</ScrollSetup>
     </MotionPrefsProvider>
   );
 }

@@ -87,7 +87,7 @@ export function Hero() {
   );
 
   return (
-    <section ref={root} id="hero" className="relative h-svh min-h-[540px] overflow-hidden md:min-h-[640px]">
+    <section ref={root} id="hero" className="clip-box relative h-svh min-h-[540px] md:min-h-[640px]">
       <div data-hero-window="" className="absolute inset-0">
         <GLImage
           image={hero.image}

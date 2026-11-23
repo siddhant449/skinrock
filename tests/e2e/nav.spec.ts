@@ -43,7 +43,7 @@ test("bar turns solid after the hero and cream on cream chapters", async ({ page
   await scrollToSection(page, "flex", 0.1);
   await page.mouse.wheel(0, -60);
   await expect(header).toHaveAttribute("data-solid", "true");
-  // let Lenis finish the wheel's smooth scroll, or it carries on and overrides the next jump
+  // let the wheel's scroll settle before the next jump
   await page.waitForTimeout(1500);
   await scrollToSection(page, "collection", 0.1);
   await page.mouse.wheel(0, -60);

@@ -4,7 +4,7 @@ import { springAtRest, stepSpring, type SpringParams, type SpringState } from "@
 type Update = (x: number, y: number, vx: number, vy: number) => void;
 
 /**
- * A 2D spring that chases a target on GSAP's ticker (already running for Lenis) and stops
+ * A 2D spring that chases a target on GSAP's ticker (already running for the animations) and stops
  * ticking once it rests. Replaces motion's useSpring, so the motion library is not shipped.
  */
 export function springFollow(params: SpringParams, onUpdate: Update, start = { x: 0, y: 0 }) {

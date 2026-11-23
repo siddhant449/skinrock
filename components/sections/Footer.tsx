@@ -4,7 +4,7 @@ import { useRef, type MouseEvent } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { useLenis } from "lenis/react";
+import { glideTo } from "@/lib/pageScroll";
 import { site } from "@/content/site";
 import { useMotionPrefs } from "@/components/providers/MotionPrefs";
 import { FooterSketch } from "@/components/ui/FooterSketch";
@@ -37,7 +37,6 @@ const ROWS = site.nav.links.filter((l) => l.href !== "#footer");
 export function Footer() {
   const root = useRef<HTMLElement>(null);
   const { reduced } = useMotionPrefs();
-  const lenis = useLenis();
   const c = site.contact;
 
   useGSAP(
@@ -71,10 +70,9 @@ export function Footer() {
     const target = document.querySelector<HTMLElement>(href);
     if (!target) return;
     e.preventDefault();
-    if (lenis) lenis.scrollTo(target, { duration: 1.6 });
-    else target.scrollIntoView({ behavior: "smooth" });
+    glideTo(target);
   };
-  const toTop = () => (lenis ? lenis.scrollTo(0, { duration: 2 }) : window.scrollTo({ top: 0, behavior: "smooth" }));
+  const toTop = () => glideTo(0);
 
   return (
     <footer ref={root} id="footer" className="relative overflow-hidden bg-deep px-5 pt-16 md:px-8 md:pt-[clamp(48px,9vh,104px)]">

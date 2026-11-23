@@ -7,7 +7,7 @@ import {
   useState,
   type MouseEvent,
 } from "react";
-import { useLenis } from "lenis/react";
+import { glideTo, onPageScroll } from "@/lib/pageScroll";
 import { site } from "@/content/site";
 import { Logo } from "./Logo";
 
@@ -39,27 +39,22 @@ export function Nav() {
   const [onCream, setOnCream] = useState(false);
   const [current, setCurrent] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-  const last = useRef(0);
   const hiddenRef = useRef(false);
   const menuButton = useRef<HTMLButtonElement>(null);
   const firstLink = useRef<HTMLAnchorElement>(null);
 
   // scroll direction: only touch React state when the answer changes
-  const lenis = useLenis(
-    useCallback((l: { scroll: number }) => {
-      const y = l.scroll;
-      const delta = y - last.current;
-      last.current = y;
-      let next = hiddenRef.current;
-      if (y <= 160) next = false;
-      else if (delta > 2) next = true;
-      else if (delta < -2) next = false;
-      if (next !== hiddenRef.current) {
-        hiddenRef.current = next;
-        setHidden(next);
-      }
-    }, []),
-  );
+  const onScroll = useCallback(({ y, velocity }: { y: number; velocity: number }) => {
+    let next = hiddenRef.current;
+    if (y <= 160) next = false;
+    else if (velocity > 2) next = true;
+    else if (velocity < -2) next = false;
+    if (next !== hiddenRef.current) {
+      hiddenRef.current = next;
+      setHidden(next);
+    }
+  }, []);
+  useEffect(() => onPageScroll(onScroll), [onScroll]);
 
   // solid after the hero, cream theme, and current section: all from IntersectionObservers
   useEffect(() => {
@@ -108,7 +103,6 @@ export function Nav() {
   // menu: lock scroll, focus the first link, Escape closes and returns focus
   useEffect(() => {
     if (!open) return;
-    lenis?.stop();
     document.documentElement.style.overflow = "hidden";
     firstLink.current?.focus();
     const onKey = (e: KeyboardEvent) => {
@@ -121,9 +115,8 @@ export function Nav() {
     return () => {
       window.removeEventListener("keydown", onKey);
       document.documentElement.style.overflow = "";
-      lenis?.start();
     };
-  }, [open, lenis]);
+  }, [open]);
 
   const go = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
     if (!href.startsWith("#")) return;
@@ -132,12 +125,7 @@ export function Nav() {
     const target = document.querySelector<HTMLElement>(href);
     if (!target) return;
     // let the menu release the scroll lock first
-    requestAnimationFrame(() => {
-      if (lenis) {
-        lenis.start();
-        lenis.scrollTo(target, { duration: 1.4 });
-      } else target.scrollIntoView({ behavior: "smooth" });
-    });
+    requestAnimationFrame(() => glideTo(target));
   };
 
   const theme = onCream ? "cream" : "ink";

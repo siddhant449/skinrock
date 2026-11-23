@@ -170,15 +170,11 @@ export function Projects() {
           <span className="text-label text-mute">Selected work</span>
           <span className="text-label text-mute">{site.projects.length} projects</span>
         </div>
-        {/* touch: the gallery owns its own touches. Smooth scrolling (Lenis) cancels any finger
-            movement with a vertical part, and a thumb always drifts a little, so sideways swipes
-            stuck; here the browser tells a sideways swipe from a scroll by itself. */}
         <div className={touch ? "rail-edges relative" : "contents"}>
         <div
           ref={track}
           id="project-rail"
           data-rail-track=""
-          data-lenis-prevent-touch={touch ? "" : undefined}
           className={
             touch
               ? "rail-swipe relative flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 md:gap-6 md:px-8"

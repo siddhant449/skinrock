@@ -3,7 +3,7 @@
  *
  * Every photo plane is a "view": a DOM element whose box is the viewport and scissor
  * rectangle of one draw call (what drei's <View> did). The stage draws on GSAP's ticker,
- * after Lenis and ScrollTrigger have moved the page, and only while something changes:
+ * after the page has scrolled and ScrollTrigger has moved things, and only while something changes:
  * scrolling (plus a tail for scrubbed tweens to settle), resizes, pointer moves over
  * pointer-driven views, or a view that reports it is still animating.
  *
@@ -24,7 +24,7 @@ export type FrameInfo = {
   dt: number;
   /** the view element's box (CSS px) */
   rect: DOMRect;
-  /** damped Lenis velocity in [-1, 1] */
+  /** damped scroll velocity in [-1, 1] */
   velocity: number;
 };
 
@@ -129,6 +129,11 @@ export class Stage {
   private cssW = 0;
   private cssH = 0;
   private dpr = 1;
+  /** the canvas is fixed and fills the window: its box only changes when the window does, so it
+      is measured then, not on every frame (reading it after the frame's animation writes would
+      force the browser to lay the page out early, each frame) */
+  private sizeDirty = true;
+  private canvasBox: DOMRect | null = null;
   private disposers: (() => void)[] = [];
 
   private constructor(
@@ -145,14 +150,18 @@ export class Stage {
     if (this.attached) return;
     this.attached = true;
     const wake = () => this.wake(SCROLL_TAIL_MS);
+    const onResize = () => {
+      this.sizeDirty = true;
+      wake();
+    };
     const onPointer = () => {
       if (this.pointerViewsOnScreen) this.wake(POINTER_TAIL_MS);
     };
-    window.addEventListener("resize", wake);
+    window.addEventListener("resize", onResize);
     window.addEventListener("pointermove", onPointer, { passive: true });
     ScrollTrigger.addEventListener("refresh", wake);
     this.disposers = [
-      () => window.removeEventListener("resize", wake),
+      () => window.removeEventListener("resize", onResize),
       () => window.removeEventListener("pointermove", onPointer),
       () => ScrollTrigger.removeEventListener("refresh", wake),
     ];
@@ -185,9 +194,9 @@ export class Stage {
     return stage;
   }
 
-  /** Lenis scroll: feeds the velocity uniform and keeps frames coming. */
-  scrolled(lenisVelocity: number) {
-    this.rawVelocity = clamp(lenisVelocity / 40, -1, 1);
+  /** Page scroll (px moved this frame): feeds the velocity uniform and keeps frames coming. */
+  scrolled(velocity: number) {
+    this.rawVelocity = clamp(velocity / 40, -1, 1);
     this.wake(SCROLL_TAIL_MS);
   }
 
@@ -233,7 +242,11 @@ export class Stage {
     this.last = now;
     this.velocity = damp(this.velocity, this.rawVelocity, 6, dt);
     this.rawVelocity = damp(this.rawVelocity, 0, 4, dt);
-    this.resize();
+    if (this.sizeDirty || !this.canvasBox) {
+      this.resize();
+      this.canvasBox = this.canvas.getBoundingClientRect();
+      this.sizeDirty = false;
+    }
 
     gl.disable(gl.SCISSOR_TEST);
     gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
@@ -243,7 +256,7 @@ export class Stage {
     gl.enable(gl.SCISSOR_TEST);
 
     const time = (now - this.start) / 1000;
-    const canvasBox = this.canvas.getBoundingClientRect();
+    const canvasBox = this.canvasBox;
     let busy = false;
     let pointerViews = false;
     for (const v of this.views) {

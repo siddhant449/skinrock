@@ -76,9 +76,8 @@ export function Preloader() {
       new Promise((r) => setTimeout(r, (T.tileAt + T.tile + T.holdMax) * 1000)),
     ]);
 
+    // the mark and the labels have already risen in CSS from the first paint (globals.css)
     const tl = gsap.timeline({ paused: true });
-    tl.fromTo(q("[data-loader-mark]"), { yPercent: 105 }, { yPercent: 0, duration: T.mark, ease: "expo.out" }, 0);
-    tl.fromTo(q("[data-loader-meta]"), { autoAlpha: 0 }, { autoAlpha: 1, duration: T.mark, ease: "power2.out" }, 0.1);
     tl.fromTo(win, { clipPath: wide ? SHUT : SHUT_NARROW }, { clipPath: TILE, duration: T.tile, ease: "expo.out" }, T.tileAt);
     tl.fromTo(photo ?? {}, { scale: 1.35 }, { scale: 1.2, duration: T.tile, ease: "expo.out" }, T.tileAt);
     // hold on the tile until the photo is really there (capped by holdMax)

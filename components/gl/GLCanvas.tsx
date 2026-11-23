@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useLenis } from "lenis/react";
+import { onPageScroll } from "@/lib/pageScroll";
 import { Stage, publishStage } from "./stage";
 
 /** The one shared canvas. Loaded lazily; see GLStage. */
@@ -9,7 +9,8 @@ export default function GLCanvas() {
   const ref = useRef<HTMLCanvasElement>(null);
   const stage = useRef<Stage | null>(null);
 
-  useLenis((lenis) => stage.current?.scrolled(lenis.velocity));
+  // scroll speed feeds the shaders and keeps frames coming while the page moves
+  useEffect(() => onPageScroll(({ velocity }) => stage.current?.scrolled(velocity)), []);
 
   useEffect(() => {
     const canvas = ref.current;

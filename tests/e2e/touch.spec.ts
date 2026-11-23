@@ -121,7 +121,12 @@ for (const [name, device] of [["phone", PHONE], ["tablet", TABLET]] as const) {
     test("photos wipe in as they enter and drift inside their frame while scrolling", async ({ page }) => {
       await intro(page);
       const img = page.locator("#projects [data-float] img").first();
-      const state = () => img.evaluate((el) => ({ clip: getComputedStyle(el).clipPath, transform: getComputedStyle(el).transform }));
+      // where the photo sits inside its frame: it drifts as the page scrolls
+      const state = () =>
+        img.evaluate((el) => ({
+          clip: getComputedStyle(el).clipPath,
+          offset: Math.round((el.getBoundingClientRect().top - el.parentElement!.getBoundingClientRect().top) * 10) / 10,
+        }));
       const before = await state();
       expect(before.clip).toContain("polygon(100%"); // hidden behind a slanted edge until it is reached
       const top = await img.evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
@@ -130,7 +135,16 @@ for (const [name, device] of [["phone", PHONE], ["tablet", TABLET]] as const) {
       const shown = await state();
       expect(shown.clip).toMatch(/polygon\(0(px|%)? 0(px|%)?, 100% 0(px|%)?, 100% 100%, 0(px|%)? 100%\)|none/);
       await scrollToY(page, top - device.viewport.height * 0.2);
-      expect((await state()).transform).not.toBe(shown.transform); // in-frame parallax
+      expect((await state()).offset).not.toBe(shown.offset); // in-frame parallax
+    });
+
+    test("the photos' drift runs on the browser's own scroll timeline, not in script on every frame", async ({ page }) => {
+      await intro(page);
+      const r = await page.locator("#projects [data-float] img").first().evaluate((el) => ({
+        supported: CSS.supports("animation-timeline: view()"),
+        animation: getComputedStyle(el).animationName,
+      }));
+      if (r.supported) expect(r.animation).toContain("gl-drift");
     });
 
     test("projects become a swipe gallery with snapping cards, not a stack of photos", async ({ page }) => {
