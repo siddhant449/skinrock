@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { damp } from "@/lib/math";
 import { BEND, sheetBend, sheetRotation } from "@/lib/bend";
-import { TEXTURE_WIDTHS, textureUrl } from "@/lib/textureSize";
+import { bendTexture } from "@/lib/textureSize";
 import { onStage, type GLView } from "./stage";
 import { bendEdgeFragment, bendFragment, bendVertex } from "./materials/bend";
 
@@ -73,7 +73,7 @@ export default function BendSheetView({ src, imageRes, progress, onReady }: Prop
     let remove = () => {};
     const cancel = onStage(async (stage) => {
       // the close-up is smaller than the sheet is drawn, so it comes at full size (re-encoded)
-      const tex = await stage.texture(textureUrl(src, TEXTURE_WIDTHS.find((w) => w >= iw) ?? 2048));
+      const tex = await stage.texture(bendTexture(src, iw));
       if (dead) return;
       const gl = stage.gl;
       const prog = stage.program(bendVertex, bendFragment);

@@ -29,7 +29,7 @@ let webglCache: boolean | null = null;
  * WebGL is a desktop and tablet enhancement: screens 768px+ with a fine pointer.
  * Phones get the DOM version (same motion, no 900 KB scene) to protect battery and frame rate.
  */
-function detectWebGL(): boolean {
+export function detectWebGL(): boolean {
   if (webglCache !== null) return webglCache;
   if (!window.matchMedia("(min-width: 768px) and (pointer: fine)").matches) {
     webglCache = false;

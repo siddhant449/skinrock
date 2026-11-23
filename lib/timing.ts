@@ -9,8 +9,9 @@ export const PRELOADER_TIMING = {
   expand: 0.85,
   /** the loader fades off the page */
   fade: 0.35,
-  /** longest we hold on the tile waiting for fonts and the hero photo */
-  holdMax: 1.2,
+  /** longest we hold on the tile waiting for fonts and the first screens' photos; the whole
+      intro stays within 3.5s even on a slow connection, and photos still arriving keep loading */
+  holdMax: 1.45,
 };
 
 /** Length of the intro when nothing has to wait. */

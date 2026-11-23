@@ -14,6 +14,7 @@
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { clamp, damp } from "@/lib/math";
+import { IMG_ACCEPT } from "@/lib/preload";
 
 export type FrameInfo = {
   gl: WebGL2RenderingContext;
@@ -70,7 +71,6 @@ layout(location = 0) out highp vec4 pc_fragColor;
 #define texture2D texture
 `;
 
-const IMG_ACCEPT = "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8";
 
 /**
  * createImageBitmap with options decodes on a worker thread. Same guard as three's GLTFLoader:

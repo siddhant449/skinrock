@@ -13,6 +13,14 @@ import { useMotionPrefs } from "@/components/providers/MotionPrefs";
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 /** The signature chapter: the lamp behind the stone turns on as you scroll. */
+/** the lamp without WebGL: opacity only, so the photo is never re-filtered while scrolling */
+function lightUp(lamp: HTMLElement | undefined, value: number) {
+  const veil = lamp?.querySelector<HTMLElement>(".backlight-veil");
+  const glow = lamp?.querySelector<HTMLElement>(".backlight-fallback");
+  if (veil) veil.style.opacity = (0.72 * (1 - value)).toFixed(3);
+  if (glow) glow.style.opacity = value.toFixed(3);
+}
+
 export function Light() {
   const root = useRef<HTMLElement>(null);
   const intensity = useRef({ value: 0 });
@@ -35,6 +43,7 @@ export function Light() {
                 start: "top top",
                 end: () => `+=${window.innerHeight}`,
                 pin: true,
+                anticipatePin: 1,
                 scrub: 1,
               }
             : // phones: no pin; the chapter is taller than the screen
@@ -45,8 +54,8 @@ export function Light() {
                 scrub: 1,
               },
         });
-        // the shader reads intensity directly; without WebGL (touch) the photo's glow reads it
-        // through --glow, so the lamp switches on with scroll on every device
+        // the shader reads intensity directly; without WebGL (touch) the veil over the photo lifts
+        // and the glow rises with it, so the lamp switches on with scroll on every device
         const lamp = q<HTMLElement>("[data-backlight]")[0];
         tl.fromTo(
           intensity.current,
@@ -55,7 +64,7 @@ export function Light() {
             value: 1,
             ease: "power2.in",
             duration: 1,
-            onUpdate: () => lamp?.style.setProperty("--glow", intensity.current.value.toFixed(3)),
+            onUpdate: () => lightUp(lamp, intensity.current.value),
           },
           0,
         );
@@ -89,7 +98,7 @@ export function Light() {
             value: 1,
             ease: "power2.in",
             duration: 1,
-            onUpdate: () => lamp.style.setProperty("--glow", intensity.current.value.toFixed(3)),
+            onUpdate: () => lightUp(lamp, intensity.current.value),
           },
           0,
         );
@@ -113,7 +122,6 @@ export function Light() {
     <section
       ref={root}
       id="light"
-      data-recede=""
       className="relative min-h-svh overflow-hidden bg-ink"
     >
       <div className="grid min-h-svh grid-cols-1 md:grid-cols-2">

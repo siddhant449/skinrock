@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* short phones: Safari's bars can leave as little as about 550px; pinned chapters tighten up */
+@custom-variant short (@media (max-width: 767px) and (max-height: 640px));
+
 /* Graubünden Night: see docs/superpowers/specs/2026-11-19-skinrock-home-design.md */
 @theme {
   --color-ink: #0d1520;
@@ -91,7 +94,13 @@ html.js [data-reveal]:not([data-revealed]) {
   }
 }
 
-/* Film grain */
+/* Film grain (desktop): on touch devices a moving, blended layer over the whole page would be
+   composited again on every frame of every scroll, so phones and tablets go without */
+@media (hover: none), (pointer: coarse) {
+  .grain {
+    display: none;
+  }
+}
 .grain {
   opacity: 0.07;
   mix-blend-mode: overlay;
@@ -198,10 +207,12 @@ html.js:not(.sr-seen) .preloader {
 .backlight-fallback {
   background: radial-gradient(60% 45% at 50% 55%, rgba(244, 233, 210, 0.42), transparent 70%);
   mix-blend-mode: screen;
-  opacity: var(--glow, 1);
 }
-[data-backlight] > img {
-  filter: brightness(calc(0.25 + 0.75 * var(--glow, 1))) saturate(calc(0.6 + 0.4 * var(--glow, 1)));
+/* the unlit stone: a dark veil over the photo that lifts as the lamp switches on (its opacity
+   is written directly, so the photo itself is never re-filtered while scrolling) */
+.backlight-veil {
+  background: rgb(13 21 32);
+  opacity: 0;
 }
 
 .proof-cell {
@@ -509,6 +520,27 @@ html:not(.js) .nav-rule {
 .studio-beam-right::before {
   clip-path: polygon(70% 0%, 100% 0%, 38% 100%, 0% 100%);
 }
+/* touch: no live blur or blend (both are recomposited while the page moves); each beam is a
+   soft band, faded by its own gradients and leaned into place */
+@media (hover: none), (pointer: coarse) {
+  .studio-beam {
+    filter: none;
+    mix-blend-mode: normal;
+  }
+  .studio-beam::before {
+    clip-path: none;
+    inset: 0 22%;
+    background: linear-gradient(90deg, transparent 0%, rgb(244 233 210 / calc(0.11 * var(--studio))) 50%, transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, rgb(0 0 0 / 0.45) 50%, transparent 88%);
+    mask-image: linear-gradient(180deg, #000 0%, rgb(0 0 0 / 0.45) 50%, transparent 88%);
+  }
+  .studio-beam-left::before {
+    transform: skewX(24deg);
+  }
+  .studio-beam-right::before {
+    transform: skewX(-24deg);
+  }
+}
 .studio-floor {
   height: 32%;
   perspective: 520px;
@@ -659,6 +691,19 @@ html:not(.js) .nav-rule {
     right: 15%;
   }
 }
+/* phones: the sheet never grows taller than the room the copy leaves it (the stage reports
+   its own size), so on short screens it shrinks instead of sliding over the words */
+@media (max-width: 767px) {
+  [data-flex-stage] {
+    container-type: size;
+  }
+  .bend-dom {
+    left: 50%;
+    right: auto;
+    width: min(86cqw, 200cqh);
+    translate: -50% -50%;
+  }
+}
 /* tall tablets have room below the copy: the sheet can use the whole stage width */
 @media (min-width: 768px) and (orientation: portrait) {
   .bend-dom {
@@ -677,12 +722,17 @@ html:not(.js) .nav-rule {
   }
   .hero-sheen {
     display: block;
-    background: linear-gradient(115deg, transparent 35%, rgb(244 233 210 / 0.16) 50%, transparent 65%) no-repeat;
-    background-size: 260% 100%;
-    background-position: 130% 0;
-    mix-blend-mode: screen;
+    overflow: hidden;
   }
-  html[data-loaded] .hero-sheen {
+  /* the band slides across by transform, so the photo under it is never repainted */
+  .hero-sheen::before {
+    content: "";
+    position: absolute;
+    inset: 0 -60%;
+    background: linear-gradient(115deg, transparent 38%, rgb(244 233 210 / 0.12) 50%, transparent 62%);
+    transform: translateX(-70%);
+  }
+  html[data-loaded] .hero-sheen::before {
     animation: hero-sheen 3.4s cubic-bezier(0.45, 0, 0.2, 1) 0.5s both;
   }
 }
@@ -691,8 +741,8 @@ html:not(.js) .nav-rule {
   to { transform: scale(1.14) translate3d(-3%, -2%, 0); }
 }
 @keyframes hero-sheen {
-  from { background-position: 130% 0; }
-  to { background-position: -30% 0; }
+  from { transform: translateX(-70%); }
+  to { transform: translateX(70%); }
 }
 
 /* ---------- The curling sheet on touch (components/gl/CssBendSheet.tsx) ----------
@@ -759,35 +809,19 @@ html:not(.js) .nav-rule {
 
 /* ---------- Why on phones: the stepper's key list ---------- */
 
-/* ---------- Phone hero poster (Hero.tsx): the name splits around the stone ----------
-   set from first paint so nothing jumps: the halves of the name wait below their own edge
-   until the intro hands over, and the eyebrow and paragraph wait for the scroll. If scripts
-   never run, everything shows after a few seconds. */
-.hero-word {
-  overflow: hidden;
-}
-.hero-word text {
-  font: 500 100px var(--font-sans);
-  letter-spacing: -0.045em;
-  fill: var(--color-stone);
-}
+/* ---------- Phone hero (Hero.tsx): headline at the foot, paragraph on scroll ----------
+   set from first paint so nothing jumps: the headline waits until the hero has placed it at
+   the foot, and the label and paragraph wait for the scroll. If scripts never run, everything
+   shows after a few seconds. */
 @media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
-  html.js #hero:not([data-hero-ready]) [data-hero-word] text {
-    transform: translateY(110%);
-    animation: hero-word-fallback 0.6s 3.5s forwards;
-  }
-  html.js [data-hero-shade] {
-    opacity: 0;
-  }
+  html.js #hero:not([data-hero-ready]) [data-hero-title],
   html.js #hero:not([data-hero-ready]) [data-hero-lede],
   html.js #hero:not([data-hero-ready]) [data-hero-eyebrow] {
     opacity: 0;
     animation: reveal-fallback 0.6s 3.5s forwards;
   }
-}
-@keyframes hero-word-fallback {
-  to {
-    transform: none;
+  html.js [data-hero-shade] {
+    opacity: 0;
   }
 }
 
@@ -892,28 +926,32 @@ html:not(.js) .nav-rule {
 }
 
 /* ---------- Phone chapter handovers (components/ui/SheetSeams.tsx) ----------
-   a cream chapter rises as an arched sheet over the dark one before it; the arch flattens
-   as it lands. Set from first paint; the chapter underneath dims through --recede. */
+   a cream chapter rises as an arched sheet over the dark one before it; the arch flattens as
+   it lands. The arch is a cap on the sheet's top edge, squashed by transform; the chapter
+   underneath dims under a veil that only fades. Nothing is repainted while scrolling. */
 @media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
   html.js [data-sheet-over] {
     position: relative;
     z-index: 30;
-    margin-top: -10vh;
-    border-top-left-radius: 50% 10vh;
-    border-top-right-radius: 50% 10vh;
   }
-  html.js [data-recede] {
-    translate: 0 calc(var(--recede, 0) * 5vh);
-  }
-  html.js [data-recede]::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 25;
-    background: rgb(8 12 18);
-    opacity: calc(var(--recede, 0) * 0.55);
-    pointer-events: none;
-  }
+}
+[data-sheet-cap] {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 100%;
+  height: 10vh;
+  background: inherit;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  transform-origin: 50% 100%;
+  pointer-events: none;
+}
+[data-sheet-veil] {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  background: rgb(8 12 18);
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* ---------- Samples: the sample box (components/sections/Cta.tsx) ---------- */

@@ -10,6 +10,8 @@ import { isLoaded, onLoaded } from "@/lib/loaded";
 import { useGLLive } from "./useGLActive";
 import { useMotionPrefs } from "@/components/providers/MotionPrefs";
 import { useNear } from "./useNear";
+import { warm } from "@/lib/preload";
+import { glImageTexture } from "@/lib/textureSize";
 
 const GLImageView = dynamic(() => import("./GLImageView"), { ssr: false });
 
@@ -50,6 +52,13 @@ export function GLImage({
   const [ready, setReady] = useState(false);
   const reveal = useRef({ value: revealOn === "none" ? 1 : 0 });
   const { touch, reduced } = useMotionPrefs();
+
+  // the scene draws this photo: fetch its texture file now, so it is in before it is needed
+  // (the texture itself is still decoded only when the photo comes near)
+  useEffect(() => {
+    if (!live || !wrap.current) return;
+    warm(glImageTexture(image.src, wrap.current.getBoundingClientRect(), image.width, image.height, parallax));
+  }, [live, image, parallax]);
 
   // touch has no WebGL: the photo itself sweeps into view once as it enters, then drifts
   // gently inside its frame while the page scrolls (the shader's reveal and parallax, in DOM)

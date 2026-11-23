@@ -29,7 +29,7 @@ function LenisGsapBridge() {
 }
 
 export function SmoothScroll({ children }: { children: ReactNode }) {
-  const { reduced, touch } = useMotionPrefs();
+  const { reduced } = useMotionPrefs();
 
   useEffect(() => {
     const refresh = () => ScrollTrigger.refresh();
@@ -45,11 +45,10 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
         autoRaf: false,
         lerp: reduced ? 1 : 0.09,
         smoothWheel: !reduced,
-        // touch: Lenis carries the finger's scroll with its own easing and inertia, the same
-        // glide as desktop, and every scroll-linked animation stays in step with it
-        syncTouch: touch && !reduced,
-        syncTouchLerp: 0.085,
-        touchInertiaExponent: 1.7,
+        // touch scrolls natively: the phone's own scrolling runs on the graphics thread with
+        // its own momentum, so it stays smooth even while the page animates, and nested
+        // scrollers (the project gallery) keep their swipes; desktop keeps the smoothed wheel
+        syncTouch: false,
         anchors: true,
       }}
     >

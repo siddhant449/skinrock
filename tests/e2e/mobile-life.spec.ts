@@ -16,48 +16,54 @@ const spacerTop = (page: Page, id: string) =>
     return host.getBoundingClientRect().top + window.scrollY;
   });
 
-test("hero: a full-bleed stone poster, Skin above and rock below, that parts as you scroll while the copy arrives", async ({ page }) => {
-  await intro(page);
-  await page.waitForTimeout(1800);
-  const state = () =>
-    page.locator("#hero").evaluate((hero) => {
-      const box = (el: Element) => el.getBoundingClientRect().toJSON() as DOMRect;
-      const win = hero.querySelector("[data-hero-window]")!;
-      return {
-        clip: getComputedStyle(win).clipPath,
-        photo: box(win),
-        skin: box(hero.querySelector('[data-hero-word="skin"]')!),
-        rock: box(hero.querySelector('[data-hero-word="rock"]')!),
-        title: box(hero.querySelector("h1")!),
-        lede: Number(getComputedStyle(hero.querySelector("[data-hero-lede]")!).opacity),
-        pinned: !!hero.parentElement?.classList.contains("pin-spacer"),
-        w: innerWidth,
-        h: innerHeight,
-      };
-    });
-  const start = await state();
-  // full bleed from the first frame: no framed card
-  expect(start.clip === "none" || /^inset\(0(px|%)?\)/.test(start.clip)).toBe(true);
-  expect(start.photo.width).toBeGreaterThanOrEqual(start.w - 1);
-  expect(start.photo.height).toBeGreaterThanOrEqual(start.h - 1);
-  // the name runs edge to edge, Skin at the top and rock at the bottom
-  expect(start.skin.width).toBeGreaterThan(start.w * 0.85);
-  expect(start.rock.width).toBeGreaterThan(start.w * 0.85);
-  expect(start.skin.bottom).toBeLessThan(start.h * 0.35);
-  expect(start.rock.top).toBeGreaterThan(start.h * 0.65);
-  // the headline sits between them, clear of both
-  expect(start.title.top).toBeGreaterThan(start.skin.bottom);
-  expect(start.title.bottom).toBeLessThan(start.rock.top);
-  expect(start.lede).toBeLessThan(0.1);
-  expect(start.pinned).toBe(true);
-  await scrollToY(page, 844 * 0.85);
-  const open = await state();
-  // the words part to let the copy through
-  expect(open.skin.top).toBeLessThan(start.skin.top - 60);
-  expect(open.rock.top).toBeGreaterThan(start.rock.top + 60);
-  expect(open.lede).toBeGreaterThan(0.9);
-  await expect(page.locator("#hero [data-hero-sheen]")).toHaveCount(1);
-});
+// real phones show less than the full screen: Safari's bars leave about 550 to 660px
+for (const [w, h] of [
+  [390, 844],
+  [390, 664],
+  [375, 553],
+  [360, 640],
+  [430, 740],
+] as const) {
+  test(`hero at ${w}x${h}: a full-bleed stone photo, the headline at its foot, the paragraph arriving as it lifts`, async ({ page }) => {
+    await page.setViewportSize({ width: w, height: h });
+    await intro(page);
+    await page.waitForTimeout(1600);
+    const state = () =>
+      page.locator("#hero").evaluate((hero) => {
+        const box = (el: Element) => el.getBoundingClientRect().toJSON() as DOMRect;
+        return {
+          photo: box(hero.querySelector("[data-hero-window]")!),
+          title: box(hero.querySelector("[data-hero-title]")!),
+          lede: box(hero.querySelector("[data-hero-lede]")!),
+          eyebrow: box(hero.querySelector("[data-hero-eyebrow]")!),
+          ledeShown: Number(getComputedStyle(hero.querySelector("[data-hero-lede]")!).opacity),
+          navBottom: document.querySelector("header")!.getBoundingClientRect().bottom,
+          words: hero.querySelectorAll("[data-hero-word]").length,
+          pinned: !!hero.parentElement?.classList.contains("pin-spacer"),
+          vw: innerWidth,
+          vh: innerHeight,
+        };
+      });
+    const rest = await state();
+    expect(rest.words).toBe(0); // no split name over the photo
+    expect(rest.photo.width).toBeGreaterThanOrEqual(rest.vw - 1);
+    expect(rest.photo.height).toBeGreaterThanOrEqual(rest.vh - 1);
+    // the headline rests at the foot, wholly on screen and clear of the menu bar
+    expect(rest.title.bottom).toBeLessThanOrEqual(rest.vh);
+    expect(rest.title.bottom).toBeGreaterThan(rest.vh * 0.75);
+    expect(rest.title.top).toBeGreaterThan(rest.navBottom);
+    expect(rest.ledeShown).toBeLessThan(0.1);
+    expect(rest.pinned).toBe(true);
+    await scrollToY(page, h * 0.85);
+    const open = await state();
+    expect(open.ledeShown).toBeGreaterThan(0.9);
+    // headline, then the label, then the paragraph: nothing overlaps and all of it is on screen
+    expect(open.eyebrow.top).toBeGreaterThanOrEqual(open.title.bottom - 1);
+    expect(open.lede.top).toBeGreaterThanOrEqual(open.eyebrow.bottom - 1);
+    expect(open.lede.bottom).toBeLessThanOrEqual(open.vh);
+    expect(open.title.top).toBeGreaterThan(Math.max(0, open.navBottom) - 1);
+  });
+}
 
 test("manifesto pins on phones; each word melts into the next as you pass it, and it never rests half melted", async ({ page }) => {
   test.setTimeout(90_000);
@@ -123,6 +129,33 @@ test("flex pins on phones and the stone sheet really curls as you scroll", async
   expect(hit).toBe(false);
 });
 
+for (const [w, h] of [
+  [375, 553],
+  [360, 640],
+  [390, 664],
+] as const) {
+  test(`flex at ${w}x${h}: the stone sheet keeps clear of the copy and the figures, and nothing is cut off`, async ({ page }) => {
+    await page.setViewportSize({ width: w, height: h });
+    await intro(page);
+    const top = await spacerTop(page, "flex");
+    for (const f of [0.05, 0.5, 1.0, 1.5]) {
+      await scrollToY(page, top + h * f);
+      const r = await page.locator("#flex").evaluate((el) => {
+        const sheet = el.querySelector(".bend-dom")!.getBoundingClientRect();
+        const copy = [el.querySelector("p")!, ...el.querySelectorAll("[data-figure]")]
+          .filter((n) => Number(getComputedStyle(n).opacity) > 0.5)
+          .map((n) => n.getBoundingClientRect());
+        const overlap = (a: DOMRect, b: DOMRect) =>
+          Math.min(a.right, b.right) - Math.max(a.left, b.left) > 2 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 2;
+        return { hits: copy.filter((b) => overlap(sheet, b)).length, sheetH: sheet.height, bottom: Math.max(...copy.map((b) => b.bottom)), vh: innerHeight };
+      });
+      expect(r.hits, `sheet over the copy ${f} screens in`).toBe(0);
+      expect(r.sheetH, `a real sheet, not a sliver, ${f} screens in`).toBeGreaterThan(80);
+      expect(r.bottom, `nothing cut off ${f} screens in`).toBeLessThanOrEqual(r.vh);
+    }
+  });
+}
+
 test("why choose us becomes a pinned stepper on phones: one reason at a time, nothing at the foot for the next chapter to cover", async ({ page }) => {
   await intro(page);
   expect(await page.locator("#why").evaluate((el) => el.parentElement!.classList.contains("pin-spacer"))).toBe(true);
@@ -182,18 +215,42 @@ test("cream chapters rise as an arched sheet that flattens as it lands, over a r
   await intro(page);
   for (const [b, a] of [["collection", "light"], ["proof", "why"]] as const) {
     const top = await page.locator(`#${b}`).evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
-    const radius = () => page.locator(`#${b}`).evaluate((el) => parseFloat(getComputedStyle(el).borderTopLeftRadius.split(" ").pop()!));
-    const recede = () => page.locator(`#${a}`).evaluate((el) => Number(getComputedStyle(el, "::after").opacity));
+    // the arch is a cream cap riding on the sheet's top edge; the chapter underneath dims under a veil
+    const arch = () => page.locator(`#${b} [data-sheet-cap]`).evaluate((el) => el.getBoundingClientRect().height);
+    const recede = () => page.locator(`#${a} [data-sheet-veil]`).evaluate((el) => Number(getComputedStyle(el).opacity));
     await scrollToY(page, top - 844 * 0.95);
-    const arched = await radius();
+    const arched = await arch();
     await scrollToY(page, top - 844 * 0.12);
     const almost = await recede();
     await scrollToY(page, top + 2);
-    const landed = await radius();
+    const landed = await arch();
     expect(arched, b).toBeGreaterThan(40); // a real arch while it rises
     expect(landed, b).toBeLessThan(4); // flat once it has landed
     expect(almost, a).toBeGreaterThan(0.25); // the chapter underneath steps back
   }
+});
+
+test("scrolling never rewrites style variables on whole chapters (each change would restyle the chapter)", async ({ page }) => {
+  await intro(page);
+  await page.evaluate(() => {
+    const w = window as unknown as { varWrites: string[] };
+    w.varWrites = [];
+    const mo = new MutationObserver((list) => {
+      for (const m of list) {
+        const el = m.target as HTMLElement;
+        if (el.style.cssText.includes("--")) w.varWrites.push(`${el.id}: ${el.style.cssText.slice(0, 60)}`);
+      }
+    });
+    document.querySelectorAll("main > section, main > .pin-spacer > section, footer").forEach((s) => mo.observe(s, { attributes: true, attributeFilter: ["style"] }));
+  });
+  const max = await page.evaluate(() => document.documentElement.scrollHeight);
+  for (let y = 0; y < max; y += 420) await scrollToY(page, y);
+  expect(await page.evaluate(() => (window as unknown as { varWrites: string[] }).varWrites)).toEqual([]);
+});
+
+test("touch devices skip the film grain: a moving, blended layer over the whole page costs every frame", async ({ page }) => {
+  await intro(page);
+  expect(await page.locator(".grain").evaluate((el) => getComputedStyle(el).display)).toBe("none");
 });
 
 test("lab results rise in row by row as they arrive, and their rules are always whole (no stubs)", async ({ page }) => {
@@ -223,13 +280,23 @@ test("lab results rise in row by row as they arrive, and their rules are always 
 
 test("light on phones: the backlit stone is framed below the site clutter, and its uses sit on one line", async ({ page }) => {
   await intro(page);
-  const r = await page.locator("#light").evaluate((el) => ({
-    pos: getComputedStyle(el.querySelector("[data-backlight] img")!).objectPosition,
-    tops: [...el.querySelectorAll("[data-use]")].map((u) => Math.round(u.getBoundingClientRect().top)),
-  }));
+  const r = await page.locator("#light").evaluate((el) => {
+    // where the photo is really drawn: object-fit cover inside the (scaled) image box
+    const frame = el.querySelector("[data-backlight]")!.getBoundingClientRect();
+    const img = el.querySelector<HTMLImageElement>("[data-backlight] img")!;
+    const box = img.getBoundingClientRect();
+    const s = Math.max(box.width / img.naturalWidth, box.height / img.naturalHeight);
+    const drawnH = img.naturalHeight * s;
+    const posY = parseFloat(getComputedStyle(img).objectPosition.split(" ")[1]) / 100;
+    const pictureTop = box.top + (box.height - drawnH) * posY;
+    return {
+      hiddenTop: (frame.top - pictureTop) / drawnH,
+      tops: [...el.querySelectorAll("[data-use]")].map((u) => Math.round(u.getBoundingClientRect().top)),
+    };
+  });
   expect(new Set(r.tops).size).toBe(1);
-  // the top of the shot has a plastic sheet and a track light: frame the lower part of the column
-  expect(parseFloat(r.pos.split(" ")[1])).toBeGreaterThanOrEqual(70);
+  // the top fifth of the shot has a plastic sheet and a track light: it stays outside the frame
+  expect(r.hiddenTop).toBeGreaterThanOrEqual(0.2);
 });
 
 test.describe("sharp photos", () => {

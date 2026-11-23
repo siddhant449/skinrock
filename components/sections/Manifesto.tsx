@@ -93,6 +93,7 @@ export function Manifesto() {
             // phones scroll in shorter screens: a tighter run keeps the four words from dragging
             end: () => `+=${window.innerHeight * (words.length - 1.2)}`,
             pin: true,
+            anticipatePin: 1,
             onUpdate: (self) => show(takeover.filter((t) => self.progress >= t).length),
           });
           return () => {
@@ -109,6 +110,7 @@ export function Manifesto() {
             start: "top top",
             end: () => `+=${window.innerHeight * (words.length - 0.5)}`,
             pin: true,
+            anticipatePin: 1,
             scrub: 0.8,
           },
           onUpdate() {

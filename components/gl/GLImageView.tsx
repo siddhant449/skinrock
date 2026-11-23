@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { textureUrl, textureWidth } from "@/lib/textureSize";
+import { glImageTexture } from "@/lib/textureSize";
 import { onStage, type GLView } from "./stage";
 import { GRADE_INK, stoneFragment, stoneVertex } from "./materials/stone";
 
@@ -30,18 +30,8 @@ export default function GLImageView({ src, imageWidth, imageHeight, grade, paral
     let view: GLView | null = null;
     let remove = () => {};
     const cancel = onStage(async (stage) => {
-      // fetched at the size it is drawn (parallax zooms in by 1 + 2 * parallax)
-      const r = el.getBoundingClientRect();
-      const w = textureWidth({
-        boxWidth: r.width || imageWidth,
-        boxHeight: r.height || imageHeight,
-        imageWidth,
-        imageHeight,
-        devicePixelRatio: window.devicePixelRatio,
-        zoom: 1 + parallax * 2,
-      });
-      // raw pass-through: the shader works on the photo's stored values
-      const tex = await stage.texture(textureUrl(src, w), { mipmaps: false });
+      // fetched at the size it is drawn; raw pass-through: the shader works on the stored values
+      const tex = await stage.texture(glImageTexture(src, el.getBoundingClientRect(), imageWidth, imageHeight, parallax), { mipmaps: false });
       if (dead) return;
       const gl = stage.gl;
       const prog = stage.program(stoneVertex, stoneFragment);

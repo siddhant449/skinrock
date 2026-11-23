@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import type { SiteImage } from "@/content/site";
@@ -8,6 +8,8 @@ import { useGLLive } from "./useGLActive";
 import { CssBendSheet } from "./CssBendSheet";
 import { useMotionPrefs } from "@/components/providers/MotionPrefs";
 import imageLoader from "@/lib/imageLoader";
+import { warm } from "@/lib/preload";
+import { bendTexture } from "@/lib/textureSize";
 
 const BendSheetView = dynamic(() => import("./BendSheetView"), { ssr: false });
 
@@ -25,6 +27,10 @@ export function BendSheet({ image, progress, className = "relative" }: Props) {
   const [ready, setReady] = useState(false);
   const drawn = live && ready;
   const { touch, reduced } = useMotionPrefs();
+  // the scene draws this sheet: fetch its texture file now, so it is in before it is needed
+  useEffect(() => {
+    if (live) warm(bendTexture(image.src, image.width));
+  }, [live, image]);
   return (
     <div ref={wrap} data-bend="" data-gl={drawn ? "ready" : undefined} className={className}>
       {/* the photo stays until WebGL has drawn its first frame, so the chapter never goes blank */}

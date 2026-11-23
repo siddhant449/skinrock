@@ -37,3 +37,40 @@ export function textureWidth({ boxWidth, boxHeight, imageWidth, imageHeight, dev
 export function textureUrl(src: string, width: number): string {
   return imageLoader({ src, width });
 }
+
+type Box = { width: number; height: number };
+
+/** the texture a GLImage draws for a box this size (its parallax zooms in by 1 + 2 * parallax) */
+export function glImageTexture(src: string, box: Box, imageWidth: number, imageHeight: number, parallax: number): string {
+  return textureUrl(
+    src,
+    textureWidth({
+      boxWidth: box.width || imageWidth,
+      boxHeight: box.height || imageHeight,
+      imageWidth,
+      imageHeight,
+      devicePixelRatio: window.devicePixelRatio,
+      zoom: 1 + parallax * 2,
+    }),
+  );
+}
+
+/** the backlit stone's texture: the shader frames the photo 1.22x tighter */
+export function backlightTexture(src: string, box: Box, imageWidth: number, imageHeight: number): string {
+  return textureUrl(
+    src,
+    textureWidth({
+      boxWidth: box.width || imageWidth,
+      boxHeight: box.height || imageHeight,
+      imageWidth,
+      imageHeight,
+      devicePixelRatio: window.devicePixelRatio,
+      zoom: 1.22,
+    }),
+  );
+}
+
+/** the bending sheet's texture: the close-up is smaller than the sheet is drawn, so full size */
+export function bendTexture(src: string, imageWidth: number): string {
+  return textureUrl(src, TEXTURE_WIDTHS.find((w) => w >= imageWidth) ?? 2048);
+}

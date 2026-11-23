@@ -4,15 +4,17 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { markLoaded } from "@/lib/loaded";
+import { loadImagesEarly } from "@/lib/preload";
+import { detectWebGL } from "@/components/providers/MotionPrefs";
 import { PRELOADER_TIMING as T } from "@/lib/timing";
 import { site } from "@/content/site";
 import { Logo } from "@/components/ui/Logo";
-import { HERO_PHOTO_SCALE } from "@/lib/heroWindow";
+import { HERO_PHOTO_SCALE, HERO_SIZES } from "@/lib/heroWindow";
 
 const SEEN_KEY = "sr-loaded";
 /** the small sample tile the window opens to first (clip-path inset, %): wider share on phones */
 const TILE_WIDE = "inset(38% 44% 38% 44%)";
-// phones: every shape carries "round" so it can tween into the hero's rounded window
+// phones: the tile has softly rounded corners, so every phone shape carries "round"
 const TILE_NARROW = "inset(38% 31% 38% 31% round 6px)";
 const SHUT_NARROW = "inset(50% 50% 50% 50% round 6px)";
 const SHUT = "inset(50% 50% 50% 50%)";
@@ -38,29 +40,39 @@ export function Preloader() {
     } catch {}
     // read the media query directly: the context reports "reduced" until hydration settles
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // photos the WebGL scene draws (desktop) fetch their own files; every other photo loads now.
+    // A beat's delay lets the touch layout settle first, so each image asks for its final size.
+    const glDrawn = !reduced && detectWebGL();
+    const loadPhotos = (nearPx: number) =>
+      new Promise<void>((resolve) => setTimeout(() => loadImagesEarly(nearPx, glDrawn).then(resolve), 60));
     if (reduced || seen || getComputedStyle(el).display === "none") {
       markLoaded();
       setDone(true);
+      // no intro to cover it: still get every photo in early, once the first screen is up
+      const later = () => void loadPhotos(0);
+      if (document.readyState === "complete") later();
+      else window.addEventListener("load", later, { once: true });
       return;
     }
 
     const wide = window.matchMedia("(min-width: 768px)").matches;
     const TILE = wide ? TILE_WIDE : TILE_NARROW;
-    // phones: the window opens to the hero's framed window (not full screen) and hands over
-    // into it, at the hero photo's resting scale, so nothing jumps when the loader fades
-    // phones open to the full screen too (the hero is a full-bleed poster); the narrow shapes
-    // carry a radius, so the open shape spells one out to tween cleanly
+    // phones open to the full screen too, at the hero photo's resting scale, so nothing jumps
+    // when the loader fades; the narrow shapes carry a radius, so the open shape spells one out
     const OPEN = wide ? "inset(0% 0% 0% 0%)" : "inset(0% 0% 0% 0% round 0px)";
     const OPEN_SCALE = wide ? 1 : HERO_PHOTO_SCALE;
     const q = gsap.utils.selector(el);
     const win = q<HTMLElement>("[data-loader-window]")[0];
     const photo = win?.querySelector("img");
-    // ready = fonts in and the hero photo decoded (it is the same file the hero shows), capped
+    // ready = fonts in, the hero photo decoded (the same file the hero shows) and the photos of
+    // the first screens in, while the rest keep loading behind the intro; capped, so a slow
+    // connection never stalls it
+    const firstScreens = loadPhotos(window.innerHeight * 2.5);
     const photoReady = photo
       ? photo.decode().catch(() => new Promise((r) => (photo.complete ? r(0) : photo.addEventListener("load", r, { once: true }))))
       : Promise.resolve();
     const ready = Promise.race([
-      Promise.all([document.fonts?.ready, photoReady]),
+      Promise.all([document.fonts?.ready, photoReady, firstScreens]),
       new Promise((r) => setTimeout(r, (T.tileAt + T.tile + T.holdMax) * 1000)),
     ]);
 
@@ -107,7 +119,7 @@ export function Preloader() {
           fill
           loading="eager"
           fetchPriority="high"
-          sizes="(min-width: 768px) 60vw, 100vw"
+          sizes={HERO_SIZES}
           className="object-cover"
         />
       </div>

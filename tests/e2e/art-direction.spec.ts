@@ -142,5 +142,13 @@ test("dark chapters share one studio (the user's reference): beams and a stone f
   );
   expect(animated).toBe(0);
   // the floor photo waits until it is near the viewport
-  expect(await page.locator("#flex [data-studio-floor] img").getAttribute("loading")).toBe("lazy");
+  // the floor never competes with the hero for the first paint: the page is served with it lazy
+  // (the intro then fetches it early, with every other photo, once the hero is under way)
+  const html = await (await page.request.get("/")).text();
+  expect(html).toMatch(/data-studio-floor[\s\S]{0,600}?loading="lazy"/);
+});
+
+test("desktop keeps the film grain over the page", async ({ page }) => {
+  await page.goto("/");
+  expect(await page.locator(".grain").evaluate((el) => getComputedStyle(el).display)).not.toBe("none");
 });

@@ -58,6 +58,7 @@ export function WhyUs() {
           start: "top top",
           end: () => `+=${window.innerHeight * STEP_VH * (cards.length - 1)}`,
           pin: true,
+          anticipatePin: 1,
           scrub: 0.6,
         },
       });
@@ -143,7 +144,6 @@ export function WhyUs() {
     <section
       ref={root}
       id="why"
-      data-recede=""
       // phones: the foot stays clear, because the cream chapter after this one rises over the
       // last tenth of the screen
       className={`relative bg-deep ${stepper ? "flex h-svh flex-col overflow-hidden px-5 pb-[calc(10vh+16px)] pt-20" : "px-5 py-24 md:px-8 md:py-[16vh]"}`}
@@ -177,7 +177,7 @@ export function WhyUs() {
             }
           >
             <div data-why-photo="" aria-hidden className={stepper ? "absolute inset-0 overflow-hidden" : "why-photo absolute inset-0"}>
-              <Image src={w.image.src} alt="" fill sizes="(min-width: 1024px) 50vw, (min-width: 768px) 100vw, 230vw" className="object-cover" />
+              <Image src={w.image.src} alt="" fill sizes="(min-width: 1024px) 50vw, (min-width: 768px) 100vw, 150vw" className="object-cover" />
               <span className="absolute inset-0 bg-gradient-to-b from-ink/30 to-ink/90" />
             </div>
             <p data-why-copy data-why-step-copy="" className="text-display relative text-[clamp(2.4rem,3.6vw,3.6rem)]">

@@ -71,6 +71,7 @@ export function FlexStory() {
             start: "top top",
             end: () => `+=${window.innerHeight * 1.6}`,
             pin: true,
+            anticipatePin: 1,
             scrub: 1,
           },
         });
@@ -100,17 +101,17 @@ export function FlexStory() {
       <StudioStage beams floor pool />
       {/* the stage (after Zirka): the sheet is the object, centred inside a fine measuring dial;
           title top left, body top right, one large figure centred beneath the sheet */}
-      <div className="relative z-20 flex flex-col gap-6 px-5 pt-20 md:absolute md:inset-x-8 md:top-[11vh] md:flex-row md:items-start md:justify-between md:gap-10 md:px-0 md:pt-0">
-        <div className="flex flex-col gap-5">
+      <div className="relative z-20 flex flex-col gap-6 px-5 pt-20 short:gap-3 short:pt-16 md:absolute md:inset-x-8 md:top-[11vh] md:flex-row md:items-start md:justify-between md:gap-10 md:px-0 md:pt-0">
+        <div className="flex flex-col gap-5 short:gap-3">
           <span className="text-label text-glacier">{flex.kicker}</span>
-          <SplitReveal as="h2" className="text-headline max-w-[11ch] text-[clamp(2.6rem,4vw,4.25rem)]">
+          <SplitReveal as="h2" className="text-headline max-w-[11ch] text-[clamp(2.6rem,4vw,4.25rem)] short:text-[2.1rem]">
             {flex.title}
           </SplitReveal>
         </div>
-        <p className="max-w-[34ch] text-[17px] leading-relaxed text-stone/90 md:mt-9 md:text-right md:text-lg">{flex.body}</p>
+        <p className="max-w-[34ch] text-[17px] leading-relaxed text-stone/90 short:text-[15px] short:leading-normal md:mt-9 md:text-right md:text-lg">{flex.body}</p>
       </div>
 
-      <div data-flex-stage="" className="relative mx-5 mt-4 min-h-0 flex-1 md:absolute md:inset-0 md:m-0 md:h-auto">
+      <div data-flex-stage="" className="relative mx-5 mt-4 min-h-0 flex-1 short:mt-2 md:absolute md:inset-0 md:m-0 md:h-auto">
         {/* the dial sits under the WebGL canvas (z-[5]) */}
         <svg
           aria-hidden
@@ -151,7 +152,7 @@ export function FlexStory() {
 
       <dl
         data-figures=""
-        className={`relative z-20 px-5 pb-10 pt-4 md:absolute md:inset-x-0 md:bottom-[6vh] md:p-0 ${
+        className={`relative z-20 px-5 pb-10 pt-4 short:pb-5 short:pt-1 md:absolute md:inset-x-0 md:bottom-[6vh] md:p-0 ${
           stacked ? "grid justify-items-center text-center" : "grid grid-cols-3 gap-4"
         }`}
       >
@@ -170,7 +171,7 @@ export function FlexStory() {
             <dt className={stacked ? "text-label text-mute" : "text-[14px] leading-snug text-mute"}>{s.label}</dt>
             <dd
               className={`tabular-nums ${
-                stacked ? "text-display text-[clamp(4rem,7vw,7.5rem)]" : "text-headline text-[clamp(1.75rem,3vw,3rem)]"
+                stacked ? "text-display text-[clamp(4rem,7vw,7.5rem)] short:text-[3rem]" : "text-headline text-[clamp(1.75rem,3vw,3rem)]"
               }`}
             >
               <span data-stat data-decimals={s.decimals}>

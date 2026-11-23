@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { damp } from "@/lib/math";
-import { textureUrl, textureWidth } from "@/lib/textureSize";
+import { backlightTexture } from "@/lib/textureSize";
 import { onStage, type GLView } from "./stage";
 import { backlightFragment, backlightVertex } from "./materials/backlight";
 
@@ -45,16 +45,7 @@ export default function BacklightView({ src, imageRes, intensity, onReady }: Pro
     let remove = () => {};
     const cancel = onStage(async (stage) => {
       // fetched at drawn size; the shader frames the photo 1.22x tighter
-      const r = el.getBoundingClientRect();
-      const w = textureWidth({
-        boxWidth: r.width || iw,
-        boxHeight: r.height || ih,
-        imageWidth: iw,
-        imageHeight: ih,
-        devicePixelRatio: window.devicePixelRatio,
-        zoom: 1.22,
-      });
-      const tex = await stage.texture(textureUrl(src, w));
+      const tex = await stage.texture(backlightTexture(src, el.getBoundingClientRect(), iw, ih));
       if (dead) return;
       const gl = stage.gl;
       const prog = stage.program(backlightVertex, backlightFragment);
