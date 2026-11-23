@@ -56,6 +56,6 @@ test("desktop: one turn of the wheel moves the page a measured step", async ({ p
   await page.mouse.wheel(0, 400);
   await page.waitForTimeout(2200);
   const travel = (await page.evaluate(() => window.scrollY)) - y0;
-  expect(travel).toBeGreaterThan(300);
-  expect(travel).toBeLessThan(370); // a little shorter than the raw 400px the wheel asks for
+  expect(travel).toBeGreaterThan(355); // just a touch shorter than the raw 400px the wheel asks for
+  expect(travel).toBeLessThan(392);
 });
