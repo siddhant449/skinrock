@@ -30,43 +30,46 @@ test("manifesto pins and swaps words while scrolling", async ({ page }) => {
   expect(Math.abs(rectTop)).toBeLessThan(4);
 });
 
-test("manifesto words melt into each other (Originkit text morph), crisp at rest", async ({ page }) => {
+test("manifesto words melt into each other (Originkit text morph) the moment you pass them, and never rest half melted", async ({ page }) => {
   test.setTimeout(120_000);
   await page.goto("/");
   await page.waitForTimeout(3500);
   const section = page.locator("#manifesto");
-  const top = await section.evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
+  const top = await section.evaluate((el) => {
+    const host = el.parentElement?.classList.contains("pin-spacer") ? el.parentElement : el;
+    return host.getBoundingClientRect().top + window.scrollY;
+  });
   const vh = 900;
-  const samples: { words: number; partial: number; filter: string; notes: number }[] = [];
-  for (let f = 0.05; f <= 3.4; f += 0.1) {
-    for (let k = 0; k < 4; k++) {
-      await page.evaluate((y) => window.scrollTo(0, y), top + vh * f);
-      await page.waitForTimeout(160);
-    }
-    await page.waitForTimeout(900);
-    samples.push(
-      await section.evaluate((el) => {
-        const ops = [...el.querySelectorAll<HTMLElement>("[data-word]")].map((w) => Number(getComputedStyle(w).opacity));
-        const notes = [...el.querySelectorAll<HTMLElement>("[data-note]")].map((n) => Number(getComputedStyle(n).opacity));
-        const box = el.querySelector<HTMLElement>("[data-morph]")!;
-        return {
-          words: ops.filter((o) => o > 0.02).length,
-          partial: ops.filter((o) => o > 0.08 && o < 0.92).length,
-          filter: getComputedStyle(box).filter,
-          notes: Math.max(...notes),
-        };
-      }),
-    );
+  const read = () =>
+    section.evaluate((el) => {
+      const ops = [...el.querySelectorAll<HTMLElement>("[data-word]")].map((w) => Number(getComputedStyle(w).opacity));
+      const notes = [...el.querySelectorAll<HTMLElement>("[data-note]")].map((n) => Number(getComputedStyle(n).opacity));
+      return {
+        partial: ops.filter((o) => o > 0.08 && o < 0.92).length,
+        full: ops.filter((o) => o >= 0.99).length,
+        filter: getComputedStyle(el.querySelector<HTMLElement>("[data-morph]")!).filter,
+        notes: Math.max(...notes),
+      };
+    });
+  await page.evaluate((y) => window.scrollTo(0, y), top + vh * 0.1);
+  await page.waitForTimeout(1200);
+  // passing the first word plays the melt straight away: catch it part way, fused through the
+  // threshold, with the small notes out of its way
+  await page.evaluate((y) => window.scrollTo(0, y), top + vh * 1.0);
+  let melt: Awaited<ReturnType<typeof read>> | undefined;
+  for (let k = 0; k < 16 && !melt; k++) {
+    await page.waitForTimeout(40);
+    const r = await read();
+    if (r.partial >= 2) melt = r;
   }
-  const melting = samples.filter((s) => s.partial >= 2);
-  // the words really overlap and fuse mid-switch
-  expect(melting.length).toBeGreaterThan(0);
-  for (const s of melting) {
-    expect(s.filter).toContain("url(");
-    expect(s.notes).toBeLessThan(0.05); // small text never goes through the threshold
+  expect(melt).toBeTruthy();
+  expect(melt!.filter).toContain("url(");
+  expect(melt!.notes).toBeLessThan(0.05);
+  // wherever the reader stops, one crisp word stands with no filter
+  for (let f = 0.3; f <= 3.2; f += 0.1) {
+    await page.evaluate((y) => window.scrollTo(0, y), top + vh * f);
+    await page.waitForTimeout(1100);
+    const r = await read();
+    expect({ partial: r.partial, full: r.full, filter: r.filter }, `stopped ${f.toFixed(1)} screens in`).toEqual({ partial: 0, full: 1, filter: "none" });
   }
-  // at rest: one crisp word, no filter
-  const resting = samples.filter((s) => s.words === 1);
-  expect(resting.length).toBeGreaterThan(5);
-  for (const s of resting) expect(s.filter).toBe("none");
 });

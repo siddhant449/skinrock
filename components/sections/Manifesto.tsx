@@ -9,14 +9,9 @@ import { useMotionPrefs } from "@/components/providers/MotionPrefs";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-/** Morph timing on the pinned timeline: switch i starts at LEAD + (i - 1) * STEP and lasts MORPH. */
-const LEAD = 0.4;
-const STEP = 1;
-const MORPH = 0.55;
-
 /**
  * One enormous word at a time while the section is pinned (after SANTAL). Each word melts into
- * the next (Originkit's Text Morph, driven by scroll): both words blur and cross over, and an
+ * the next (Originkit's Text Morph, its word chosen by the scroll): both words blur and cross over, and an
  * alpha threshold fuses them into one liquid shape. The threshold only runs during a switch,
  * so the words are crisp at rest; the notes are hidden while it runs.
  * Phones get it too (it is what makes the chapter move there). Without JS or with reduced
@@ -59,75 +54,48 @@ export function Manifesto() {
         gsap.set(items.slice(1), { autoAlpha: 0, filter: blur, scale: 0.8 });
         gsap.set(captions.slice(1), { autoAlpha: 0, y: 16 });
 
-        if (ctx.conditions?.phone) {
-          // phones: the scroll picks the word and each change plays the whole melt in time, so
-          // a reader who stops mid-scroll never looks at two words fused half way
-          let current = 0;
-          let playing: gsap.core.Timeline | undefined;
-          // a named context method: the morphs it starts later are still cleaned up on revert
-          const show = ctx.add("show", (next: number) => {
-            if (next === current) return;
-            const from = current;
-            const dir = next > from ? 1 : -1;
-            current = next;
-            playing?.progress(1).kill();
-            melt(true);
-            playing = gsap
-              .timeline({ onComplete: () => melt(false) })
-              .to(captions[from], { autoAlpha: 0, y: -12 * dir, duration: 0.18, ease: "power2.in" }, 0)
-              .to(items[from], { autoAlpha: 0, filter: blur, scale: dir > 0 ? 1.2 : 0.8, duration: 0.6, ease: "power1.in" }, 0.05)
-              .fromTo(
-                items[next],
-                { autoAlpha: 0, filter: blur, scale: dir > 0 ? 0.8 : 1.2 },
-                { autoAlpha: 1, filter: "blur(0px)", scale: 1, duration: 0.6, ease: "power1.out" },
-                0.05,
-              )
-              .fromTo(captions[next], { autoAlpha: 0, y: 16 * dir }, { autoAlpha: 1, y: 0, duration: 0.3, ease: "power2.out" }, 0.62);
-          }) as (next: number) => void;
-          // where each word takes over, as a share of the pinned run: the first word holds a
-          // little, the last stays a while before the page moves on
-          const takeover = words.slice(1).map((_, k) => 0.2 + k * 0.25);
-          ScrollTrigger.create({
-            trigger: root.current,
-            start: "top top",
-            // phones scroll in shorter screens: a tighter run keeps the four words from dragging
-            end: () => `+=${window.innerHeight * (words.length - 1.2)}`,
-            pin: true,
-            anticipatePin: 1,
-            onUpdate: (self) => show(takeover.filter((t) => self.progress >= t).length),
-          });
-          return () => {
-            playing?.kill();
-            cleanup();
-          };
-        }
+        // the scroll picks the word and each change plays the whole melt at once, in time: it
+        // answers the scroll straight away (a melt tied to the scroll trailed behind the wheel)
+        // and a reader who stops mid-scroll never looks at two words fused half way
+        let current = 0;
+        let playing: gsap.core.Timeline | undefined;
+        // a named context method: the morphs it starts later are still cleaned up on revert
+        const show = ctx.add("show", (next: number) => {
+          if (next === current) return;
+          const from = current;
+          const dir = next > from ? 1 : -1;
+          current = next;
+          playing?.progress(1).kill();
+          melt(true);
+          playing = gsap
+            .timeline({ onComplete: () => melt(false) })
+            .to(captions[from], { autoAlpha: 0, y: -12 * dir, duration: 0.18, ease: "power2.in" }, 0)
+            .to(items[from], { autoAlpha: 0, filter: blur, scale: dir > 0 ? 1.2 : 0.8, duration: 0.6, ease: "power1.in" }, 0.05)
+            .fromTo(
+              items[next],
+              { autoAlpha: 0, filter: blur, scale: dir > 0 ? 0.8 : 1.2 },
+              { autoAlpha: 1, filter: "blur(0px)", scale: 1, duration: 0.6, ease: "power1.out" },
+              0.05,
+            )
+            .fromTo(captions[next], { autoAlpha: 0, y: 16 * dir }, { autoAlpha: 1, y: 0, duration: 0.3, ease: "power2.out" }, 0.62);
+        }) as (next: number) => void;
+        // where each word takes over, as a share of the pinned run: the first word holds a
+        // little, the last stays a while before the page moves on
+        const takeover = words.slice(1).map((_, k) => 0.2 + k * 0.25);
+        ScrollTrigger.create({
+          trigger: root.current,
+          start: "top top",
+          // phones scroll in shorter screens: a tighter run keeps the four words from dragging
+          end: () => `+=${window.innerHeight * (words.length - (ctx.conditions?.phone ? 1.2 : 0.5))}`,
+          pin: true,
+          anticipatePin: 1,
+          onUpdate: (self) => show(takeover.filter((t) => self.progress >= t).length),
+        });
+        return () => {
+          playing?.kill();
+          cleanup();
+        };
 
-        const switches = words.slice(1).map((_, k) => LEAD + k * STEP);
-        const tl = gsap.timeline({
-          defaults: { ease: "none" },
-          scrollTrigger: {
-            trigger: root.current,
-            start: "top top",
-            end: () => `+=${window.innerHeight * (words.length - 0.5)}`,
-            pin: true,
-            anticipatePin: 1,
-            scrub: 0.8,
-          },
-          onUpdate() {
-            const t = this.time();
-            melt(switches.some((s) => t > s + 0.01 && t < s + MORPH - 0.01));
-          },
-        });
-        switches.forEach((s, k) => {
-          const i = k + 1;
-          // the note leaves before the words melt and the next one arrives after
-          tl.to(captions[i - 1], { autoAlpha: 0, y: -12, duration: 0.2, ease: "power2.in" }, s - 0.22);
-          tl.to(items[i - 1], { autoAlpha: 0, filter: blur, scale: 1.2, duration: MORPH, ease: "power1.in" }, s);
-          tl.to(items[i], { autoAlpha: 1, filter: "blur(0px)", scale: 1, duration: MORPH, ease: "power1.out" }, s);
-          tl.to(captions[i], { autoAlpha: 1, y: 0, duration: 0.3, ease: "power2.out" }, s + MORPH + 0.02);
-        });
-        tl.to({}, { duration: 0.5 });
-        return cleanup;
       });
       return () => mm.revert();
     },
