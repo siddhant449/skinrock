@@ -20,6 +20,18 @@ export function SwissProof() {
     () => {
       if (reduced) return;
       const q = gsap.utils.selector(root);
+      const mm = gsap.matchMedia();
+      // phones (after White Desert's ink): each result prints as it reaches the reading line,
+      // its hairline drawing beneath it; firing the whole list at once played most of it
+      // before the rows were even on screen
+      mm.add("(max-width: 767px)", () => {
+        q<HTMLElement>("[data-cell]").forEach((cell) => {
+          const st = { trigger: cell, start: "top 88%", end: "top 62%", scrub: true };
+          gsap.fromTo(cell.querySelectorAll("dt, dd"), { opacity: 0.2 }, { opacity: 1, ease: "none", stagger: 0.15, scrollTrigger: st });
+          gsap.fromTo(cell, { backgroundSize: "0% 1px" }, { backgroundSize: "100% 1px", ease: "none", scrollTrigger: st });
+        });
+      });
+      mm.add("(min-width: 768px)", () => {
       gsap.from(q("[data-cell]"), {
         clipPath: "inset(0% 0% 100% 0%)",
         duration: 1.1,
@@ -35,6 +47,8 @@ export function SwissProof() {
         stagger: 0.07,
         scrollTrigger: { trigger: q("[data-grid]")[0], start: "top 80%", once: true },
       });
+      });
+      return () => mm.revert();
     },
     { scope: root, dependencies: [reduced] },
   );
@@ -42,7 +56,7 @@ export function SwissProof() {
   const specs = [site.specs.thickness.value, site.specs.weight.value, site.specs.format.value];
 
   return (
-    <section ref={root} id="proof" data-theme="cream" className="relative bg-cream px-5 py-24 text-ink md:px-8 md:py-[16vh]">
+    <section ref={root} id="proof" data-theme="cream" data-sheet-over="why" className="relative bg-cream px-5 py-24 text-ink md:px-8 md:py-[16vh]">
       <div className="relative z-20 grid grid-cols-1 gap-12 md:grid-cols-12">
         <div className="flex flex-col gap-6 md:col-span-4">
           <span className="text-label text-glacier-ink">Swiss proof</span>

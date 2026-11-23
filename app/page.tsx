@@ -10,6 +10,7 @@ import { WhyUs } from "@/components/sections/WhyUs";
 import { SwissProof } from "@/components/sections/SwissProof";
 import { Cta } from "@/components/sections/Cta";
 import { Footer } from "@/components/sections/Footer";
+import { SheetSeams } from "@/components/ui/SheetSeams";
 
 export default function Home() {
   return (
@@ -27,6 +28,8 @@ export default function Home() {
         <SwissProof />
         <Cta />
       </main>
+      {/* phones: cream chapters rise as arched sheets over the dark ones before them */}
+      <SheetSeams />
       <Footer />
     </>
   );

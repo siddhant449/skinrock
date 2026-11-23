@@ -36,7 +36,7 @@ export function Collection() {
   }, [touch]);
 
   return (
-    <section id="collection" data-theme="cream" className="relative bg-cream px-5 py-24 text-ink md:px-8 md:py-[16vh]">
+    <section id="collection" data-theme="cream" data-sheet-over="light" className="relative bg-cream px-5 py-24 text-ink md:px-8 md:py-[16vh]">
       <div className="relative z-20 grid grid-cols-1 gap-10 md:grid-cols-12">
         <div className="flex flex-col gap-6 md:col-span-4">
           <span className="text-label text-glacier-ink">Collection</span>

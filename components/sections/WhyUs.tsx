@@ -153,6 +153,7 @@ export function WhyUs() {
     <section
       ref={root}
       id="why"
+      data-recede=""
       className={`relative bg-deep ${stepper ? "flex h-svh flex-col overflow-hidden px-5 pb-6 pt-20" : "px-5 py-24 md:px-8 md:py-[16vh]"}`}
     >
       <StudioStage floor strength={0.6} />

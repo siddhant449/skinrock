@@ -51,7 +51,7 @@ export function GLImage({
   const reveal = useRef({ value: revealOn === "none" ? 1 : 0 });
   const { touch, reduced } = useMotionPrefs();
 
-  // touch has no WebGL: the photo itself wipes up into view once as it enters, then drifts
+  // touch has no WebGL: the photo itself sweeps into view once as it enters, then drifts
   // gently inside its frame while the page scrolls (the shader's reveal and parallax, in DOM)
   useEffect(() => {
     const el = wrap.current;
@@ -66,10 +66,18 @@ export function GLImage({
       const r = el.getBoundingClientRect();
       const seen = r.top < window.innerHeight && r.bottom > 0;
       if (revealOn !== "scroll" || seen) return;
+      // a slanted edge sweeps in from the right while the photo slides the other way into
+      // place (after ERA Residence); four points on both ends so the shape tweens cleanly
       gsap.fromTo(
         img,
-        { clipPath: "inset(100% 0% 0% 0%)" },
-        { clipPath: "inset(0% 0% 0% 0%)", duration: 1.3, ease: "expo.out", scrollTrigger: { trigger: el, start: "top 88%", once: true } },
+        { clipPath: "polygon(100% 0%, 100% 0%, 100% 100%, 112% 100%)", x: 60 },
+        {
+          clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
+          x: 0,
+          duration: 1.15,
+          ease: "power3.out",
+          scrollTrigger: { trigger: el, start: "top 88%", once: true },
+        },
       );
     }, el);
     return () => ctx.revert();

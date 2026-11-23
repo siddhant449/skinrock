@@ -140,3 +140,38 @@ test("intro paragraphs fill word by word as you read down (Riotters)", async ({ 
   expect(Math.min(...early)).toBeLessThan(0.6);
   expect(Math.min(...late)).toBeGreaterThan(0.9);
 });
+
+test("cream chapters rise as an arched sheet that flattens as it lands, over a receding dark chapter (ERA)", async ({ page }) => {
+  await intro(page);
+  for (const [b, a] of [["collection", "light"], ["proof", "why"]] as const) {
+    const top = await page.locator(`#${b}`).evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
+    const radius = () => page.locator(`#${b}`).evaluate((el) => parseFloat(getComputedStyle(el).borderTopLeftRadius.split(" ").pop()!));
+    const recede = () => page.locator(`#${a}`).evaluate((el) => Number(getComputedStyle(el, "::after").opacity));
+    await scrollToY(page, top - 844 * 0.95);
+    const arched = await radius();
+    await scrollToY(page, top - 844 * 0.12);
+    const almost = await recede();
+    await scrollToY(page, top + 2);
+    const landed = await radius();
+    expect(arched, b).toBeGreaterThan(40); // a real arch while it rises
+    expect(landed, b).toBeLessThan(4); // flat once it has landed
+    expect(almost, a).toBeGreaterThan(0.25); // the chapter underneath steps back
+  }
+});
+
+test("the lab results print row by row as you read (White Desert ink)", async ({ page }) => {
+  await intro(page);
+  const rows = page.locator("#proof [data-cell]");
+  const firstTop = await rows.first().evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
+  await scrollToY(page, firstTop - 844 * 0.45); // the first row has passed the reading line
+  const s = await rows.evaluateAll((els) =>
+    els.map((e) => ({ top: e.getBoundingClientRect().top / innerHeight, ink: Number(getComputedStyle(e.querySelector("dd")!).opacity), line: getComputedStyle(e).backgroundSize })),
+  );
+  const printed = s.filter((r) => r.top < 0.55);
+  const waiting = s.filter((r) => r.top > 1.0);
+  expect(printed.length).toBeGreaterThan(0);
+  expect(waiting.length).toBeGreaterThan(0);
+  expect(Math.min(...printed.map((r) => r.ink))).toBeGreaterThan(0.9);
+  expect(Math.max(...waiting.map((r) => r.ink))).toBeLessThan(0.35);
+  expect(printed[0].line.startsWith("100%")).toBe(true);
+});

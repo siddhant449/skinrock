@@ -58,7 +58,8 @@ export function Manifesto() {
           scrollTrigger: {
             trigger: root.current,
             start: "top top",
-            end: () => `+=${window.innerHeight * (words.length - 0.5)}`,
+            // phones scroll in shorter screens: a tighter run keeps the four words from dragging
+            end: () => `+=${window.innerHeight * (words.length - (window.innerWidth < 768 ? 1.2 : 0.5))}`,
             pin: true,
             scrub: 0.8,
           },

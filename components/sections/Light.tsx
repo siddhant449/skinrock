@@ -113,6 +113,7 @@ export function Light() {
     <section
       ref={root}
       id="light"
+      data-recede=""
       className="relative min-h-svh overflow-hidden bg-ink"
     >
       <div className="grid min-h-svh grid-cols-1 md:grid-cols-2">

@@ -123,12 +123,12 @@ for (const [name, device] of [["phone", PHONE], ["tablet", TABLET]] as const) {
       const img = page.locator("#projects [data-float] img").first();
       const state = () => img.evaluate((el) => ({ clip: getComputedStyle(el).clipPath, transform: getComputedStyle(el).transform }));
       const before = await state();
-      expect(before.clip).toContain("inset(100%"); // hidden until it is reached
+      expect(before.clip).toContain("polygon(100%"); // hidden behind a slanted edge until it is reached
       const top = await img.evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
       await scrollToY(page, top - device.viewport.height * 0.5);
       await page.waitForTimeout(1600);
       const shown = await state();
-      expect(shown.clip).toMatch(/inset\(0(px|%)?/);
+      expect(shown.clip).toMatch(/polygon\(0(px|%)? 0(px|%)?, 100% 0(px|%)?, 100% 100%, 0(px|%)? 100%\)|none/);
       await scrollToY(page, top - device.viewport.height * 0.2);
       expect((await state()).transform).not.toBe(shown.transform); // in-frame parallax
     });
