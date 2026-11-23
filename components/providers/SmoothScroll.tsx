@@ -5,6 +5,7 @@ import { ReactLenis, useLenis } from "lenis/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useMotionPrefs } from "./MotionPrefs";
+import { scrollFeel } from "@/lib/scrollFeel";
 
 gsap.registerPlugin(ScrollTrigger);
 // phones show and hide their address bar while scrolling; re-measuring every pin on each of
@@ -41,16 +42,7 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
   return (
     <ReactLenis
       root
-      options={{
-        autoRaf: false,
-        lerp: reduced ? 1 : 0.09,
-        smoothWheel: !reduced,
-        // touch scrolls natively: the phone's own scrolling runs on the graphics thread with
-        // its own momentum, so it stays smooth even while the page animates, and nested
-        // scrollers (the project gallery) keep their swipes; desktop keeps the smoothed wheel
-        syncTouch: false,
-        anchors: true,
-      }}
+      options={scrollFeel(reduced)}
     >
       <LenisGsapBridge />
       {children}
