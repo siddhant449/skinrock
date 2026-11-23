@@ -123,3 +123,107 @@ for (const [w, h] of [[1366, 768], [1440, 900], [1920, 1080]]) {
     expect(top).toBeGreaterThanOrEqual(16); // fully readable, not cut by the top of the screen
   });
 }
+
+/** scroll to the true end of the page (pins recalculate the page height after a jump) */
+async function toEnd(page: import("@playwright/test").Page) {
+  await expect
+    .poll(
+      async () => {
+        await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+        await page.waitForTimeout(700);
+        return page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - window.scrollY);
+      },
+      { timeout: 15_000 },
+    )
+    .toBeLessThan(2);
+}
+
+test.describe("footer stone sketch (after the Truvolt footer drawing)", () => {
+  test("draws itself in as the page ends, then stays live: the skin flexes and light runs through it", async ({ page }) => {
+    await page.goto("/");
+    await expect.poll(() => page.evaluate(() => document.documentElement.dataset.loaded), { timeout: 15_000 }).toBe("true");
+    const sketch = page.locator("footer#footer [data-footer-sketch]");
+    await expect(sketch).toHaveAttribute("aria-hidden", "true");
+    const lines = sketch.locator("[data-draw]");
+    expect(await lines.count()).toBeGreaterThan(8);
+    // nothing is drawn before the footer arrives
+    expect(await lines.evaluateAll((els) => els.every((e) => Number(e.getAttribute("stroke-dashoffset")) > 0.9))).toBe(true);
+    await toEnd(page);
+    await expect
+      .poll(() => lines.evaluateAll((els) => els.every((e) => Math.abs(Number(e.getAttribute("stroke-dashoffset"))) < 0.01)), { timeout: 8000 })
+      .toBe(true);
+    await expect(sketch).toHaveAttribute("data-live", "on", { timeout: 4000 });
+    const read = () =>
+      sketch.evaluate((el) => ({
+        skin: el.querySelector("[data-skin]")!.getAttribute("d"),
+        light: el.querySelector("[data-flow]")!.getAttribute("stroke-dashoffset"),
+        lit: Number(getComputedStyle(el.querySelector("[data-flow]")!).opacity),
+      }));
+    const a = await read();
+    await page.waitForTimeout(800);
+    const b = await read();
+    expect(b.skin).not.toBe(a.skin); // the stone skin keeps flexing
+    expect(b.light).not.toBe(a.light); // light keeps running through it
+    expect(b.lit).toBeGreaterThan(0.5);
+  });
+
+  test("the live drawing rests while the footer is off screen", async ({ page }) => {
+    await page.goto("/");
+    await expect.poll(() => page.evaluate(() => document.documentElement.dataset.loaded), { timeout: 15_000 }).toBe("true");
+    const sketch = page.locator("footer#footer [data-footer-sketch]");
+    await toEnd(page);
+    await expect(sketch).toHaveAttribute("data-live", "on", { timeout: 8000 });
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect(sketch).toHaveAttribute("data-live", "off", { timeout: 4000 });
+    const skin = () => sketch.locator("[data-skin]").first().getAttribute("d");
+    const a = await skin();
+    await page.waitForTimeout(700);
+    expect(await skin()).toBe(a);
+  });
+
+  test("with reduced motion it is a finished, still drawing", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await toEnd(page);
+    await page.waitForTimeout(1200);
+    const sketch = page.locator("footer#footer [data-footer-sketch]");
+    const hidden = await sketch.locator("[data-draw]").evaluateAll((els) => els.filter((e) => Number(e.getAttribute("stroke-dashoffset") ?? 0) > 0.01).length);
+    expect(hidden).toBe(0);
+    const skin = () => sketch.locator("[data-skin]").first().getAttribute("d");
+    const a = await skin();
+    await page.waitForTimeout(700);
+    expect(await skin()).toBe(a);
+  });
+
+  for (const [w, h] of [[1366, 688], [1440, 820], [1920, 960]]) {
+    test(`sits between the invitation and the link rows, clear of both, at ${w}x${h}`, async ({ page }) => {
+      await page.setViewportSize({ width: w, height: h });
+      await page.goto("/");
+      await toEnd(page);
+      const r = await page.evaluate(() => {
+        const f = document.querySelector("footer#footer")!;
+        const box = (s: string) => f.querySelector(s)!.getBoundingClientRect().toJSON() as DOMRect;
+        return { say: box("[data-footer-say]"), info: box("[data-footer-info]"), sketch: box("[data-footer-sketch] svg"), rows: box("[data-rows]") };
+      });
+      expect(r.sketch.width).toBeGreaterThan(280);
+      expect(r.sketch.left).toBeGreaterThanOrEqual(Math.max(r.say.right, r.info.right) - 1);
+      expect(r.sketch.right).toBeLessThanOrEqual(r.rows.left + 1);
+    });
+  }
+});
+
+test.describe("phone footer sketch", () => {
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  test("the drawing follows the invitation, full width, before the address", async ({ page }) => {
+    await page.goto("/");
+    await toEnd(page);
+    const r = await page.evaluate(() => {
+      const f = document.querySelector("footer#footer")!;
+      const box = (s: string) => f.querySelector(s)!.getBoundingClientRect().toJSON() as DOMRect;
+      return { say: box("[data-footer-say]"), info: box("[data-footer-info]"), sketch: box("[data-footer-sketch] svg") };
+    });
+    expect(r.sketch.width).toBeGreaterThan(300);
+    expect(r.sketch.top).toBeGreaterThanOrEqual(r.say.bottom);
+    expect(r.sketch.bottom).toBeLessThanOrEqual(r.info.top);
+  });
+});

@@ -7,6 +7,7 @@ import { useGSAP } from "@gsap/react";
 import { useLenis } from "lenis/react";
 import { site } from "@/content/site";
 import { useMotionPrefs } from "@/components/providers/MotionPrefs";
+import { FooterSketch } from "@/components/ui/FooterSketch";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -30,7 +31,8 @@ const ROWS = site.nav.links.filter((l) => l.href !== "#footer");
 /**
  * Invitation with link rows (after Trionn, Mesh Optical, Make Believe on footer.design):
  * a large "Let's talk stone.", big link rows that slide and light up on hover,
- * and a faint wordmark rising behind as the page ends.
+ * and a faint wordmark rising behind as the page ends. Between them, a live drawing of the
+ * product (after the Truvolt footer): stone whose thin skin peels, flexes and lets light through.
  */
 export function Footer() {
   const root = useRef<HTMLElement>(null);
@@ -78,8 +80,10 @@ export function Footer() {
     <footer ref={root} id="footer" className="relative overflow-hidden bg-deep px-5 pt-16 md:px-8 md:pt-[clamp(48px,9vh,104px)]">
       {/* Fits one screen on laptops and desktops, so arriving at the end of the page shows the
           invitation, the links and the wordmark together. Spacing scales with screen height. */}
-      <div className="relative z-20 grid grid-cols-1 gap-12 md:grid-cols-[1.2fr_1fr] md:gap-16">
-        <div className="flex flex-col">
+      {/* phones: invitation, drawing, address, links. From 768px the drawing sits beside the
+          invitation; from 1280px it is the middle column, so the footer keeps its height. */}
+      <div className="footer-grid relative z-20 grid grid-cols-1 md:gap-x-16 xl:gap-x-12">
+        <div data-footer-say="" className="[grid-area:say]">
           <p className="text-display text-[clamp(3rem,5.4vw,6rem)] leading-[0.92]">
             Let&apos;s talk <span className="text-glacier">stone.</span>
           </p>
@@ -91,7 +95,12 @@ export function Footer() {
               Back to top ↑
             </button>
           </div>
-          <div className="mt-10 grid grid-cols-1 gap-8 text-[16px] leading-relaxed text-stone/90 sm:grid-cols-2 md:mt-[clamp(32px,6vh,64px)]">
+        </div>
+        <FooterSketch className="mt-10 [grid-area:sketch] md:mt-0" />
+        <div
+          data-footer-info=""
+          className="mt-10 grid grid-cols-1 gap-8 text-[16px] leading-relaxed text-stone/90 [grid-area:info] sm:grid-cols-2 md:mt-[clamp(32px,6vh,64px)]"
+        >
             <div>
               <span className="text-label mb-3 block text-mute">Studio</span>
               <address className="not-italic">
@@ -114,10 +123,13 @@ export function Footer() {
                 ))}
               </ul>
             </div>
-          </div>
         </div>
 
-        <nav aria-label="Footer" data-rows className="md:self-start">
+        <nav
+          aria-label="Footer"
+          data-rows
+          className="mt-12 [grid-area:rows] md:self-start xl:mt-0"
+        >
           {ROWS.map((l) => (
             <a
               key={l.href}

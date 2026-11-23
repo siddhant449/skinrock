@@ -575,12 +575,57 @@ html:not(.js) .nav-rule {
    cards snap to the centre; where the browser supports scroll-driven animation, each card
    settles into focus as it reaches the centre and eases back as it leaves */
 .rail-swipe {
-  /* the neighbours fade at the edges, so cut-off captions never read as broken */
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
   scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
   scroll-padding-inline: 20px;
+  overscroll-behavior-x: contain;
+}
+/* the neighbours fade at the edges, so cut-off captions never read as broken; painted over
+   the gallery rather than masking it, so the browser can keep scrolling it on the GPU */
+.rail-edges::before,
+.rail-edges::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 30;
+  width: 5%;
+  pointer-events: none;
+}
+.rail-edges::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--color-ink), transparent);
+}
+.rail-edges::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--color-ink), transparent);
+}
+.rail-arrow {
+  display: inline-grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgb(238 233 224 / 0.22);
+  border-radius: 9999px;
+  color: var(--color-stone);
+  font-size: 18px;
+  line-height: 1;
+  touch-action: manipulation;
+  transition:
+    opacity 0.3s,
+    transform 0.2s,
+    background-color 0.3s;
+}
+.rail-arrow:active:not(:disabled) {
+  transform: scale(0.94);
+  background-color: rgb(238 233 224 / 0.08);
+}
+.rail-arrow:disabled {
+  opacity: 0.3;
+}
+@media (hover: hover) {
+  .rail-arrow:not(:disabled):hover {
+    background-color: rgb(238 233 224 / 0.08);
+  }
 }
 .rail-swipe::-webkit-scrollbar {
   display: none;
@@ -733,6 +778,106 @@ html:not(.js) .nav-rule {
   html.js #hero:not([data-hero-ready]) [data-hero-lede] {
     opacity: 0;
   }
+}
+
+/* ---------- Footer: invitation, live drawing, address, link rows ---------- */
+.footer-grid {
+  grid-template-areas: "say" "sketch" "info" "rows";
+}
+@media (min-width: 768px) {
+  /* tablets: invitation and address on the left, the drawing centred beside them, then the
+     link rows full width, as on phones */
+  .footer-grid {
+    grid-template-columns: 1.2fr 1fr;
+    grid-template-areas: "say sketch" "info sketch" "rows rows";
+  }
+  .footer-sketch {
+    align-self: center;
+  }
+}
+@media (min-width: 1280px) {
+  .footer-grid {
+    grid-template-columns: 1.35fr 0.95fr 1fr;
+    grid-template-areas: "say sketch rows" "info sketch rows";
+  }
+}
+
+/* ---------- Footer drawing (components/ui/FooterSketch.tsx) ----------
+   a blueprint in the palette: stone lines, cool glacier light in, warm backlight out */
+.footer-sketch {
+  --sk: 1.1px;
+  pointer-events: none;
+  user-select: none;
+}
+.footer-sketch svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+@media (min-width: 1280px) {
+  /* the drawing takes the height the words and links give it and never adds to it */
+  .footer-sketch {
+    position: relative;
+    align-self: stretch;
+    min-height: 0;
+  }
+  .footer-sketch svg {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+  }
+}
+@media (max-width: 767px) {
+  /* drawn smaller on a phone: keep the line weight and the label readable */
+  .footer-sketch {
+    --sk: 1.5px;
+  }
+  .sk-label {
+    font-size: 17px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* the still drawing keeps its beams; the travelling pulses belong to the live loop */
+  .sk-pulse {
+    display: none;
+  }
+}
+.sk-ink {
+  stroke: rgb(238 233 224 / 0.82);
+  stroke-width: var(--sk);
+}
+.sk-soft {
+  stroke: rgb(238 233 224 / 0.26);
+  stroke-width: calc(var(--sk) * 0.85);
+}
+.sk-strata {
+  stroke: rgb(238 233 224 / 0.42);
+  stroke-width: calc(var(--sk) * 0.85);
+}
+.sk-vein {
+  stroke: rgb(238 233 224 / 0.34);
+  stroke-width: calc(var(--sk) * 0.8);
+}
+.sk-beam-cool {
+  stroke: rgb(191 227 242 / 0.2);
+  stroke-width: var(--sk);
+}
+.sk-beam-warm {
+  stroke: rgb(244 233 210 / 0.36);
+  stroke-width: calc(var(--sk) * 1.2);
+}
+.sk-cool {
+  stroke: rgb(191 227 242 / 0.95);
+  stroke-width: calc(var(--sk) * 1.5);
+}
+.sk-warm {
+  stroke: rgb(244 233 210);
+  stroke-width: calc(var(--sk) * 1.8);
+}
+.sk-label {
+  fill: var(--color-mute);
+  font: 500 14px var(--font-sans);
+  letter-spacing: 0.06em;
 }
 
 /* ---------- Phone chapter handovers (components/ui/SheetSeams.tsx) ----------

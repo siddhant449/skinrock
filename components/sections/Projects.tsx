@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -10,6 +10,16 @@ import { SplitReveal } from "@/components/ui/SplitReveal";
 import { useMotionPrefs } from "@/components/providers/MotionPrefs";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
+
+/** where each card of the touch gallery comes to rest: centred, or at the gallery's start or
+    end for cards that cannot be centred */
+const restsOf = (t: HTMLElement) => {
+  const max = t.scrollWidth - t.clientWidth;
+  return [...t.children].map((c) => {
+    const el = c as HTMLElement;
+    return Math.max(0, Math.min(max, el.offsetLeft + el.offsetWidth / 2 - t.clientWidth / 2));
+  });
+};
 
 /** Floating collage positions (after Marvell): left/top in %, width in vw, parallax speed. */
 const COLLAGE = [
@@ -27,6 +37,46 @@ export function Projects() {
   const rail = useRef<HTMLDivElement>(null);
   const { reduced, touch } = useMotionPrefs();
   const collage = site.projects.slice(0, COLLAGE.length);
+  // touch gallery: whether the arrows have anywhere left to go
+  const [edge, setEdge] = useState({ start: true, end: false });
+
+  useEffect(() => {
+    const t = track.current;
+    if (!touch || !t) return;
+    let frame = 0;
+    // at an end once the gallery is nearer its first (or last) resting place than the next one
+    const read = () => {
+      frame = 0;
+      const rests = restsOf(t);
+      const first = rests[0];
+      const last = rests[rests.length - 1];
+      const second = rests.find((r) => r > first + 2) ?? last;
+      const penultimate = [...rests].reverse().find((r) => r < last - 2) ?? first;
+      setEdge({ start: t.scrollLeft < (first + second) / 2, end: t.scrollLeft > (penultimate + last) / 2 });
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(read);
+    };
+    read();
+    t.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      t.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, [touch]);
+
+  /** glide to the neighbour of the project in view */
+  const step = (dir: 1 | -1) => {
+    const t = track.current;
+    if (!t) return;
+    const rests = restsOf(t);
+    const gaps = rests.map((r) => Math.abs(r - t.scrollLeft));
+    let i = gaps.indexOf(Math.min(...gaps));
+    // skip neighbours that rest in the same place (several cards can share the start or end)
+    do i += dir;
+    while (i > 0 && i < rests.length - 1 && Math.abs(rests[i] - t.scrollLeft) < 2);
+    t.scrollTo({ left: rests[Math.max(0, Math.min(rests.length - 1, i))], behavior: reduced ? "auto" : "smooth" });
+  };
 
   useGSAP(
     () => {
@@ -119,12 +169,18 @@ export function Projects() {
           <span className="text-label text-mute">Selected work</span>
           <span className="text-label text-mute">{site.projects.length} projects</span>
         </div>
+        {/* touch: the gallery owns its own touches. Smooth scrolling (Lenis) cancels any finger
+            movement with a vertical part, and a thumb always drifts a little, so sideways swipes
+            stuck; here the browser tells a sideways swipe from a scroll by itself. */}
+        <div className={touch ? "rail-edges relative" : "contents"}>
         <div
           ref={track}
+          id="project-rail"
           data-rail-track=""
+          data-lenis-prevent-touch={touch ? "" : undefined}
           className={
             touch
-              ? "rail-swipe flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 md:gap-6 md:px-8"
+              ? "rail-swipe relative flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 md:gap-6 md:px-8"
               : "flex flex-col gap-10 px-5 pb-24 md:h-full md:w-max md:flex-row md:items-center md:gap-[4vw] md:px-[8vw] md:pb-0 md:pt-16"
           }
         >
@@ -153,6 +209,31 @@ export function Projects() {
             </figure>
           ))}
         </div>
+        </div>
+        {touch && (
+          <div className="mt-6 flex justify-end gap-3 px-5 md:px-8">
+            <button
+              type="button"
+              aria-label="Previous project"
+              aria-controls="project-rail"
+              disabled={edge.start}
+              onClick={() => step(-1)}
+              className="rail-arrow"
+            >
+              <span aria-hidden>&larr;</span>
+            </button>
+            <button
+              type="button"
+              aria-label="Next project"
+              aria-controls="project-rail"
+              disabled={edge.end}
+              onClick={() => step(1)}
+              className="rail-arrow"
+            >
+              <span aria-hidden>&rarr;</span>
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );
