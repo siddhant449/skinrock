@@ -304,6 +304,13 @@ for (const [name, device] of [["phone", PHONE], ["tablet", TABLET]] as const) {
       await intro(page);
       await page.waitForTimeout(1500); // nav items finish dropping into place
       const ok = await page.evaluate(() => {
+        // phones navigate from the dock at the foot, whose controls are full 52px squares
+        if (getComputedStyle(document.querySelector("header")!).display === "none") {
+          return [...document.querySelectorAll<HTMLElement>('[data-dock] a[href="#hero"], [data-dock] button')].map((el) => {
+            const r = el.getBoundingClientRect();
+            return r.width >= 44 && r.height >= 44;
+          });
+        }
         const targets = [document.querySelector('header a[href="#hero"]'), document.querySelector("header button")].filter(Boolean) as HTMLElement[];
         return targets.map((el) => {
           const r = el.getBoundingClientRect();

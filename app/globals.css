@@ -961,3 +961,94 @@ html:not(.js) .nav-rule {
   .sample-pill:hover .sample-arrow { transform: translate(3px, -3px); }
 }
 .sample-tile:focus-visible [data-tilt] { outline: 2px solid var(--color-glacier); outline-offset: 4px; }
+
+/* ---------- Phone dock and menu card (components/ui/PhoneDock.tsx) ----------
+   after Fluid Glass: a slim bar at the foot of the screen, under the thumb; the menu grows out
+   of it as a card over the dimmed page */
+.dock {
+  left: 50%;
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  width: min(320px, calc(100vw - 32px));
+  translate: -50% 0;
+  transition: translate 0.7s var(--ease-expo);
+}
+/* waits below the screen until the intro hands over, and steps aside while you read on */
+.dock:not([data-ready="true"]),
+.dock[data-hidden="true"] {
+  translate: -50% calc(100% + 40px);
+}
+.dock-bar {
+  box-shadow:
+    0 0 0 1px rgb(238 233 224 / 0.08),
+    0 18px 40px -12px rgb(8 12 18 / 0.6);
+}
+/* the chapter's name rises in each time it changes */
+.dock-chapter {
+  animation: dock-chapter 0.45s var(--ease-expo) both;
+}
+@keyframes dock-chapter {
+  from {
+    transform: translateY(110%);
+    opacity: 0;
+  }
+}
+.dock-veil {
+  background: rgb(13 21 32 / 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s ease;
+}
+.dock-veil[data-open="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* the card starts clipped to exactly the dock's rectangle at its foot, then opens upward and
+   outward; the dock stays on top of it */
+.dock-card {
+  --gap: max(0px, calc((100vw - 352px) / 2));
+  left: 16px;
+  right: 16px;
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  max-height: calc(100svh - 28px - env(safe-area-inset-bottom));
+  padding: 22px 22px 72px;
+  clip-path: inset(calc(100% - 52px) var(--gap) 0 var(--gap));
+  visibility: hidden;
+  transition:
+    clip-path 0.5s cubic-bezier(0.76, 0, 0.24, 1),
+    visibility 0s linear 0.5s;
+}
+.dock-card[data-open="true"] {
+  clip-path: inset(0 0 0 0);
+  visibility: visible;
+  transition:
+    clip-path 0.6s cubic-bezier(0.76, 0, 0.24, 1),
+    visibility 0s;
+}
+.dock-card [data-item] {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+.dock-card[data-open="true"] [data-item] {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.45s ease calc(0.22s + var(--i, 0) * 0.05s),
+    transform 0.6s var(--ease-expo) calc(0.22s + var(--i, 0) * 0.05s);
+}
+.dock-cta:active {
+  transform: scale(0.98);
+}
+@media (prefers-reduced-motion: reduce) {
+  .dock,
+  .dock-veil,
+  .dock-card,
+  .dock-card [data-item] {
+    transition: none;
+  }
+  .dock-chapter {
+    animation: none;
+  }
+}

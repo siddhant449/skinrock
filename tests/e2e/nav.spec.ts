@@ -53,7 +53,7 @@ test("bar turns solid after the hero and cream on cream chapters", async ({ page
 test.describe("phone", () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
 
-  test("menu button opens a full screen index and closes with Escape", async ({ page }) => {
+  test("the menu button opens the menu and Escape closes it, handing focus back", async ({ page }) => {
     await intro(page);
     const button = page.getByRole("button", { name: "Menu" });
     await expect(button).toHaveAttribute("aria-expanded", "false");
@@ -89,14 +89,91 @@ test("nav labels render once and the cta stays on one line", async ({ page }) =>
   expect((await cta.boundingBox())!.height).toBeLessThan(30);
 });
 
-test.describe("phone menu", () => {
-  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
-  test("the open menu covers the whole screen", async ({ page }) => {
+test.describe("phone dock (after Fluid Glass)", () => {
+  // a real phone in Safari: the bars leave about 660px
+  test.use({ viewport: { width: 390, height: 664 }, isMobile: true, hasTouch: true });
+
+  test("phones navigate from a dock at the foot of the screen, within thumb reach; no top bar", async ({ page }) => {
+    await intro(page);
+    expect(await page.locator("header").evaluate((el) => getComputedStyle(el).display)).toBe("none");
+    const dock = page.getByRole("navigation", { name: "Main" });
+    await expect(dock).toBeVisible();
+    await page.waitForTimeout(900); // the dock rises into place as the intro hands over
+    const box = (await dock.boundingBox())!;
+    expect(box.y + box.height).toBeLessThanOrEqual(664 - 8);
+    expect(box.y).toBeGreaterThan(664 - 130);
+    expect(box.height).toBeGreaterThanOrEqual(48);
+    await expect(dock.getByRole("button", { name: "Menu" })).toBeVisible();
+    await expect(dock.getByRole("link", { name: "Skinrock, back to top" })).toBeVisible();
+  });
+
+  test("the dock names the chapter you are reading", async ({ page }) => {
+    await intro(page);
+    const chapter = page.locator("[data-dock-chapter]");
+    await scrollToSection(page, "collection", 0.2);
+    await expect(chapter).toHaveText("Collection");
+    await scrollToSection(page, "projects", 0.4);
+    await expect(chapter).toHaveText("Projects");
+  });
+
+  test("the dock steps aside while you read on and comes back when you scroll up", async ({ page }) => {
+    await intro(page);
+    const shown = () => page.locator("[data-dock]").evaluate((el) => el.getBoundingClientRect().top < window.innerHeight);
+    expect(await shown()).toBe(true);
+    await page.evaluate(() => window.scrollTo(0, 2600));
+    await page.waitForTimeout(1000);
+    expect(await shown()).toBe(false);
+    await page.evaluate(() => window.scrollTo(0, 2300));
+    await page.waitForTimeout(1000);
+    expect(await shown()).toBe(true);
+  });
+
+  test("the menu grows out of the dock as a card: the stones, the chapters and a samples button, under the thumb", async ({ page }) => {
     await intro(page);
     await page.getByRole("button", { name: "Menu" }).click();
-    const box = (await page.getByRole("dialog", { name: "Menu" }).boundingBox())!;
-    expect(box.y).toBeLessThanOrEqual(1);
-    expect(box.height).toBeGreaterThanOrEqual(843);
+    const menu = page.getByRole("dialog", { name: "Menu" });
+    await expect(menu).toBeVisible();
+    await page.waitForTimeout(900);
+    const r = await menu.evaluate((el) => {
+      const b = el.getBoundingClientRect();
+      return { top: b.top, bottom: b.bottom, left: b.left, swatches: el.querySelectorAll("[data-menu-swatch] img").length };
+    });
+    expect(r.swatches).toBe(4);
+    expect(r.top).toBeGreaterThan(40); // a card, not the whole screen
+    expect(r.bottom).toBeGreaterThan(664 - 130); // resting on the dock
+    expect(r.left).toBeGreaterThanOrEqual(8);
+    await expect(menu.getByRole("link", { name: /Request samples/ })).toBeVisible();
+  });
+
+  test("tapping the dimmed page closes the menu", async ({ page }) => {
+    await intro(page);
+    await page.getByRole("button", { name: "Menu" }).click();
+    await page.waitForTimeout(800);
+    await page.touchscreen.tap(195, 24);
+    await expect(page.getByRole("dialog", { name: "Menu" })).toBeHidden();
+  });
+
+  test("on a short phone the whole menu still fits on screen", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 553 });
+    await intro(page);
+    await page.getByRole("button", { name: "Menu" }).click();
+    await page.waitForTimeout(900);
+    const r = await page.getByRole("dialog", { name: "Menu" }).evaluate((el) => {
+      const b = el.getBoundingClientRect();
+      const cta = [...el.querySelectorAll("a")].find((a) => a.textContent?.includes("Request samples"))!.getBoundingClientRect();
+      return { top: b.top, ctaBottom: cta.bottom };
+    });
+    expect(r.top).toBeGreaterThanOrEqual(0);
+    expect(r.ctaBottom).toBeLessThanOrEqual(553);
+  });
+});
+
+test.describe("tablet", () => {
+  test.use({ viewport: { width: 820, height: 1180 }, isMobile: true, hasTouch: true });
+  test("tablets keep the top bar; the dock is a phone thing", async ({ page }) => {
+    await intro(page);
+    await expect(page.locator("header")).toBeVisible();
+    await expect(page.locator("[data-dock]")).toBeHidden();
   });
 });
 

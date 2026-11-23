@@ -10,6 +10,7 @@ import { SplitReveal } from "@/components/ui/SplitReveal";
 import { useMotionPrefs } from "@/components/providers/MotionPrefs";
 import { onLoaded } from "@/lib/loaded";
 import { HERO_SIZES } from "@/lib/heroWindow";
+import { Logo } from "@/components/ui/Logo";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -123,11 +124,14 @@ export function Hero() {
         style={{ backgroundImage: "linear-gradient(90deg, #0D1520 0%, rgba(13,21,32,0.55) 14%, rgba(13,21,32,0) 38%), linear-gradient(0deg, rgba(13,21,32,0.75) 0%, rgba(13,21,32,0) 35%), linear-gradient(180deg, rgba(13,21,32,0.7) 0%, rgba(13,21,32,0) 22%)" }}
       />
 
+      {/* phones have no top bar (they navigate from the dock): the logo rests on the photo */}
+      <Logo className="pointer-events-none absolute left-5 top-6 z-20 w-[128px] text-stone md:hidden" />
+
       {/* phones: headline, then label and paragraph, stacked at the foot (display: contents
           lets the phone order differ from the desktop columns) */}
       <div
         data-hero-copy
-        className="relative z-20 flex h-full flex-col px-5 pb-[max(36px,env(safe-area-inset-bottom))] pt-24 max-md:justify-end md:justify-between md:px-8 md:pb-10 md:pt-[18vh]"
+        className="relative z-20 flex h-full flex-col px-5 pb-[calc(92px+env(safe-area-inset-bottom))] pt-24 max-md:justify-end md:justify-between md:px-8 md:pb-10 md:pt-[18vh]"
       >
         <div className="flex flex-col gap-8 max-md:contents md:max-w-[34vw]">
           <p data-hero-eyebrow="" className="text-label text-mute max-md:order-2 max-md:mt-7">

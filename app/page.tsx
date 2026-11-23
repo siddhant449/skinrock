@@ -11,12 +11,14 @@ import { SwissProof } from "@/components/sections/SwissProof";
 import { Cta } from "@/components/sections/Cta";
 import { Footer } from "@/components/sections/Footer";
 import { SheetSeams } from "@/components/ui/SheetSeams";
+import { PhoneDock } from "@/components/ui/PhoneDock";
 
 export default function Home() {
   return (
     <>
       <Preloader />
       <Nav />
+      <PhoneDock />
       <main>
         <Hero />
         <Manifesto />

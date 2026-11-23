@@ -30,7 +30,8 @@ function Roll({ children }: { children: string }) {
 /**
  * Swiss grid bar (after AAT Architecten, Montfort, SANTAL). Links sit on the page's
  * 12 column grid; the bar goes solid after the hero, cream over cream chapters,
- * hides on scroll down and returns on scroll up. Phones get a full screen index.
+ * hides on scroll down and returns on scroll up. Tablets get a full screen index; phones
+ * navigate from a dock at the foot of the screen instead (components/ui/PhoneDock.tsx).
  */
 export function Nav() {
   const [hidden, setHidden] = useState(false);
@@ -146,7 +147,7 @@ export function Nav() {
       <header
         data-nav-theme={theme}
         data-solid={solid ? "true" : "false"}
-        className={`nav-bar fixed inset-x-0 top-0 z-50 transition-[transform,background-color,color] duration-700 ease-expo ${
+        className={`nav-bar fixed inset-x-0 top-0 z-50 max-md:hidden transition-[transform,background-color,color] duration-700 ease-expo ${
           hidden && !open ? "-translate-y-full" : "translate-y-0"
         } ${onCream && !open ? "text-ink" : "text-stone"} ${
           solid && !open
