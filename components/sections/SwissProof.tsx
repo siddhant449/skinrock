@@ -21,14 +21,20 @@ export function SwissProof() {
       if (reduced) return;
       const q = gsap.utils.selector(root);
       const mm = gsap.matchMedia();
-      // phones (after White Desert's ink): each result prints as it reaches the reading line,
-      // its hairline drawing beneath it; firing the whole list at once played most of it
+      // phones reveal each row as it arrives; firing the whole list at once played most of it
       // before the rows were even on screen
       mm.add("(max-width: 767px)", () => {
+        // phones (after Kononenko's rows): the rules are whole from the start, since a rule
+        // caught half drawn reads as a stray hairline, and each result rises in once as it arrives
         q<HTMLElement>("[data-cell]").forEach((cell) => {
-          const st = { trigger: cell, start: "top 88%", end: "top 62%", scrub: true };
-          gsap.fromTo(cell.querySelectorAll("dt, dd"), { opacity: 0.2 }, { opacity: 1, ease: "none", stagger: 0.15, scrollTrigger: st });
-          gsap.fromTo(cell, { backgroundSize: "0% 1px" }, { backgroundSize: "100% 1px", ease: "none", scrollTrigger: st });
+          gsap.from(cell.querySelectorAll("dt, dd"), {
+            y: 14,
+            opacity: 0,
+            duration: 0.7,
+            ease: "expo.out",
+            stagger: 0.08,
+            scrollTrigger: { trigger: cell, start: "top 88%", once: true },
+          });
         });
       });
       mm.add("(min-width: 768px)", () => {

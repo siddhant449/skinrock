@@ -135,7 +135,7 @@ export function Light() {
             text={light.paragraph}
             className="text-headline max-w-[22ch] text-[clamp(1.6rem,2.6vw,2.6rem)] leading-[1.08]"
           />
-          <ul className="flex flex-wrap gap-x-6 gap-y-2 text-[15px] font-medium text-mute">
+          <ul className="flex flex-wrap gap-x-4 gap-y-2 text-[15px] font-medium text-mute md:gap-x-6">
             {light.uses.map((u) => (
               <li key={u} data-use>
                 {u}

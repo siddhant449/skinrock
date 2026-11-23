@@ -25,7 +25,8 @@ export function BacklightStone({ image, intensity, className = "relative" }: Pro
       {/* the photo and CSS glow stay until WebGL has drawn its first frame */}
       {!drawn ? (
         <>
-          <Image src={image.src} alt={image.alt} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" />
+          {/* phones frame the lower part of the column: the top of the shot shows site clutter */}
+          <Image src={image.src} alt={image.alt} fill sizes="(min-width: 768px) 50vw, 150vw" className="object-cover max-md:object-[50%_85%]" />
           <div aria-hidden className="backlight-fallback absolute inset-0" />
         </>
       ) : (

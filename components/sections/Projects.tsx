@@ -149,7 +149,7 @@ export function Projects() {
               className={`absolute w-[calc(var(--w)*2.3vw)] ${touch ? "md:w-[calc(var(--w)*1.7vw)]" : "md:w-[calc(var(--w)*1vw)]"}`}
               style={{ left: `${c.left}%`, top: `${c.top}%`, ["--w" as string]: c.w }}
             >
-              <GLImage image={p.image} sizes="22vw" grade={0.45} parallax={0.06} className={`relative w-full ${c.ratio}`} />
+              <GLImage image={p.image} sizes="(min-width: 768px) 22vw, 60vw" grade={0.45} parallax={0.06} className={`relative w-full ${c.ratio}`} />
             </div>
           );
         })}
@@ -195,7 +195,7 @@ export function Projects() {
             >
               <GLImage
                 image={p.image}
-                sizes={touch ? "(min-width: 768px) 44vw, 80vw" : "(min-width: 768px) 30vw, 100vw"}
+                sizes={touch ? "(min-width: 768px) 85vw, 150vw" : "(min-width: 768px) 30vw, 100vw"}
                 grade={0.4}
                 parallax={0.05}
                 className={`relative w-full ${touch ? "aspect-[4/5]" : i % 3 === 0 ? "aspect-[4/5]" : "aspect-[4/3]"}`}

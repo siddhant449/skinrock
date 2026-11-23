@@ -758,25 +758,36 @@ html:not(.js) .nav-rule {
 }
 
 /* ---------- Why on phones: the stepper's key list ---------- */
-.why-key {
-  color: rgb(143 160 179 / 0.55);
-  transition: color 0.45s var(--ease-expo);
-}
-.why-key[data-on] {
-  color: var(--color-stone);
-}
 
-/* ---------- Phone hero: the stone starts framed in a window (lib/heroWindow.ts) ----------
-   set from first paint so nothing jumps; the scroll story opens it to full screen */
+/* ---------- Phone hero poster (Hero.tsx): the name splits around the stone ----------
+   set from first paint so nothing jumps: the halves of the name wait below their own edge
+   until the intro hands over, and the eyebrow and paragraph wait for the scroll. If scripts
+   never run, everything shows after a few seconds. */
+.hero-word {
+  overflow: hidden;
+}
+.hero-word text {
+  font: 500 100px var(--font-sans);
+  letter-spacing: -0.045em;
+  fill: var(--color-stone);
+}
 @media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
-  html.js [data-hero-window] {
-    clip-path: inset(14% 5% 25% 5% round 10px);
+  html.js #hero:not([data-hero-ready]) [data-hero-word] text {
+    transform: translateY(110%);
+    animation: hero-word-fallback 0.6s 3.5s forwards;
   }
   html.js [data-hero-shade] {
     opacity: 0;
   }
-  html.js #hero:not([data-hero-ready]) [data-hero-lede] {
+  html.js #hero:not([data-hero-ready]) [data-hero-lede],
+  html.js #hero:not([data-hero-ready]) [data-hero-eyebrow] {
     opacity: 0;
+    animation: reveal-fallback 0.6s 3.5s forwards;
+  }
+}
+@keyframes hero-word-fallback {
+  to {
+    transform: none;
   }
 }
 

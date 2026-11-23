@@ -49,15 +49,8 @@ export function WhyUs() {
       if (!stepper) return;
       const q = gsap.utils.selector(root);
       const cards = q<HTMLElement>("[data-why-cell]");
-      const keys = q<HTMLElement>("[data-why-key]");
       const switches = cards.slice(1).map((_, k) => k + 0.2);
-      const light = (t: number) => {
-        // a card counts as on screen once its wipe is half way
-        const on = switches.filter((s) => t > s + 0.3).length;
-        keys.forEach((k, i) => k.toggleAttribute("data-on", i === on));
-      };
       gsap.set(cards.slice(1), { clipPath: "inset(100% 0% 0% 0%)" });
-      light(0);
       const tl = gsap.timeline({
         defaults: { ease: "none" },
         scrollTrigger: {
@@ -66,9 +59,6 @@ export function WhyUs() {
           end: () => `+=${window.innerHeight * STEP_VH * (cards.length - 1)}`,
           pin: true,
           scrub: 0.6,
-        },
-        onUpdate() {
-          light(this.time());
         },
       });
       cards.slice(1).forEach((card, k) => {
@@ -154,7 +144,9 @@ export function WhyUs() {
       ref={root}
       id="why"
       data-recede=""
-      className={`relative bg-deep ${stepper ? "flex h-svh flex-col overflow-hidden px-5 pb-6 pt-20" : "px-5 py-24 md:px-8 md:py-[16vh]"}`}
+      // phones: the foot stays clear, because the cream chapter after this one rises over the
+      // last tenth of the screen
+      className={`relative bg-deep ${stepper ? "flex h-svh flex-col overflow-hidden px-5 pb-[calc(10vh+16px)] pt-20" : "px-5 py-24 md:px-8 md:py-[16vh]"}`}
     >
       <StudioStage floor strength={0.6} />
       <div className={`relative z-20 flex flex-col gap-6 md:mb-16 md:flex-row md:items-end md:justify-between ${stepper ? "mb-5" : "mb-12"}`}>
@@ -166,17 +158,6 @@ export function WhyUs() {
         </div>
         <p className="hidden max-w-[30ch] text-[17px] leading-relaxed text-stone/90 md:block">{touch ? site.whyIntroTouch : site.whyIntro}</p>
       </div>
-
-      {/* phones: the seven keys as a compact list; the one on screen lights up */}
-      {stepper && (
-        <div aria-hidden className="relative z-20 mb-4 flex flex-wrap gap-x-4 gap-y-1.5">
-          {site.why.map((w) => (
-            <span key={w.key} data-why-key="" className="why-key text-label">
-              {w.key}
-            </span>
-          ))}
-        </div>
-      )}
 
       <div
         data-why-grid
@@ -196,7 +177,7 @@ export function WhyUs() {
             }
           >
             <div data-why-photo="" aria-hidden className={stepper ? "absolute inset-0 overflow-hidden" : "why-photo absolute inset-0"}>
-              <Image src={w.image.src} alt="" fill sizes="(min-width: 1024px) 50vw, 100vw" className="object-cover" />
+              <Image src={w.image.src} alt="" fill sizes="(min-width: 1024px) 50vw, (min-width: 768px) 100vw, 230vw" className="object-cover" />
               <span className="absolute inset-0 bg-gradient-to-b from-ink/30 to-ink/90" />
             </div>
             <p data-why-copy data-why-step-copy="" className="text-display relative text-[clamp(2.4rem,3.6vw,3.6rem)]">

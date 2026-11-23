@@ -7,7 +7,7 @@ import { markLoaded } from "@/lib/loaded";
 import { PRELOADER_TIMING as T } from "@/lib/timing";
 import { site } from "@/content/site";
 import { Logo } from "@/components/ui/Logo";
-import { HERO_PHOTO_SCALE, HERO_WINDOW } from "@/lib/heroWindow";
+import { HERO_PHOTO_SCALE } from "@/lib/heroWindow";
 
 const SEEN_KEY = "sr-loaded";
 /** the small sample tile the window opens to first (clip-path inset, %): wider share on phones */
@@ -48,7 +48,9 @@ export function Preloader() {
     const TILE = wide ? TILE_WIDE : TILE_NARROW;
     // phones: the window opens to the hero's framed window (not full screen) and hands over
     // into it, at the hero photo's resting scale, so nothing jumps when the loader fades
-    const OPEN = wide ? "inset(0% 0% 0% 0%)" : HERO_WINDOW;
+    // phones open to the full screen too (the hero is a full-bleed poster); the narrow shapes
+    // carry a radius, so the open shape spells one out to tween cleanly
+    const OPEN = wide ? "inset(0% 0% 0% 0%)" : "inset(0% 0% 0% 0% round 0px)";
     const OPEN_SCALE = wide ? 1 : HERO_PHOTO_SCALE;
     const q = gsap.utils.selector(el);
     const win = q<HTMLElement>("[data-loader-window]")[0];

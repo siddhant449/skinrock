@@ -2,7 +2,8 @@ import { test, expect } from "@playwright/test";
 
 test("manifesto words in order", async ({ page }) => {
   await page.goto("/");
-  const text = (await page.locator("#manifesto").innerText()).replace(/\s+/g, " ");
+  // screen readers get the whole statement even while the morph shows one word at a time
+  const text = (await page.locator("#manifesto .sr-only").textContent())!.replace(/\s+/g, " ");
   const idx = ["Stone.", "Bends.", "Glows.", "1.5 mm."].map((w) => text.indexOf(w));
   expect(idx.every((i) => i >= 0)).toBe(true);
   expect([...idx].sort((a, b) => a - b)).toEqual(idx);

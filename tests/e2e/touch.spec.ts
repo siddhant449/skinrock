@@ -73,7 +73,7 @@ for (const [name, device] of [["phone", PHONE], ["tablet", TABLET]] as const) {
   });
 }
 
-for (const [name, device] of [["phone", PHONE], ["tablet", TABLET]] as const) {
+for (const [name, device] of [["tablet", TABLET]] as const) {
   test.describe(`${name}: collection and why`, () => {
     test.use(device);
 
@@ -177,12 +177,49 @@ test.describe("tablet: why grid", () => {
     });
 });
 
-test.describe("phone: collection focus", () => {
+test.describe("phone: collection", () => {
   test.use(PHONE);
+  test("a two-column grid of stone swatches, big enough to see the stone, each named beneath (Monolith)", async ({ page }) => {
+    await intro(page);
+    const top = await topOf(page, "#collection ul");
+    await scrollToY(page, top - PHONE.viewport.height * 0.15);
+    await page.waitForTimeout(1500);
+    const cells = await page.locator("#collection [data-row]").evaluateAll((els) =>
+      els.map((e) => {
+        const tile = e.querySelector("[data-swatch]")!;
+        const t = tile.getBoundingClientRect();
+        const n = e.querySelector("[data-name]")!.getBoundingClientRect();
+        const r = e.getBoundingClientRect();
+        return {
+          left: Math.round(r.left),
+          w: t.width,
+          h: t.height,
+          nameBelow: n.top >= t.bottom - 1,
+          nameFits: n.right <= r.right + 1,
+          op: Number(getComputedStyle(e).opacity),
+          clip: getComputedStyle(tile).clipPath,
+        };
+      }),
+    );
+    expect(cells).toHaveLength(4);
+    expect(new Set(cells.map((c) => c.left)).size).toBe(2); // two columns
+    for (const c of cells) {
+      expect(c.w).toBeGreaterThan(150);
+      expect(c.h).toBeGreaterThan(c.w); // portrait tiles, like sample sheets
+      expect(c.nameBelow).toBe(true);
+      expect(c.nameFits).toBe(true);
+      expect(c.op).toBeGreaterThan(0.95); // nothing steps back on phones: every stone shows
+    }
+    expect(cells[0].clip).toMatch(/none|inset\(0(px|%)?( 0(px|%)?){0,3}\)/); // opened once in view
+  });
+});
+
+test.describe("tablet: collection focus", () => {
+  test.use(TABLET);
   test("the other stone rows step back while one is active (ESR marques)", async ({ page }) => {
     await intro(page);
     const top = await topOf(page, "#collection ul");
-    await scrollToY(page, top - PHONE.viewport.height * 0.35);
+    await scrollToY(page, top - TABLET.viewport.height * 0.35);
     await expect.poll(() => page.locator('#collection [data-row][data-active="true"]').count()).toBe(1);
     const dim = await page.locator('#collection [data-row][data-active="false"]').evaluateAll((els) => els.map((e) => Number(getComputedStyle(e).opacity)));
     // stepped back but still readable (the audits asked for about half, not near invisible)
