@@ -7,6 +7,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useMotionPrefs } from "./MotionPrefs";
 
 gsap.registerPlugin(ScrollTrigger);
+// phones show and hide their address bar while scrolling; re-measuring every pin on each of
+// those resizes makes pinned chapters jump, so ScrollTrigger ignores them
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 /**
  * Drives whichever Lenis instance is live from GSAP's ticker. Lenis may be recreated
@@ -26,7 +29,7 @@ function LenisGsapBridge() {
 }
 
 export function SmoothScroll({ children }: { children: ReactNode }) {
-  const { reduced } = useMotionPrefs();
+  const { reduced, touch } = useMotionPrefs();
 
   useEffect(() => {
     const refresh = () => ScrollTrigger.refresh();
@@ -36,7 +39,20 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <ReactLenis root options={{ autoRaf: false, lerp: reduced ? 1 : 0.09, smoothWheel: !reduced, anchors: true }}>
+    <ReactLenis
+      root
+      options={{
+        autoRaf: false,
+        lerp: reduced ? 1 : 0.09,
+        smoothWheel: !reduced,
+        // touch: Lenis carries the finger's scroll with its own easing and inertia, the same
+        // glide as desktop, and every scroll-linked animation stays in step with it
+        syncTouch: touch && !reduced,
+        syncTouchLerp: 0.085,
+        touchInertiaExponent: 1.7,
+        anchors: true,
+      }}
+    >
       <LenisGsapBridge />
       {children}
     </ReactLenis>

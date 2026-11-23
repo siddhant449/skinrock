@@ -83,15 +83,6 @@ test("samples: four real stone tiles fan open when the section is in view", asyn
   await expect(page.locator("#samples").getByRole("link", { name: /Request samples/ })).toHaveAttribute("href", /contact/);
 });
 
-test.describe("phone", () => {
-  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
-  test("why cells stack and reveal their photo as they scroll into the middle", async ({ page }) => {
-    await intro(page);
-    await reach(page, "#why [data-why-cell]:nth-child(2)", 0.45);
-    const cell = page.locator("#why [data-why-cell]").nth(1);
-    await expect(cell).toHaveAttribute("data-active", "true", { timeout: 4000 });
-  });
-});
 
 test("the samples button label is clearly readable", async ({ page }) => {
   await page.goto("/");

@@ -16,17 +16,32 @@ const spacerTop = (page: Page, id: string) =>
     return host.getBoundingClientRect().top + window.scrollY;
   });
 
-test("hero: the photo owns the screen, the copy gathers at the bottom, and the photo drifts", async ({ page }) => {
+test("hero: the stone sits in a window, then scrolling opens it to full screen while the copy arrives", async ({ page }) => {
   await intro(page);
-  const s = await page.locator("#hero").evaluate((hero) => {
-    const lede = hero.querySelector("[data-hero-fade]")!.getBoundingClientRect();
-    const h1 = hero.querySelector("h1")!.getBoundingClientRect();
-    const photo = hero.querySelector("[data-gl-image]")!;
-    return { ledeTop: lede.top / innerHeight, ledeAboveH1: lede.bottom <= h1.top + 2, drift: getComputedStyle(photo).animationName };
-  });
-  expect(s.ledeTop).toBeGreaterThan(0.38);
-  expect(s.ledeAboveH1).toBe(true);
-  expect(s.drift).not.toBe("none");
+  await page.waitForTimeout(1500);
+  const state = () =>
+    page.locator("#hero").evaluate((hero) => {
+      const win = hero.querySelector("[data-hero-window]")!;
+      const lede = hero.querySelector("[data-hero-lede]")!;
+      const r = win.getBoundingClientRect();
+      return {
+        clip: getComputedStyle(win).clipPath,
+        lede: Number(getComputedStyle(lede).opacity),
+        pinned: !!hero.parentElement?.classList.contains("pin-spacer"),
+        drift: getComputedStyle(hero.querySelector("[data-gl-image]")!).animationName,
+        winTop: r.top,
+      };
+    });
+  const start = await state();
+  expect(start.clip).toContain("round"); // a framed window, not full bleed
+  expect(start.clip).not.toMatch(/^inset\(0(px|%)?\)/);
+  expect(start.lede).toBeLessThan(0.1); // the paragraph waits for the scroll
+  expect(start.pinned).toBe(true);
+  expect(start.drift).not.toBe("none");
+  await scrollToY(page, 844 * 0.85);
+  const open = await state();
+  expect(open.clip).toMatch(/inset\(0(px|%)?( 0(px|%)?){0,3}( round 0px)?\)|none/);
+  expect(open.lede).toBeGreaterThan(0.9);
   await expect(page.locator("#hero [data-hero-sheen]")).toHaveCount(1);
 });
 
@@ -70,4 +85,58 @@ test("flex pins on phones and the stone sheet really curls as you scroll", async
     });
   });
   expect(hit).toBe(false);
+});
+
+test("why choose us becomes a pinned stepper on phones: one reason at a time, the key list follows", async ({ page }) => {
+  await intro(page);
+  expect(await page.locator("#why").evaluate((el) => el.parentElement!.classList.contains("pin-spacer"))).toBe(true);
+  const top = await spacerTop(page, "why");
+  const state = () =>
+    page.locator("#why").evaluate((el) => {
+      const cards = [...el.querySelectorAll<HTMLElement>("[data-why-cell]")];
+      const shown = cards.map((c) => !getComputedStyle(c).clipPath.includes("inset(100%"));
+      const keys = [...el.querySelectorAll("[data-why-key]")].map((k) => k.hasAttribute("data-on"));
+      // the top-most revealed card is the one on screen
+      return { front: shown.lastIndexOf(true), on: keys.indexOf(true), lit: keys.filter(Boolean).length, keys: keys.length };
+    });
+  await scrollToY(page, top + 10);
+  const first = await state();
+  expect(first).toMatchObject({ front: 0, on: 0, lit: 1, keys: 7 });
+  await scrollToY(page, top + 844 * 1.6);
+  const later = await state();
+  expect(later.front).toBeGreaterThan(1);
+  expect(later.on).toBe(later.front);
+  expect(later.lit).toBe(1);
+});
+
+test("light: the backlit stone opens from a window to full width while the lamp switches on", async ({ page }) => {
+  await intro(page);
+  const photo = page.locator("#light [data-backlight]");
+  const top = await photo.evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
+  const state = () =>
+    photo.evaluate((el) => ({
+      clip: getComputedStyle(el).clipPath,
+      glow: Number(getComputedStyle(el.querySelector(".backlight-fallback")!).opacity),
+    }));
+  await scrollToY(page, top - 844 * 0.85);
+  const before = await state();
+  await scrollToY(page, top - 844 * 0.15);
+  const after = await state();
+  expect(before.clip).toMatch(/inset\((?!0px 0px 0px 0px|0%)/); // still a window
+  expect(after.clip).toMatch(/inset\(0(px|%)? ?(0(px|%)? ?){0,3}(round 0px)?\)|none/); // full width
+  expect(after.glow - before.glow).toBeGreaterThan(0.4);
+});
+
+test("intro paragraphs fill word by word as you read down (Riotters)", async ({ page }) => {
+  await intro(page);
+  const para = page.locator("#collection [data-scroll-fill]");
+  const top = await para.evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
+  const words = () => para.evaluate((el) => [...el.querySelectorAll<HTMLElement>("div, span")].map((w) => Number(getComputedStyle(w).opacity)));
+  await scrollToY(page, top - 844 * 0.88);
+  const early = await words();
+  await scrollToY(page, top - 844 * 0.3);
+  const late = await words();
+  expect(early.length).toBeGreaterThan(8);
+  expect(Math.min(...early)).toBeLessThan(0.6);
+  expect(Math.min(...late)).toBeGreaterThan(0.9);
 });

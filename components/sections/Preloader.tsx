@@ -7,11 +7,14 @@ import { markLoaded } from "@/lib/loaded";
 import { PRELOADER_TIMING as T } from "@/lib/timing";
 import { site } from "@/content/site";
 import { Logo } from "@/components/ui/Logo";
+import { HERO_PHOTO_SCALE, HERO_WINDOW } from "@/lib/heroWindow";
 
 const SEEN_KEY = "sr-loaded";
 /** the small sample tile the window opens to first (clip-path inset, %): wider share on phones */
 const TILE_WIDE = "inset(38% 44% 38% 44%)";
-const TILE_NARROW = "inset(38% 31% 38% 31%)";
+// phones: every shape carries "round" so it can tween into the hero's rounded window
+const TILE_NARROW = "inset(38% 31% 38% 31% round 6px)";
+const SHUT_NARROW = "inset(50% 50% 50% 50% round 6px)";
 const SHUT = "inset(50% 50% 50% 50%)";
 
 /**
@@ -41,7 +44,12 @@ export function Preloader() {
       return;
     }
 
-    const TILE = window.matchMedia("(min-width: 768px)").matches ? TILE_WIDE : TILE_NARROW;
+    const wide = window.matchMedia("(min-width: 768px)").matches;
+    const TILE = wide ? TILE_WIDE : TILE_NARROW;
+    // phones: the window opens to the hero's framed window (not full screen) and hands over
+    // into it, at the hero photo's resting scale, so nothing jumps when the loader fades
+    const OPEN = wide ? "inset(0% 0% 0% 0%)" : HERO_WINDOW;
+    const OPEN_SCALE = wide ? 1 : HERO_PHOTO_SCALE;
     const q = gsap.utils.selector(el);
     const win = q<HTMLElement>("[data-loader-window]")[0];
     const photo = win?.querySelector("img");
@@ -57,7 +65,7 @@ export function Preloader() {
     const tl = gsap.timeline({ paused: true });
     tl.fromTo(q("[data-loader-mark]"), { yPercent: 105 }, { yPercent: 0, duration: T.mark, ease: "expo.out" }, 0);
     tl.fromTo(q("[data-loader-meta]"), { autoAlpha: 0 }, { autoAlpha: 1, duration: T.mark, ease: "power2.out" }, 0.1);
-    tl.fromTo(win, { clipPath: SHUT }, { clipPath: TILE, duration: T.tile, ease: "expo.out" }, T.tileAt);
+    tl.fromTo(win, { clipPath: wide ? SHUT : SHUT_NARROW }, { clipPath: TILE, duration: T.tile, ease: "expo.out" }, T.tileAt);
     tl.fromTo(photo ?? {}, { scale: 1.35 }, { scale: 1.2, duration: T.tile, ease: "expo.out" }, T.tileAt);
     // hold on the tile until the photo is really there (capped by holdMax)
     tl.add(() => {
@@ -67,8 +75,8 @@ export function Preloader() {
     tl.add(() => el.setAttribute("data-phase", "open"));
     // fromTo with explicit four-value insets: the browser reports the tile as "inset(38% 44%)",
     // and tweening from that two-value form pairs the wrong edges (the window grew lopsided)
-    tl.fromTo(win, { clipPath: TILE }, { clipPath: "inset(0% 0% 0% 0%)", duration: T.expand, ease: "expo.inOut", immediateRender: false });
-    tl.to(photo ?? {}, { scale: 1, duration: T.expand, ease: "expo.inOut" }, "<");
+    tl.fromTo(win, { clipPath: TILE }, { clipPath: OPEN, duration: T.expand, ease: "expo.inOut", immediateRender: false });
+    tl.to(photo ?? {}, { scale: OPEN_SCALE, duration: T.expand, ease: "expo.inOut" }, "<");
     tl.to(q("[data-loader-mark], [data-loader-meta]"), { autoAlpha: 0, duration: T.expand * 0.5, ease: "power2.in" }, "<");
     tl.add(() => {
       try {

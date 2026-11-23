@@ -7,6 +7,7 @@ import { useGSAP } from "@gsap/react";
 import { site } from "@/content/site";
 import { SplitReveal } from "@/components/ui/SplitReveal";
 import { useMotionPrefs } from "@/components/providers/MotionPrefs";
+import { ScrollFill } from "@/components/ui/ScrollFill";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -48,7 +49,7 @@ export function SwissProof() {
           <SplitReveal as="h2" className="text-headline text-[clamp(2.5rem,4.6vw,4.75rem)]">
             {site.proofTitle}
           </SplitReveal>
-          <p className="max-w-[36ch] text-[17px] leading-relaxed md:text-lg text-ink/85">{site.proofIntro}</p>
+          <ScrollFill touchOnly start="top 88%" end="bottom 60%" text={site.proofIntro} className="max-w-[36ch] text-[17px] leading-relaxed md:text-lg text-ink/85" />
           <a href={site.cta.href} target="_blank" rel="noopener" className="nav-link tap self-start text-[15px] font-medium">
             Ask for the reports ↗
           </a>

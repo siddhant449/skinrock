@@ -9,14 +9,24 @@ import { useMotionPrefs } from "@/components/providers/MotionPrefs";
 
 gsap.registerPlugin(SplitText, ScrollTrigger, useGSAP);
 
-/** Paragraph whose words brighten one by one as it scrolls through the viewport. */
-export function ScrollFill({ text, className }: { text: string; className?: string }) {
+type Props = {
+  text: string;
+  className?: string;
+  /** only on touch devices (phones, tablets): desktop keeps a plain paragraph */
+  touchOnly?: boolean;
+  /** where the fill starts and ends (ScrollTrigger positions) */
+  start?: string;
+  end?: string;
+};
+
+/** Paragraph whose words brighten one by one as it scrolls through the viewport (after Riotters). */
+export function ScrollFill({ text, className, touchOnly = false, start = "top 82%", end = "bottom 42%" }: Props) {
   const ref = useRef<HTMLParagraphElement>(null);
-  const { reduced } = useMotionPrefs();
+  const { reduced, touch } = useMotionPrefs();
 
   useGSAP(
     () => {
-      if (reduced || !ref.current) return;
+      if (reduced || !ref.current || (touchOnly && !touch)) return;
       // aria "none": words stay real text for screen readers (aria-label is not allowed on <p>)
       const split = SplitText.create(ref.current, { type: "words", aria: "none" });
       gsap.fromTo(
@@ -26,16 +36,16 @@ export function ScrollFill({ text, className }: { text: string; className?: stri
           opacity: 1,
           ease: "none",
           stagger: 0.08,
-          scrollTrigger: { trigger: ref.current, start: "top 82%", end: "bottom 42%", scrub: 0.6 },
+          scrollTrigger: { trigger: ref.current, start, end, scrub: 0.6 },
         },
       );
       return () => split.revert();
     },
-    { scope: ref, dependencies: [reduced] },
+    { scope: ref, dependencies: [reduced, touch, touchOnly, start, end] },
   );
 
   return (
-    <p ref={ref} className={className}>
+    <p ref={ref} data-scroll-fill="" className={className}>
       {text}
     </p>
   );

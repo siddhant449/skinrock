@@ -67,7 +67,43 @@ export function Light() {
         );
       };
       mm.add("(min-width: 768px)", () => build(true));
-      mm.add("(max-width: 767px)", () => build(false));
+      // phones (after Sobha's portrait that grows to full bleed and brightens): the backlit stone
+      // starts as an inset window and opens to the full width as it rises, switching the lamp on
+      // as it goes, so you watch the stone become the light
+      mm.add("(max-width: 767px)", () => {
+        const lamp = q<HTMLElement>("[data-backlight]")[0];
+        if (!lamp) return;
+        const tl = gsap.timeline({
+          scrollTrigger: { trigger: lamp, start: "top 92%", end: "center 52%", scrub: 1 },
+        });
+        tl.fromTo(
+          lamp,
+          { clipPath: "inset(9% 11% 9% 11% round 6px)" },
+          { clipPath: "inset(0% 0% 0% 0% round 0px)", ease: "power2.out", duration: 1 },
+          0,
+        );
+        tl.fromTo(
+          intensity.current,
+          { value: 0.04 },
+          {
+            value: 1,
+            ease: "power2.in",
+            duration: 1,
+            onUpdate: () => lamp.style.setProperty("--glow", intensity.current.value.toFixed(3)),
+          },
+          0,
+        );
+        gsap.fromTo(
+          q("[data-use]"),
+          { color: "#8FA0B3" },
+          {
+            color: "#EEE9E0",
+            stagger: 0.12,
+            duration: 0.3,
+            scrollTrigger: { trigger: q("ul")[0], start: "top 85%", end: "top 55%", scrub: 1 },
+          },
+        );
+      });
       return () => mm.revert();
     },
     { scope: root, dependencies: [reduced] },

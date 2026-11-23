@@ -10,6 +10,7 @@ import { SplitReveal } from "@/components/ui/SplitReveal";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 import { useMotionPrefs } from "@/components/providers/MotionPrefs";
 import { StudioStage } from "@/components/ui/StudioStage";
+import { ScrollFill } from "@/components/ui/ScrollFill";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -87,7 +88,7 @@ export function Cta() {
           <SplitReveal as="h2" className="text-display max-w-[11ch] text-[clamp(3.4rem,7.4vw,8.5rem)]">
             {cta.title}
           </SplitReveal>
-          <p className="max-w-[36ch] text-[17px] leading-relaxed text-stone/90 md:text-lg">{cta.body}</p>
+          <ScrollFill touchOnly start="top 90%" end="bottom 62%" text={cta.body} className="max-w-[36ch] text-[17px] leading-relaxed text-stone/90 md:text-lg" />
           <MagneticButton
             href={cta.href}
             strength={0.25}

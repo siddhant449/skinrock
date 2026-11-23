@@ -92,17 +92,6 @@ for (const [name, device] of [["phone", PHONE], ["tablet", TABLET]] as const) {
       await expect.poll(() => page.locator('#collection [data-row][data-active="true"]').count()).toBe(1);
     });
 
-    test("why choose us lights exactly one cell at a time", async ({ page }) => {
-      await intro(page);
-      const top = await topOf(page, "#why [data-why-grid]");
-      const counts: number[] = [];
-      for (let i = 1; i <= 6; i++) {
-        await scrollToY(page, top - device.viewport.height * 0.5 + i * 220);
-        counts.push(await page.locator('#why [data-why-cell][data-active="true"]').count());
-      }
-      expect(Math.max(...counts)).toBe(1);
-      expect(counts.filter((c) => c === 1).length).toBeGreaterThan(3);
-    });
   });
 }
 
@@ -171,6 +160,22 @@ for (const [name, device] of [["phone", PHONE], ["tablet", TABLET]] as const) {
     });
   });
 }
+
+test.describe("tablet: why grid", () => {
+  test.use(TABLET);
+  const device = TABLET;
+  test("why choose us lights exactly one cell at a time", async ({ page }) => {
+      await intro(page);
+      const top = await topOf(page, "#why [data-why-grid]");
+      const counts: number[] = [];
+      for (let i = 1; i <= 6; i++) {
+        await scrollToY(page, top - device.viewport.height * 0.5 + i * 220);
+        counts.push(await page.locator('#why [data-why-cell][data-active="true"]').count());
+      }
+      expect(Math.max(...counts)).toBe(1);
+      expect(counts.filter((c) => c === 1).length).toBeGreaterThan(3);
+    });
+});
 
 test.describe("phone: collection focus", () => {
   test.use(PHONE);

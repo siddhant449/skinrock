@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { site } from "@/content/site";
 import { SplitReveal } from "@/components/ui/SplitReveal";
+import { ScrollFill } from "@/components/ui/ScrollFill";
 import { CursorPreview } from "@/components/ui/CursorPreview";
 import { useMotionPrefs } from "@/components/providers/MotionPrefs";
 
@@ -42,7 +43,7 @@ export function Collection() {
           <SplitReveal as="h2" className="text-headline text-[clamp(2.5rem,4.6vw,4.75rem)]">
             {site.collectionTitle}
           </SplitReveal>
-          <p className="max-w-[32ch] text-[17px] leading-relaxed md:text-lg text-ink/85">{site.collectionIntro}</p>
+          <ScrollFill touchOnly start="top 88%" end="bottom 60%" text={site.collectionIntro} className="max-w-[32ch] text-[17px] leading-relaxed md:text-lg text-ink/85" />
         </div>
 
         <ul ref={list} className="md:col-span-8" onPointerLeave={() => setActive(null)}>
